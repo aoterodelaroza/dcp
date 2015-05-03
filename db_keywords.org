@@ -1,0 +1,36 @@
+## Comments in the db files start with #. Blank lines are OK.
+## Keywords are case-insensitive.
+
+## Relevant files: parsedb.m, filldb.m, and writedb.m
+
+| Name | Field     | Value  | Apropos                                                      | Acceptable values           |
+|------+-----------+--------+--------------------------------------------------------------+-----------------------------|
+|      | file      | str    | File name from where the db entry was read                   |                             |
+| name | name      | str    | Name associated to the db entry                              |                             |
+| type | type      | str    | Type of calculation                                          | be_frozen_monomer           |
+| ref  | ref       | num    | Reference value for the calculation (energy, distance, etc.) | BE -> BE in kcal/mol        |
+| mol  | mol       | struct | Molecular geometry for the dimer                             |                             |
+|      | mol.nat   | num    | Number of atoms in mol                                       |                             |
+|      | mol.at    | cell   | Atomic symbols for mol                                       |                             |
+|      | mol.x     | natx3  | Atomic coordinates in mol                                    |                             |
+|      | mol.q     | num    | Charge for mol                                               | default: 0                  |
+|      | mol.mult  | num    | Multiplicity for mol                                         | default: 1                  |
+| mon1 | mon1      | struct | Molecular geometry for the first monomer                     | (q,mult) after mon1         |
+|      | mon1.nat  | num    | Number of atoms in mon1                                      |                             |
+|      | mon1.at   | cell   | Atomic symbols for mon1                                      |                             |
+|      | mon1.x    | natx3  | Atomic coordinates in mon1                                   |                             |
+|      | mon1.q    | num    | Charge for mon1                                              | default:0                   |
+|      | mon1.mult | num    | Multiplicity for mon1                                        | default:1                   |
+| mon2 | mon2      | struct | Molecular geometry for the first monomer                     | (q,mult) after mon2 or void |
+|      | mon2.nat  | num    | Number of atoms in mon2                                      |                             |
+|      | mon2.at   | cell   | Atomic symbols for mon2                                      |                             |
+|      | mon2.x    | natx3  | Atomic coordinates in mon2                                   |                             |
+|      | mon2.q    | num    | Charge for mon2                                              | default:0                   |
+|      | mon2.mult | num    | Multiplicity for mon2                                        | default:1                   |
+|      | wei       | num    | Weight of the entry in the cost function                     |                             |
+|      | method    | str    | Functional in Gaussian route section                         |                             |
+|      | basis     | str    | Basis in Gaussian route section or external file             |                             |
+|      | extragau  | str    | Extra information in Gaussian's route section                |                             |
+|      | ncpu      | num    | Number of processors for the calculation                     |                             |
+|      | mem       | num    | Memory for the calculation (in GB)                           |                             |
+|------+-----------+--------+--------------------------------------------------------------+-----------------------------|
