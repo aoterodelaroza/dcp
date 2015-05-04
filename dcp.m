@@ -16,8 +16,8 @@ method="blyp";
 basis="6-31g(d)";
 
 ## Extra bits for gaussian (do not include pseudo=read here)
-# extragau="EmpiricalDispersion=GD3BJ SCF=(Conver=5, MaxCycle=1000) Symm=Loose";
-extragau="SCF=(Conver=5, MaxCycle=1000) Symm=Loose";
+# extragau="EmpiricalDispersion=GD3BJ SCF=(Conver=5, MaxCycle=40) Symm=Loose";
+extragau="SCF=(Conver=5, MaxCycle=40) Symm=Loose";
 
 ## Number of CPUs and memory (in GB) for Gaussian runs
 ncpu=6;

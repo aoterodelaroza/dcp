@@ -72,7 +72,7 @@ function y = fbasic(x)
     for i = 1:length(db)
       wei(i) = db{i}.wei;
     endfor
-    y = sum(wei .* abs(dy));
+    y = sum(wei .* dy.^2);
 
     ## Print summary to output
     if (verbose)
