@@ -51,11 +51,12 @@ dcpini="dcp.ini";
 ## with lowest cost function.
 dcpfin="dcp.fin";
 
-## Prefix for the calculations. If prefix is "bleh", then all the 
+## Prefix for the calculations. If prefix is "bleh", then all the
 ## inputs and outputs will be stored in subdirectory bleh/ of the
-## current working directory. The file names will be bleh_xx_name.gjf
-## where xx is the DCP optimization step number and name is the
-## identifier for the database entry.
+## current working directory. The file names will be bleh_xx.tar.bz2
+## where xx is the DCP optimization evaluation number. The archive
+## contains files bleh_xx_name, where name is the identifier for the
+## database entry. 
 prefix="bleh";
 
 ## Name for the the minimization procedure driver.
