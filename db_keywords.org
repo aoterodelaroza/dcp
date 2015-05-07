@@ -29,7 +29,6 @@
 |      | mon2.mult | num    | Multiplicity for mon2                                        | default:1                   |
 |      | wei       | num    | Weight of the entry in the cost function                     |                             |
 |      | method    | str    | Functional in Gaussian route section                         |                             |
-|      | basis     | str    | Basis in Gaussian route section or external file             |                             |
 |      | extragau  | str    | Extra information in Gaussian's route section                |                             |
 |      | ncpu      | num    | Number of processors for the calculation                     |                             |
 |      | mem       | num    | Memory for the calculation (in GB)                           |                             |

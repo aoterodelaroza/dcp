@@ -1,5 +1,5 @@
-function db = filldb(db,weis=[],method=[],basis,extragau,ncpu,mem);
-  %% function db = filldb(db,weis,method,basis,extragau,ncpu,mem);
+function db = filldb(db,weis=[],method=[],extragau,ncpu,mem);
+  %% function db = filldb(db,weis,method,extragau,ncpu,mem);
   %% 
   %% Fill the missing information in the database with default values.
   %% If a non-optional parameter is missing from the database,
@@ -7,8 +7,6 @@ function db = filldb(db,weis=[],method=[],basis,extragau,ncpu,mem);
   %%
   %% weis: an array containing the weight of every reference calculation.
   %% method: functional string for Gaussian.
-  %% basis: either the basis set string for Gaussian or the name of an external
-  %%        input file to be used with the gen keyword.
   %% extragau: extra bits to use in Gaussian's route section.
   %% ncpu: number of CPUs for the calcs.
   %% mem: amount of memory (in GB) for the calcs.
@@ -114,12 +112,6 @@ function db = filldb(db,weis=[],method=[],basis,extragau,ncpu,mem);
           error(sprintf("No method specified and no default available in entry %s",db{i}.file))
         endif
         db{i}.method = method;
-      endif
-      if (!isfield(db{i},"basis"))
-        if (isempty(basis))
-          error(sprintf("No basis specified and no default available in entry %s",db{i}.file))
-        endif
-        db{i}.basis = basis;
       endif
       if (!isfield(db{i},"extragau"))
         if (isempty(extragau))

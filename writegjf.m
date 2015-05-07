@@ -1,4 +1,4 @@
-function writegjf(file,dcp,at,x,q,mult,ent);
+function writegjf(file,dcp,basis,at,x,q,mult,ent);
   %% function writegjf(file,dcp,at,x,q,mult,ent);
   %%
   %% Write a Gaussian input file (gjf) in filename file. Use the 
@@ -20,7 +20,11 @@ function writegjf(file,dcp,at,x,q,mult,ent);
   endif
   fprintf(fid,"%%mem=%dGB\n",ent.mem);
   fprintf(fid,"%%nproc=%d\n",ent.ncpu);
-  fprintf(fid,"#p %s gen pseudo=read %s\n",ent.method,ent.extragau);
+  if (iscell(basis))
+    fprintf(fid,"#p %s gen pseudo=read %s\n",ent.method,ent.extragau);
+  else
+    fprintf(fid,"#p %s %s pseudo=read %s\n",ent.method,basis,ent.extragau);
+  endif
   fprintf(fid,"\n");
   fprintf(fid,"title\n");
   fprintf(fid,"\n");
@@ -29,12 +33,7 @@ function writegjf(file,dcp,at,x,q,mult,ent);
     fprintf(fid,"%s %.10f %.10f %.10f\n",at{i},x(i,:));
   endfor
   fprintf(fid,"\n");
-  for i = 1:length(atlist)
-    fprintf(fid,"%s ",atlist{i});
-  endfor
-  fprintf(fid,"0\n");
-  fprintf(fid,"%s\n",ent.basis);
-  fprintf(fid,"****\n");
+  writebasis(basis,fid,at);
   fprintf(fid,"\n");
   writedcp(dcp,fid,at);
   fprintf(fid,"\n");

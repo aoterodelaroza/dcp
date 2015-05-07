@@ -8,7 +8,7 @@ function y = fbasic(x)
   %% calculations are carried out, and the cost function for the DCP
   %% given by x is calculated, and returned as y.
   
-  global dcp db prefix nstep verbose run_inputs ycur
+  global dcp db prefix nstep verbose run_inputs ycur dcpfin costmin
   
   ## Yet another function evaluation.
   nstep++;
@@ -82,6 +82,12 @@ function y = fbasic(x)
                i,db{i}.name,wei(i),yref(i),ycalc(i),dy(i))
       endfor
       printf("# Cost function: %.10f\n",y)
+    endif
+    
+    ## Write the DCP if this is the best we have
+    if (y < costmin)
+      writedcp(dcp,dcpfin);
+      costmin = y;
     endif
   endif
 

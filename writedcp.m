@@ -44,7 +44,7 @@ function writedcp(dcp,file="",atlist={})
 
   ## Wrap up
   if (docrash)
-    error(sprintf("Could not open file for final DCP output: %s",file));
+    error(sprintf("Could not open file for DCP output: %s",file));
   elseif (ischar(file) && fid != stdout())
     fclose(fid);
   endif

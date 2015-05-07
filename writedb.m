@@ -40,10 +40,6 @@ function writedb(db,file="")
     if (isfield(db{i},"method"))
       fprintf(fid,"method %s\n",db{i}.method);
     endif
-    ## basis
-    if (isfield(db{i},"basis"))
-      fprintf(fid,"basis %s\n",db{i}.basis);
-    endif
     ## extragau
     if (isfield(db{i},"extragau"))
       fprintf(fid,"extragau %s\n",db{i}.extragau);
