@@ -18,7 +18,7 @@ function db = parsedb(files)
     if (!exist(files{i},"file"))
       aux = strcat(strtrim(files{i}),".db");
       if (!exist(aux,"file"))
-        error(sprintf("Initial DCP file not found: %s or %s\n",files{i},aux));
+        error(sprintf("Initial DB file not found: %s or %s\n",files{i},aux));
       endif
       files{i} = aux;
     endif
