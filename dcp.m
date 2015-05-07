@@ -22,8 +22,8 @@ method="blyp";
 basis="basis.ini";
 
 ## Extra bits for gaussian (do not include pseudo=read here)
-# extragau="EmpiricalDispersion=GD3BJ SCF=(Conver=5, MaxCycle=40) Symm=Loose";
-extragau="SCF=(Conver=5, MaxCycle=40) Symm=Loose";
+extragau="EmpiricalDispersion=GD3BJ SCF=(Conver=5, MaxCycle=40) Symm=Loose";
+# extragau="SCF=(Conver=5, MaxCycle=40) Symm=Loose";
 
 ## Number of CPUs and memory (in GB) for Gaussian runs
 ncpu=6;
@@ -32,21 +32,23 @@ mem=2;
 ## List of database files to use in DCP optimization
 listdb={...
         "db/bde_c-h.db","db/bde_ch-h.db","db/bde_ch2-h.db","db/bde_ch3-ch3.db","db/bde_c2h5-h.db",...
+	"db/pes_c6h6s-09.db","db/pes_c6h6t-09.db","db/pes_c3h8-40.db","db/pes_c2h6-35.db","db/pes_ch4g-325.db","db/pes_ch4c-375.db",...
+	"db/pes_c6h6s-10.db","db/pes_c6h6t-10.db","db/pes_c3h8-42.db","db/pes_c2h6-39.db","db/pes_ch4g-350.db","db/pes_ch4c-385.db",...
+        "db/pes_c6h6s-12.db","db/pes_c6h6t-12.db","db/pes_c3h8-44.db","db/pes_c2h6-41.db","db/pes_ch4g-365.db","db/pes_ch4c-410.db",...
+	"db/pes_c6h6s-15.db","db/pes_c6h6t-15.db","db/pes_c3h8-46.db","db/pes_c2h6-43.db","db/pes_ch4g-425.db","db/pes_ch4c-450.db",...
+        "db/pes_c6h6s-20.db","db/pes_c6h6t-20.db","db/pes_c3h8-60.db","db/pes_c2h6-50.db","db/pes_ch4g-500.db","db/pes_ch4c-500.db",...
         };
 weightdb=[];
 ##      "db/bde_cyclobutene-perits.db","db/bde_cyclopentadiene-perits.db","db/bde_darc-ethine-butadiene.db","db/bde_dim-13cyclopentadiene.db",...
-##	"db/pes_c6h6s-09.db","db/pes_c6h6t-09.db","db/pes_c3h8-40.db","db/pes_c2h6-35.db","db/pes_ch4g-325.db","db/pes_ch4c-375.db",...
-##	"db/pes_c6h6s-10.db","db/pes_c6h6t-10.db","db/pes_c3h8-42.db","db/pes_c2h6-39.db","db/pes_ch4g-350.db","db/pes_ch4c-385.db",...
-##      "db/pes_c6h6s-12.db","db/pes_c6h6t-12.db","db/pes_c3h8-44.db","db/pes_c2h6-41.db","db/pes_ch4g-365.db","db/pes_ch4c-410.db",...
-##	"db/pes_c6h6s-15.db","db/pes_c6h6t-15.db","db/pes_c3h8-46.db","db/pes_c2h6-43.db","db/pes_ch4g-425.db","db/pes_ch4c-450.db",...
-##      "db/pes_c6h6s-20.db","db/pes_c6h6t-20.db","db/pes_c3h8-60.db","db/pes_c2h6-50.db","db/pes_ch4g-500.db","db/pes_ch4c-500.db",...
 ##      "db/pes_c3h8-100.db","db/pes_c2h6-100.db","db/pes_ch4g-1000.db","db/pes_ch4c-1000.db",...
 
 ## Initial DCP file (you can use a cell array of files here, like
 ## {"C.dcp","H.dcp"}, or a single string "bleh.dcp")
 dcpini="dcp.ini";
 
-## Final DCP file (can be the same as the initial file)
+## Final DCP file (can be the same as the initial file). When
+## the script is running, dcp.fin contains the DCP for the evaluation
+## with lowest cost function.
 dcpfin="dcp.fin";
 
 ## Prefix for the calculations. If prefix is "bleh", then all the 
@@ -60,8 +62,8 @@ prefix="bleh";
 feval = "fbasic";
 
 ## Name of the Gaussian input runner routine
-run_inputs = @run_inputs_serial; ## Run all Gaussian inputs sequentially on the same node
-## run_inputs = @run_inputs_grex; ## Submit inputs to the queue, wait for all to finish. Grex version.
+## run_inputs = @run_inputs_serial; ## Run all Gaussian inputs sequentially on the same node
+run_inputs = @run_inputs_grex; ## Submit inputs to the queue, wait for all to finish. Grex version.
 
 ## Tolerance criteria for the minimization
 ftol = Inf;  ## function change tolerance, default 1e-12
