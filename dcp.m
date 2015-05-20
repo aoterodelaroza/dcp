@@ -78,7 +78,7 @@ gtol = Inf;  ## gradient tolerance, default 1e-5
 ## [x(1), x(2), x(3) * (1+isz), ... x(n)]
 ## ...
 ## [x(1), x(2), x(3), ... x(n) * (1+isz)]
-isz = 1;
+isz = 10;
 
 #### No touching past this point. ####
 
