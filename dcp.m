@@ -2,7 +2,7 @@
 
 pkg load optim
 format long
-global dcp basis db prefix nstep verbose run_inputs ycur dcpfin costmin
+global dcp basis db prefix nstep verbose run_inputs ycur dcpfin costmin iload
 
 #### Modify this to change the input behavior ####
 
@@ -91,13 +91,14 @@ if (verbose)
   writedb(db);
 endif
 
-## Run the minimization
+## Run the minimization, initialize global variables
 nstep = 0;
 costmin = Inf;
+iload = [];
 xini = packdcp(dcp);
 
 ## Minimize
-[xmin ymin] = nelder_mead_min(feval,{xini},struct('crit',2,'tol',ptol,'verbose',2));
+[xmin ymin] = amoeba_dcp(feval,{xini},struct('crit',2,'tol',ptol,'verbose',2));
 ymin = fbasic(xmin);
 dcp = unpackdcp(xmin,dcp);
 

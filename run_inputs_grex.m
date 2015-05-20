@@ -14,7 +14,7 @@ function s = run_inputs_grex(ilist)
   %% the calc results. When all jobs are done, control is given back
   %% to the caller.
   
-  global verbose
+  global verbose iload
   
   ## Parameters for the run
   hours = 2; ## walltime hours
@@ -30,35 +30,52 @@ function s = run_inputs_grex(ilist)
     every = 1;
   endif
 
+  if (isempty(iload)) 
+    ## No information: randomize the input list
+    idx = randperm(length(ilist));
+  else
+    [idum idx] = sort(iload);
+    n = length(ilist);
+    k = usenodes;
+    idx = [idx zeros(1,k*ceil(n/k)-n)];
+    idx = reshape(idx,k,ceil(n/k));
+    idx = idx';
+    idx = reshape(idx,1,k*ceil(n/k));
+  endif
+
   ## Create submission scripts for all inputs on the list
   fid = -1;
   jobname = {};
-  for i = 1:length(ilist)
+  for i = 1:length(idx)
+    if (idx(i) == 0)
+      continue
+    endif
+    name = ilist{idx(i)};
     if (mod(i-1,every) == 0)
       if (fid > 0)
         fclose(fid);
       endif
-      fid = fopen(sprintf("%s.sub",ilist{i}),"w");
+      fid = fopen(sprintf("%s.sub",name),"w");
       if (fid < 0) 
-        error("Could not create submission script: %s.sub",ilist{i});
+        error("Could not create submission script: %s.sub",name);
       endif
       fprintf(fid,"#! /bin/bash\n");
       fprintf(fid,"#PBS -S /bin/bash\n");
       fprintf(fid,"#PBS -j eo\n");
-      fprintf(fid,"#PBS -e %s/%s.err \n",pwd(),ilist{i});
-      fprintf(fid,"#PBS -N dcp_%s\n",ilist{i});
+      fprintf(fid,"#PBS -e %s/%s.err \n",pwd(),name);
+      fprintf(fid,"#PBS -N dcp_%s\n",name);
       fprintf(fid,"#PBS -l walltime=%d:00:00,mem=%dGB,nodes=1:ppn=%d\n",hours,mem,ncpu);
       fprintf(fid,"#PBS -m n\n");
       fprintf(fid,"\n");
       fprintf(fid,"module load gaussian/g09.d01\n");
       fprintf(fid,"\n");
       fprintf(fid,"cd %s\n",pwd());
-      fprintf(fid,"g09 %s.gjf\n",ilist{i});
-      fprintf(fid,"touch %s.done\n",ilist{i});
-      jobname = [jobname, sprintf("%s.sub",ilist{i})];
+      fprintf(fid,"g09 %s.gjf\n",name);
+      fprintf(fid,"touch %s.done\n",name);
+      jobname = [jobname, sprintf("%s.sub",name)];
     else
-      fprintf(fid,"g09 %s.gjf\n",ilist{i});
-      fprintf(fid,"touch %s.done\n",ilist{i});
+      fprintf(fid,"g09 %s.gjf\n",name);
+      fprintf(fid,"touch %s.done\n",name);
     endif
   endfor
   if (fid > 0)
@@ -108,6 +125,17 @@ function s = run_inputs_grex(ilist)
   for i = 1:length(ilist)
     [s out] = system(sprintf("rm -f %s.done %s.err %s.sub",ilist{i},ilist{i},ilist{i}));
   endfor
+
+  ## Calculate the load for subsequent runs
+  iload = read_jobload(ilist,iload);
+  if (verbose)
+    printf("| Id | Name | Load (s) |\n")
+    for i = 1:length(ilist)
+      printf("| %d | %s | %.1f |\n",...
+             i,ilist{i},iload(i));
+    endfor
+    printf("#\n");
+  endif
 
   ## Check that we have a normal termination. If not, pass the error 
   ## back to the caller.
