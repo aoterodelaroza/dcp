@@ -71,6 +71,15 @@ ftol = Inf;  ## function change tolerance, default 1e-12
 ptol = 1d-3; ## parameter change tolerance, default 1e-6
 gtol = Inf;  ## gradient tolerance, default 1e-5
 
+## Initial simplex size parameter. If dcp.ini is x, then the points in
+## the initial simplex are:  
+## [x(1) * (1+isz), x(2), x(3), ... x(n)]
+## [x(1), x(2) * (1+isz), x(3), ... x(n)]
+## [x(1), x(2), x(3) * (1+isz), ... x(n)]
+## ...
+## [x(1), x(2), x(3), ... x(n) * (1+isz)]
+isz = 1;
+
 #### No touching past this point. ####
 
 ## Read the basis set
@@ -98,7 +107,7 @@ iload = [];
 xini = packdcp(dcp);
 
 ## Minimize
-[xmin ymin] = amoeba_dcp(feval,{xini},struct('crit',2,'tol',ptol,'verbose',2));
+[xmin ymin] = amoeba_dcp(feval,{xini},struct('crit',2,'tol',ptol,'verbose',2,'isz',isz));
 ymin = fbasic(xmin);
 dcp = unpackdcp(xmin,dcp);
 
