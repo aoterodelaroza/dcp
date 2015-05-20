@@ -33,8 +33,10 @@ function writegjf(file,dcp,basis,at,x,q,mult,ent);
     fprintf(fid,"%s %.10f %.10f %.10f\n",at{i},x(i,:));
   endfor
   fprintf(fid,"\n");
-  writebasis(basis,fid,at);
-  fprintf(fid,"\n");
+  if (iscell(basis))
+    writebasis(basis,fid,at);
+    fprintf(fid,"\n");
+  endif
   writedcp(dcp,fid,at);
   fprintf(fid,"\n");
 
