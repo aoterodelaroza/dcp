@@ -100,6 +100,27 @@ if (verbose)
   writedb(db);
 endif
 
+## Crash if some of the DCP atoms are not used in any of the
+## db files
+for i = 1:length(dcp)
+  atom = dcp{i}.atom;
+  ifound = 0;
+  for j = 1:length(db)
+    for k = 1:db{j}.mol.nat
+      if (tolower(atom) == tolower(db{j}.mol.at{k}))
+        ifound = 1;
+        break
+      endif
+    endfor
+    if (ifound)
+      break
+    endif
+  endfor
+  if (!ifound)
+    error(sprintf("Atom %s is present in the inital DCP file (%s) but is not present in any of the DB files.",atom,dcpini))
+  endif
+endfor
+
 ## Run the minimization, initialize global variables
 nstep = 0;
 costmin = Inf;

@@ -23,6 +23,9 @@ function s = run_inputs_grex(ilist)
   sleeptime = 5; ## time in seconds between job completion checks
   usenodes = 6; ## pack all available jobs so that only usenodes number of nodes 
                 ## are used. If usenodes = -1, submit one job per Gaussian input.
+  maxtime = 1000; ## maximum sleep time in seconds. Crash if the script sleeps
+                  ## for longer than this number without a new Gaussian output
+                  ## being written.
 
   if (usenodes > 0) 
     every = ceil(length(ilist) / usenodes);
@@ -95,31 +98,30 @@ function s = run_inputs_grex(ilist)
     endif
   endfor
 
-  ## Wait until all the calcs are done
+  ## Wait until all the calcs are done (see at the end of the file for
+  ## an alternative that doesn't work because of the unreliability
+  ## of qstat).
   done = zeros(1,length(ilist));
-  jdone = zeros(1,length(jobname));
+  nslept = 0;
+  nslept0 = 0;
   do 
      sleep(sleeptime);
-     ## See if jobs are done
-     [s out] = system("qstat");
-     if (s != 0) 
-       error("Error using qstat");
-     endif
-     for i = find(!jdone)
-       if (!findstr(out,jobnum{i}))
-         jdone(i) = 1;
-       endif
-     endfor
-     ## See if calcs are done
+     nslept += sleeptime;
+     nslept0 += sleeptime;
+     ## See if calcs are done, reset the nslept if a new output was found
      for i = find(!done)
        if (exist(sprintf("%s.done",ilist{i}),"file"))
          done(i) = 1;
+         nslept = 0;
        endif
      endfor
-     if (all(jdone) && !all(done))
-       error("All jobs have finished but not all done files are present, aborting");
+     if (nslept > maxtime)
+       error(sprintf("Maximum sleep time %f exceeded.",maxtime));
      endif
   until(all(done))
+  if (verbose)
+    printf("All Gaussian outputs are ready after %d seconds\n",nslept0);
+  endif
 
   ## Clean up the done and the err files
   for i = 1:length(ilist)
@@ -152,3 +154,28 @@ function s = run_inputs_grex(ilist)
   endfor  
 
 endfunction
+
+##  done = zeros(1,length(ilist));
+##  jdone = zeros(1,length(jobname));
+##  do 
+##     sleep(sleeptime);
+##     ## See if jobs are done
+##     [s out] = system("qstat");
+##     if (s != 0) 
+##       error("Error using qstat");
+##     endif
+##     for i = find(!jdone)
+##       if (!findstr(out,jobnum{i}))
+##         jdone(i) = 1;
+##       endif
+##     endfor
+##     ## See if calcs are done
+##     for i = find(!done)
+##       if (exist(sprintf("%s.done",ilist{i}),"file"))
+##         done(i) = 1;
+##       endif
+##     endfor
+##     if (all(jdone) && !all(done))
+##       error("All jobs have finished but not all done files are present, aborting");
+##     endif
+##  until(all(done))

@@ -81,7 +81,10 @@ function y = fbasic(x)
         printf("| %d | %s | %.4f | %.4f | %.4f | %.4f |\n",...
                i,db{i}.name,wei(i),yref(i),ycalc(i),dy(i))
       endfor
-      printf("# Cost function: %.10f\n",y)
+      printf("# Cost function: %.10f\n",y);
+      printf("# Weighted RMS: %.3f\n",sqrt(y/sum(wei)));
+      printf("# RMS: %.3f\n",sqrt(mean((yref-ycalc).^2)));
+      printf("# MAE: %.3f\n",mean(abs(yref-ycalc)));
     endif
     
     ## Write the DCP if this is the best we have
