@@ -1,7 +1,6 @@
 #! /bin/bash
 #PBS -S /bin/bash
 #PBS -j eo
-#PBS -e $PBS_O_WORKDIR/dcp.err
 #PBS -N dcp_test
 #PBS -l walltime=72:00:00,mem=4GB,nodes=1:ppn=1
 #PBS -m n
