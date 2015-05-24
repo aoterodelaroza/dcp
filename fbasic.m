@@ -1,4 +1,4 @@
-function y = fbasic(x,noopt=0)
+function y = fbasic(x)
   %% function y = fbasic(x)
   %%
   %% Evaluation function for the minimization routine. This function is meant
@@ -26,6 +26,7 @@ function y = fbasic(x,noopt=0)
   ## Unpack the DCP coefficients and exponents
   dcp = unpackdcp(x,dcp);
 
+  ## Write the DCP to the output (if verbose)
   if (verbose)
     printf("# DCP for this iteration\n");
     writedcp(dcp);
@@ -42,10 +43,8 @@ function y = fbasic(x,noopt=0)
   ## If any of the exponents is positive, return Inf
   if (any(x(1:2:end) < 0))
     y = Inf;
-    if (!noopt)
-      printf("#xx# | %2d | %5d | %15.7f | %7.4f | %7.4f | %7.4f | %d |\n",astep,nstep,y,Inf,Inf,Inf,time()-stime0);
-      stime0 = time();
-    endif
+    printf("#xx# | %2d | %5d | %15.7f | %7.4f | %7.4f | %7.4f | %d |\n",astep,nstep,y,Inf,Inf,Inf,time()-stime0);
+    stime0 = time();
   else
     ## Set up the Gaussian input files
     ilist = {};
@@ -84,7 +83,7 @@ function y = fbasic(x,noopt=0)
     ## Propagate outputs, unprune
     for i = 1:length(ilist0)
       if (ipoint(i))
-        [s out] = system(sprintf("cp -f %s.log %s.log",ilist0{ipoint(i)},ilist0{i}));
+        [s1 out] = system(sprintf("cp -f %s.log %s.log",ilist0{ipoint(i)},ilist0{i}));
         if (s != 0)
           error(sprintf("Could not propagate outputs %s.log -> %s.log",ilist0{ipoint(i)},ilist0{i}));
         endif
@@ -103,10 +102,8 @@ function y = fbasic(x,noopt=0)
       y = Inf;
       stash_inputs_outputs(ilist);
       clear_checkpoints(ilist);
-      if (!noopt)
-        printf("#xx# | %2d | %5d | %15.7f | %7.4f | %7.4f | %7.4f | %d |\n",astep,nstep,y,Inf,Inf,Inf,time()-stime0);
-        stime0 = time();
-      endif
+      printf("#xx# | %2d | %5d | %15.7f | %7.4f | %7.4f | %7.4f | %d |\n",astep,nstep,y,Inf,Inf,Inf,time()-stime0);
+      stime0 = time();
       return
     endif
 
@@ -131,12 +128,10 @@ function y = fbasic(x,noopt=0)
     y = sum(wei .* dy.^2);
 
     ## Print summary to output
-    if (!noopt)
-      printf("#xx# | %2d | %5d | %15.7f | %7.4f | %7.4f | %7.4f | %d |\n",astep,nstep,...
-             y,sqrt(y/sum(wei)),sqrt(mean((yref-ycalc).^2)),mean(abs(yref-ycalc)),...
-             time()-stime0);
-      stime0 = time();
-    endif
+    printf("#xx# | %2d | %5d | %15.7f | %7.4f | %7.4f | %7.4f | %d |\n",astep,nstep,...
+           y,sqrt(y/sum(wei)),sqrt(mean((yref-ycalc).^2)),mean(abs(yref-ycalc)),...
+           time()-stime0);
+    stime0 = time();
     if (verbose)
       printf("| Id | Name | weig | yref | ycalc | dy |\n")
       for i = 1:length(db)

@@ -23,19 +23,17 @@ basis="basis.ini";
 extragau="SCF=(Conver=5, MaxCycle=40) Symm=Loose";
 
 ## Number of CPUs and memory (in GB) for Gaussian runs
-ncpu=4;
+ncpu=6;
 mem=2;
 
 ## List of database files to use in DCP optimization
 listdb={...
         "db/bde_c-h.db","db/bde_ch-h.db","db/bde_ch2-h.db","db/bde_ch3-ch3.db","db/bde_c2h5-h.db",...
-        };
-##      "db/bde_cyclobutene-perits.db","db/bde_cyclopentadiene-perits.db","db/bde_darc-ethine-butadiene.db","db/bde_dim-13cyclopentadiene.db",...
-##      "db/pes_c3h8-100.db","db/pes_c2h6-100.db","db/pes_ch4g-1000.db","db/pes_ch4c-1000.db",...
+       };
 
 ## List of DCP files to evaluate (you can use a cell array of files
 ## here, like {"C.dcp","H.dcp"}, or a single string "bleh.dcp")
-dcpini={"bleh/bleh_0012.dcp","bleh/bleh_0006.dcp","bleh/bleh_0009.dcp"};
+dcpini={"dcp3.fin","dcp3bis.fin"};
 
 ## Prefix for the calculations. If prefix is "bleh", then all the
 ## inputs and outputs will be stored in subdirectory bleh/ of the
@@ -49,18 +47,14 @@ prefix="test";
 funeval = "fbasic";
 
 ## Name of the Gaussian input runner routine
-run_inputs = @run_inputs_serial; ## Run all Gaussian inputs sequentially on the same node
-## run_inputs = @run_inputs_grex; ## Submit inputs to the queue, wait for all to finish. Grex version.
-
-## Carry over Gaussian checkpoint files from one iteration to the next.
-## Use them as the initial guess in Gaussian.
-## usechk = "" ## do not use checkpoint files
-usechk = 1;
+## run_inputs = @run_inputs_serial; ## Run all Gaussian inputs sequentially on the same node
+run_inputs = @run_inputs_grex; ## Submit inputs to the queue, wait for all to finish. Grex version.
 
 #### No touching past this point. ####
 
 ## Header
 printf("### DCP evaluation started on %s ###\n",strtrim(ctime(time())));
+
 ## Read the basis set
 basis = parsebasis(basis);
 
@@ -70,44 +64,96 @@ db = filldb(db,[],method,extragau,ncpu,mem);
 
 ## Initialization
 verbose = 0;
-
-## Read and evaluate the DCPs one by one
+usechk = 0;
 if (!iscell(dcpini))
   dcpini = {dcpini};
 endif
+
+## Read and evaluate the DCPs one by one, prepare all input files
+ilist = {};
 for idcp = 1:length(dcpini)
   dcp = parsedcp(dcpini{idcp});
+  nstep = idcp;
 
-  ## Run the minimization, initialize global variables
-  nstep = idcp-1;
-  costmin = Inf;
-  iload = [];
-  stime0 = time();
-  dcpeval = dcpfin = "";
-  x = packdcp(dcp);
-  y = feval(funeval,x,1);
+  ## Create the prefix directory if it doesn't exist yet
+  if (!exist(prefix,"dir"))
+    [s out] = system(sprintf("mkdir %s",prefix));
+    if (s != 0)
+      error(sprintf("Could not create directory %s",prefix));
+    endif
+  endif
 
-  ## Reference energies and errores
-  dy = yref = zeros(length(db),1);
+  ## Set up the Gaussian input files
   for i = 1:length(db)
-    yref(i) = db{i}.ref;
-    dy(i) = ycur(i) - yref(i);
+    ilist = [ilist, setup_input_one(db{i},dcp)];
   endfor
+endfor
+
+## Prune the list to eliminate those inputs that are exactly the same
+ilist0 = ilist;
+ipoint = zeros(1,length(ilist0));
+ilist = {};
+for i = 1:length(ilist0)
+  found = 0;
+  for j = 1:i-1
+    [s out] = system(sprintf("diff -q -I '^%%chk=' %s.gjf %s.gjf",ilist0{i},ilist0{j}));
+    if (s == 0)
+      found = 1;
+      ipoint(i) = j;
+      break
+    endif
+  endfor
+  if (!found)
+    ilist = {ilist{:} ilist0{i}};
+  endif
+endfor
+
+## Run all inputs
+srun = run_inputs(ilist,1);
+
+## Propagate outputs, unprune
+for i = 1:length(ilist0)
+  if (ipoint(i) && exist(sprintf("%s.log",ilist0{ipoint(i)}),"file"))
+    [s1 out] = system(sprintf("cp -f %s.log %s.log",ilist0{ipoint(i)},ilist0{i}));
+    if (s != 0)
+      error(sprintf("Could not propagate outputs %s.log -> %s.log",ilist0{ipoint(i)},ilist0{i}));
+    endif
+  endif
+endfor
+ilist = ilist0;
+
+## Collect the results and compare to the reference data
+for idcp = 1:length(dcpini)
+  nstep = idcp;
+
+  dy = ycalc = yref = zeros(length(db),1);
+  for i = 1:length(db)
+    [dy(i) ycalc(i) yref(i)] = process_output_one(db{i});
+  endfor
+  if (any(ycalc == Inf))
+    mae = Inf;
+    mape = Inf;
+    rms = Inf;
+  else
+    dyr = dy(find(dy != Inf));
+    yrefr = yref(find(yref != Inf));
+    mae = mean(abs(dyr));
+   mape = mean(abs(dyr./yrefr))*100;
+   rms = sqrt(mean(dyr.^2));
+  endif
 
   ## Write the results at the minimum
-  printf("# DCP %d (%s) | MAE = %.4f | MAPE = %.4f | RMS = %.4f | time = %d |\n",idcp,dcpini{idcp},...
-         mean(abs(y-yref)),mean(abs((yref-y)./yref))*100,sqrt(mean((yref-ycur).^2)),time()-stime0);
-
+  printf("# DCP %d (%s) | MAE = %.4f | MAPE = %.4f | RMS = %.4f |\n",idcp,dcpini{idcp},...
+         mae,mape,rms);
+  
   printf("| Id|           Name       |       yref   |      ycalc   |       dy     |\n");
   for i = 1:length(db)
     printf("| %d | %20s | %12.4f | %12.4f | %12.4f |\n",...
-           i,db{i}.name,yref(i),ycur(i),dy(i));
+           i,db{i}.name,yref(i),ycalc(i),dy(i));
   endfor
   printf("\n");
 endfor
 
-## DELETE the checkpoint files from the stasch
-clear_checkpoints()
-
 ## Clean up
+stash_inputs_outputs(ilist);
 printf("### DCP evaluation finished on %s ###\n",strtrim(ctime(time())));

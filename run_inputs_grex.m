@@ -1,5 +1,5 @@
-function s = run_inputs_grex(ilist)
-  %% function run_inputs_grex(ilist)
+function s = run_inputs_grex(ilist,cont=0)
+  %% function run_inputs_grex(ilist,cont=0)
   %% 
   %% Run all the inputs in the job list (ilist). The jobs should be  
   %% in the current working directory, with extension gjf. This
@@ -9,6 +9,10 @@ function s = run_inputs_grex(ilist)
   %% all the inputs in ilist will also be in the CWD. Optionally,
   %% all checkpoint files (with the same name) should also be
   %% in the CWD.
+  %%
+  %% If cont is true, continue with the calculations even
+  %% if one of the Gaussian input fails. Then return the 
+  %% success/failure state in ifail
   %%
   %% This version of run_inputs creates submission scripts for all
   %% inputs in the list and submits them to grex. After that,
@@ -159,36 +163,21 @@ function s = run_inputs_grex(ilist)
   for i = 1:length(ilist)
     if (!exist(sprintf("%s.log",ilist{i}),"file"))
       s = 1;
-      return
+      if (cont)
+        continue
+      else
+        return
+      endif
     endif
     [s out] = system(sprintf("tail -n 1 %s.log | grep 'Normal termination' | wc -l",ilist{i}));
     if (str2num(out) == 0)
       s = 1;
-      return
+      if (cont)
+        continue
+      else
+        return
+      endif
     endif
   endfor  
 
 endfunction
-
-##  ## Wait until all the calcs are done
-##  done = zeros(1,length(ilist));
-##  nslept = 0;
-##  nslept0 = 0;
-##  do 
-##     sleep(sleeptime);
-##     nslept += sleeptime;
-##     nslept0 += sleeptime;
-##     ## See if calcs are done, reset the nslept if a new output was found
-##     for i = find(!done)
-##       if (exist(sprintf("%s.done",ilist{i}),"file"))
-##         done(i) = 1;
-##         nslept = 0;
-##       endif
-##     endfor
-##     if (nslept > maxtime)
-##       error(sprintf("Maximum sleep time %f exceeded.",maxtime));
-##     endif
-##  until(all(done))
-##  if (verbose)
-##    printf("All Gaussian outputs are ready after %d seconds\n",nslept0);
-##  endif

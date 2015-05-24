@@ -1,5 +1,5 @@
-function sout = run_inputs_serial(ilist)
-  %% function run_inputs_serial(ilist)
+function sout = run_inputs_serial(ilist,cont=0)
+  %% function run_inputs_serial(ilist,cont=0)
   %% 
   %% Run all the inputs in the job list (ilist). The jobs should be  
   %% in the current working directory, with extension gjf. This
@@ -10,13 +10,17 @@ function sout = run_inputs_serial(ilist)
   %% all checkpoint files (with the same name) should also be
   %% in the CWD.
   %%
+  %% If cont is true, continue with the calculations even
+  %% if one of the Gaussian input fails. Then return the 
+  %% success/failure state in ifail
+  %%
   %% This version of run_inputs runs all input files sequentially
   %% on the same node in which the octave script is running.
   
   global verbose
 
   sout = 0;
-
+  
   ## Run all the jobs in the current working directory
   for i = 1:length(ilist)
     if (verbose)

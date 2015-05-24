@@ -15,30 +15,28 @@ function [dy ycalc yref] = process_output_one(ent)
     ## Read the energy for the dimer
     file = sprintf("%s_%4.4d_%s_mol.log",prefix,nstep,ent.name);
     if (!exist(file,"file"))
-      error(sprintf("Output file not found %s in output processing for entry %s",file,ent.name));
+      dy = ycalc = yref = Inf;
+      return
     endif
     [s out] = system(sprintf("grep Done %s | awk '{print $5}'",file));
     e2 = str2num(out);
     if (s != 0 || isempty(e2)) 
-      printf("Error reading energy from output file: %s \n",file)
-      printf("In database entry: %s \n",ent.name)
-      printf("Calling sequence: grep Done %s | awk '{print $5}'\n",file);
-      error("Could not extract the energy from the output");
+      dy = ycalc = yref = Inf;
+      return
     endif
 
     ## Then the monomer 1
     if (ent.mon1.nat > 0)
       file = sprintf("%s_%4.4d_%s_mon1.log",prefix,nstep,ent.name);
       if (!exist(file,"file"))
-        error(sprintf("Output file not found %s in output processing for entry %s",file,ent.name));
+        dy = ycalc = yref = Inf;
+        return
       endif
       [s out] = system(sprintf("grep Done %s | awk '{print $5}'",file));
       e1a = str2num(out);
       if (s != 0 || isempty(e1a)) 
-        printf("Error reading energy from output file: %s \n",file)
-        printf("In database entry: %s \n",ent.name)
-        printf("Calling sequence: grep Done %s | awk '{print $5}'\n",file);
-        error("Could not extract the energy from the output");
+        dy = ycalc = yref = Inf;
+        return
       endif
     else 
       e1a = 0;
@@ -48,15 +46,14 @@ function [dy ycalc yref] = process_output_one(ent)
     if (ent.mon2.nat > 0)
       file = sprintf("%s_%4.4d_%s_mon2.log",prefix,nstep,ent.name);
       if (!exist(file,"file"))
-        error(sprintf("Output file not found %s in output processing for entry %s",file,ent.name));
+        dy = ycalc = yref = Inf;
+        return
       endif
       [s out] = system(sprintf("grep Done %s | awk '{print $5}'",file));
       e1b = str2num(out);
       if (s != 0 || isempty(e1b)) 
-        printf("Error reading energy from output file: %s \n",file)
-        printf("In database entry: %s \n",ent.name)
-        printf("Calling sequence: grep Done %s | awk '{print $5}'\n",file);
-        error("Could not extract the energy from the output");
+        dy = ycalc = yref = Inf;
+        return
       endif
     else
       e1b = 0;

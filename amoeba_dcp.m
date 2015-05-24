@@ -139,7 +139,7 @@ if (!usesave)
   ## Build the initial simplex
   u = isz * eye (N+1,N) .* (ones(N+1,1)*x') + ones(N+1,1)*x';
 
-  printf("#xx# |Step|  Iter |  Cost function  |   wRMS   |    RMS   |    MAE   | time(s) |\n")
+  printf("#xx# |Step|  Iter |  Cost function  |   wRMS  |   RMS   |   MAE   | time(s) |\n")
   y = zeros (N+1,1);
   for i = 1:N+1,
     y(i) = feval (f, args{1:narg-1},reshape(u(i,:),R,C),args{narg+1:end});
