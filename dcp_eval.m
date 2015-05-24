@@ -43,9 +43,6 @@ dcpini={"dcp3.fin","dcp3bis.fin"};
 ## database entry. 
 prefix="test";
 
-## Name for the the minimization procedure driver.
-funeval = "fbasic";
-
 ## Name of the Gaussian input runner routine
 ## run_inputs = @run_inputs_serial; ## Run all Gaussian inputs sequentially on the same node
 run_inputs = @run_inputs_grex; ## Submit inputs to the queue, wait for all to finish. Grex version.
