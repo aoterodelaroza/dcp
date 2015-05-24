@@ -1,11 +1,12 @@
-function writegjf(file,dcp,basis,at,x,q,mult,ent);
-  %% function writegjf(file,dcp,at,x,q,mult,ent);
+function writegjf(file,dcp,basis,at,x,q,mult,ent,chk="");
+  %% function writegjf(file,dcp,at,x,q,mult,ent,chk="");
   %%
   %% Write a Gaussian input file (gjf) in filename file. Use the 
   %% DCP information contained in the dcp argument, the geometry
   %% in at (cell array of atomic symbols), x (array of atomic
   %% coordinates), q (charge), mult (multiplicity), and the method,
   %% basis, route section, etc. contained in the database entry ent. 
+  %% chk is the (optional) checkpoint file.
   
   atlist = {};
   for i = 1:length(at)
@@ -18,12 +19,18 @@ function writegjf(file,dcp,basis,at,x,q,mult,ent);
   if (fid <= 0) 
     error(sprintf("Could not open Gaussian input file for writing: %s",file));
   endif
+  if (length(chk) > 0) 
+    fprintf(fid,"%%chk=%s\n",chk);
+    chkstr = "guess=(read,tcheck)";
+  else
+    chkstr = "";
+  endif
   fprintf(fid,"%%mem=%dGB\n",ent.mem);
   fprintf(fid,"%%nproc=%d\n",ent.ncpu);
   if (iscell(basis))
-    fprintf(fid,"#p %s gen pseudo=read %s\n",ent.method,ent.extragau);
+    fprintf(fid,"#p %s gen pseudo=read %s %s\n",ent.method,ent.extragau,chkstr);
   else
-    fprintf(fid,"#p %s %s pseudo=read %s\n",ent.method,basis,ent.extragau);
+    fprintf(fid,"#p %s %s pseudo=read %s %s\n",ent.method,basis,ent.extragau,chkstr);
   endif
   fprintf(fid,"\n");
   fprintf(fid,"title\n");

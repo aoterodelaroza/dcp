@@ -13,7 +13,7 @@
 ## You should have received a copy of the GNU General Public License along with
 ## this program; if not, see <http://www.gnu.org/licenses/>.
 
-## [x0,v,nev] = nelder_mead_min (f,args,ctl) - Nelder-Mead minimization
+## [x0,v] = nelder_mead_min (f,args,ctl) - Nelder-Mead minimization
 ##
 ## Minimize 'f' using the Nelder-Mead algorithm. This function is inspired
 ## from the that found in the book "Numerical Recipes".
@@ -30,7 +30,6 @@
 ## ---------------
 ## x0  : matrix   : Local minimum of f
 ## v   : real     : Value of f in x0
-## nev : number   : Number of function evaluations
 ## 
 ## CONTROL VARIABLE : (optional) may be named arguments (i.e. "name",value
 ## ------------------ pairs), a struct, or a vector of length <= 6, where
@@ -73,18 +72,10 @@
 ##                Set ctl(5) to the distance you expect between the starting
 ##                point and the minimum.
 ##
-## rst   ctl(6)   : When a minimum is found the algorithm restarts next to
-##                  it until the minimum does not improve anymore. ctl(6) is
-##                  the maximum number of restarts. Set ctl(6) to zero if
-##                  you know the function is well-behaved or if you don't
-##                  mind not getting a true minimum.                     <0>
-##
-## verbose, v     Be more or less verbose (quiet=0)                      <0>
 
-function [x,v,nev] = amoeba_dcp(f, args, varargin)
+function [x,v] = amoeba_dcp(f, args, varargin)
 
-verbose = 0;
-
+  global astep nstep
 				# Default control variables
 ftol = rtol = 10*eps;		# Stop either by likeness of values or
 vtol = nan;                     # radius, but don't care about volume.
@@ -93,7 +84,7 @@ tol = 10*eps;			# Stopping test's threshold     ctl(2)
 narg = 1;			# Position of minimized arg     ctl(3)
 maxev = inf;			# Max num of func evaluations   ctl(4)
 isz = 1;			# Initial size                  ctl(5)
-rst = 0;			# Max # of restarts
+asave = "";                   
 
 
 if nargin >= 3,			# Read control arguments
@@ -103,25 +94,15 @@ if nargin >= 3,			# Read control arguments
   else 
           ctl = varargin{va_arg_cnt++}; 
   end
-  if isnumeric (ctl)
-    if length (ctl)>=1 && !isnan (ctl(1)), crit = ctl(1); end
-    if length (ctl)>=2 && !isnan (ctl(2)), tol = ctl(2); end
-    if length (ctl)>=3 && !isnan (ctl(3)), narg = ctl(3); end
-    if length (ctl)>=4 && !isnan (ctl(4)), maxev = ctl(4); end
-    if length (ctl)>=5 && !isnan (ctl(5)), isz = ctl(5); end
-    if length (ctl)>=6 && !isnan (ctl(6)), rst = ctl(6); end
-  else
-    if isfield (ctl, "crit") && ! isnan (ctl.crit ), crit  = ctl.crit ; end
-    if isfield (ctl,  "tol") && ! isnan (ctl.tol  ), tol   = ctl.tol  ; end
-    if isfield (ctl, "ftol") && ! isnan (ctl.ftol ), ftol  = ctl.ftol ; end
-    if isfield (ctl, "rtol") && ! isnan (ctl.rtol ), rtol  = ctl.rtol ; end
-    if isfield (ctl, "vtol") && ! isnan (ctl.vtol ), vtol  = ctl.vtol ; end
-    if isfield (ctl, "narg") && ! isnan (ctl.narg ), narg  = ctl.narg ; end
-    if isfield (ctl,"maxev") && ! isnan (ctl.maxev), maxev = ctl.maxev; end
-    if isfield (ctl,  "isz") && ! isnan (ctl.isz  ), isz   = ctl.isz  ; end
-    if isfield (ctl,  "rst") && ! isnan (ctl.rst  ), rst   = ctl.rst  ; end
-    if isfield(ctl,"verbose")&& !isnan(ctl.verbose),verbose=ctl.verbose;end
-  end
+  if isfield (ctl, "crit") && ! isnan (ctl.crit ), crit  = ctl.crit ; end
+  if isfield (ctl,  "tol") && ! isnan (ctl.tol  ), tol   = ctl.tol  ; end
+  if isfield (ctl, "ftol") && ! isnan (ctl.ftol ), ftol  = ctl.ftol ; end
+  if isfield (ctl, "rtol") && ! isnan (ctl.rtol ), rtol  = ctl.rtol ; end
+  if isfield (ctl, "vtol") && ! isnan (ctl.vtol ), vtol  = ctl.vtol ; end
+  if isfield (ctl, "narg") && ! isnan (ctl.narg ), narg  = ctl.narg ; end
+  if isfield (ctl,"maxev") && ! isnan (ctl.maxev), maxev = ctl.maxev; end
+  if isfield (ctl,  "isz") && ! isnan (ctl.isz  ), isz   = ctl.isz  ; end
+  if isfield (ctl,"asave") && ! isnan (ctl.asave), asave = ctl.asave; end
 end
 
 
@@ -138,30 +119,50 @@ else				# Single argument
   args = {args};
 endif
 
-if narg > length (args)		# Check
-  error ("nelder_mead_min : narg==%i, length (args)==%i\n",
-	 narg, length (args));
-end
+printf("#### Amoeba started with tol = %.5f and isz = %f \n",rtol,isz);
 
-[R,C] = size (x);
-N = R*C;			# Size of argument
+## Simplex dimension
+[R0,C0] = size (x);
+N0 = R0*C0;			
 x = x(:);
-				# Initial simplex
-## u = isz * eye (N+1,N) + ones(N+1,1)*x'; ## default nelder_mead behavior.
-u = isz * eye (N+1,N) .* (ones(N+1,1)*x') + ones(N+1,1)*x';
+usesave = 0;
+if (length(asave) > 0 && exist(asave,"file"))
+  load(asave,"N","R","C");
+  if (N == N0 && R == R0 && C == C0)
+    usesave = 1;
+  endif
+endif
+N = N0; R = R0; C = C0;
 
-y = zeros (N+1,1);
-for i = 1:N+1,
-  y(i) = feval (f, args{1:narg-1},reshape(u(i,:),R,C),args{narg+1:end});
-end ;
-nev = N+1;
+astep = 0;
+if (!usesave)
+  ## Build the initial simplex
+  u = isz * eye (N+1,N) .* (ones(N+1,1)*x') + ones(N+1,1)*x';
 
-[ymin,imin] = min(y);
-ymin0 = ymin;
-## y
-nextprint = 0 ;
-v = nan;
-while nev <= maxev,
+  printf("#xx# |Step|  Iter |  Cost function  |   wRMS   |    RMS   |    MAE   | time(s) |\n")
+  y = zeros (N+1,1);
+  for i = 1:N+1,
+    y(i) = feval (f, args{1:narg-1},reshape(u(i,:),R,C),args{narg+1:end});
+  end ;
+
+  [ymin,imin] = min(y);
+  ymin0 = ymin;
+  v = nan;
+  str = "initialization";
+  nev = 1;
+else
+  printf("#### Amoeba found restart file %s \n",asave);
+  printf("#xx# |Step|  Iter |  Cost function  |   wRMS   |    RMS   |    MAE   | time(s) |\n")
+  nev = 0;
+endif
+
+while(true)
+  if (astep == 0 && usesave)
+    load(asave)
+  elseif (length(asave) > 0)
+    save(asave,"u","y","astep","nstep","v","N","R","C","str");
+  endif
+  astep++;
 
   ## ymin, ymax, ymx2 : lowest, highest and 2nd highest function values
   ## imin, imax, imx2 : indices of vertices with these values
@@ -170,13 +171,7 @@ while nev <= maxev,
   [ymx2,imx2] = max(y) ;  
   y(imax) = ymax ;
   
-  ## ymin may be > ymin0 after restarting
-  ## if ymin > ymin0 ,
-  ## "nelder-mead : Whoa 'downsimplex' Should be renamed 'upsimplex'"
-  ## keyboard
-  ## end
-  
-				# Compute stopping criterion
+  ## Compute stopping criterion
   done = 0;
   if ! isnan (ftol), 
      done |= ((max(y)-min(y)) / max(1,max(abs(y))) < ftol); 
@@ -187,123 +182,62 @@ while nev <= maxev,
   if ! isnan (vtol)
     done |= (abs (det (u(1:N,:)-ones(N,1)*u(N+1,:)))/factorial(N) < vtol);
   end
-  ## [ 2*max (max (u) - min (u)), abs (det (u(1:N,:)-ones(N,1)*u(N+1,:)))/factorial(N);\
-  ##  rtol, vtol]
   
-				# Eventually print some info
-  if verbose && nev > nextprint && ! done 
+  printf("#### Amoeba: step %d | rsize %.5f (tol %.5f)| fsize %.5f | vsize %.5f | cost %.5f | step %s | %s \n",...
+        astep,2*max (max (u) - min (u)), rtol, (max(y)-min(y)) / max(1,max(abs(y))),...
+        abs (det (u(1:N,:)-ones(N,1)*u(N+1,:)))/factorial(N), ymin, str, strtrim(ctime(time())));
 
-    printf("nev=%-5d   imin=%-3d   ymin=%-8.3g  done=%i\n",...
-	   nev,imin,ymin,done) ;
-
-    nextprint = nextprint + 100 ;
-  end
-  
-  if done			# Termination test
-    if (rst > 0) && (isnan (v) || v > ymin)
-      rst--;
-      if verbose
-	if isnan (v),
-	  printf ("Restarting next to minimum %10.3e\n",ymin); 
-	else
-	  printf ("Restarting next to minimum %10.3e\n",ymin-v); 
-	end
-      end
-				# Keep best minimum
+  if (done)
+    if isnan (v),
       x = reshape (u(imin,:), R, C) ;
       v = ymin ;
-    
-      jumplen = 10 * max (max (u) - min (u));
-      
-      u += jumplen * randn (size (u));
-      for i = 1:N+1, y(i) = ...
-	    feval (f, args{1:narg-1},reshape(u(i,:),R,C),args{narg+1:length(args)});
-      end
-      nev += N+1;
-      [ymin,imin] = min(y);  [ymax,imax] = max(y);
-      y(imax) = ymin;
-      [ymx2,imx2] = max(y);
-      y(imax) = ymax ;
-    else
-      if isnan (v),
-	x = reshape (u(imin,:), R, C) ;
-	v = ymin ;
-      end
-      if verbose,
-	printf("nev=%-5d   imin=%-3d   ymin=%-8.3g  done=%i. Done\n",...
-	       nev,imin,ymin,done) ;
-      end
-      return
     end
-
-  end
+    if (nev == 0) 
+      v = feval(f, args{1:narg-1},reshape(x,R,C),args{narg+1:length(args)});
+    endif
+    printf("#### Amoeba converged\n");
+    return
+  endif
   ##   [ y' u ]
 
-  tra = 0 ;			# 'trace' debug var contains flags
-  if verbose > 1, str = sprintf (" %i : %10.3e --",done,ymin); end
-
-				# Look for a new point
-  xsum = sum(u) ;		# Consider reflection of worst vertice
-				# around centroid.
+  ## Look for a new point
+  ## Consider reflection of worst vertice around centroid.
+  xsum = sum(u) ;		
+				
   ## f1 = (1-(-1))/N = 2/N;
   ## f2 = f1 - (-1)  = 2/N + 1 = (N+2)/N
   xnew = (2*xsum - (N+2)*u(imax,:)) / N;
   ## xnew = (2*xsum - N*u(imax,:)) / N;
   ynew = feval (f, args{1:narg-1},reshape(xnew,R,C),args{narg+1:length(args)});
-  nev++;
   
-  if ynew <= ymin ,		# Reflection is good
-    
-    tra += 1 ;
-    if verbose > 1
-      str = [str,sprintf(" %3i : %10.3e good refl >>",nev,ynew-ymin)];
-    end
+  if (ynew <= ymin)
+    ## Reflection is good    
     y(imax) = ynew; u(imax,:) = xnew ;
-    ## ymin = ynew;
-    ## imin = imax;
     xsum = sum(u) ;
     
     ## f1 = (1-2)/N = -1/N
     ## f2 = f1 - 2  = -1/N - 2 = -(2*N+1)/N
     xnew = ( -xsum + (2*N+1)*u(imax,:) ) / N;
     ynew = feval (f, args{1:narg-1},reshape(xnew,R,C),args{narg+1:length(args)});
-    nev++;
       
-    if ynew <= ymin ,		# expansion improves
-      tra += 2 ;
-      ##      'expanded reflection'
+    if ynew <= ymin ,		
       y(imax) = ynew ; u(imax,:) = xnew ;
       xsum = sum(u) ;
-      if verbose > 1
-	str = [str,sprintf(" %3i : %10.3e expd refl",nev,ynew-ymin)];
-      end
+      str = "good reflection (expand)";
     else
-      tra += 4 ;
-      ##      'plain reflection'
-      ## Updating of y and u has already been done
-      if verbose > 1
-	str = [str,sprintf(" %3i : %10.3e plain ref",nev,ynew-ymin)];
-      end
+      str = "good reflection (plain)";
     end
-				# Reflexion is really bad
-  elseif ynew >= ymax ,
-    
-    tra += 8 ;
-    if verbose > 1
-      str = [str,sprintf(" %3i : %10.3e intermedt >>",nev,ynew-ymin)];
-    end
-    ## look for intermediate point
-				# Bring worst point closer to centroid
+
+  elseif (ynew >= ymax)
+    ## Bring worst point closer to centroid
     ## f1 = (1-0.5)/N = 0.5/N
     ## f2 = f1 - 0.5  = 0.5*(1 - N)/N
     xnew = 0.5*(xsum + (N-1)*u(imax,:)) / N;
     ynew = feval (f, args{1:narg-1},reshape(xnew,R,C),args{narg+1:length(args)});
-    nev++;
 
-    if ynew >= ymax ,		# New point is even worse. Contract whole
-				# simplex
-
-      nev += N + 1 ;
+    if (ynew >= ymax)
+      ## New point is even worse. Contract whole
+      ## simplex
       ## u0 = u;
       u = (u + ones(N+1,1)*u(imin,:)) / 2;
       ## keyboard
@@ -316,38 +250,18 @@ while nev <= maxev,
 	y(i) = ...
 	    ynew = feval (f, args{1:narg-1},reshape(u(i,:),R,C),args{narg+1:length(args)});
       end
-      ##      'contraction'
-      tra += 16 ;
-      if verbose > 1
-	str = [str,sprintf(" %3i contractn",nev)];
-      end
+      str = "contraction";
     else				# Replace highest point
       y(imax) = ynew ; u(imax,:) = xnew ;
       xsum = sum(u) ; 
-      ##      'intermediate'
-      tra += 32 ;
-      if verbose > 1
-	str = [str,sprintf(" %3i : %10.3e intermedt",nev,ynew-ymin)];
-      end
+      str = "intermediate";
     end
-
-  else				# Reflexion is neither good nor bad
+  else				
+    ## Reflection is neither good nor bad
     y(imax) = ynew ; u(imax,:) = xnew ;
     xsum = sum(u) ; 
-    ##      'plain reflection (2)'
-    tra += 64 ;
-    if verbose > 1
-      str = [str,sprintf(" %3i : %10.3e keep refl",nev,ynew-ymin)];
-    end
+    str = "keep reflection (plain)";
   end
-  if verbose > 1, printf ("%s\n",str); end
+  nev++;
 end
 
-if verbose >= 0
-  printf ("nelder_mead : Too many iterations. Returning\n");
-end
-
-if isnan (v) || v > ymin,
-  x = reshape (u(imin,:), R, C) ;
-  v = ymin ;
-end

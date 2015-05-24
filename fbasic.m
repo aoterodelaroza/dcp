@@ -1,4 +1,4 @@
-function y = fbasic(x)
+function y = fbasic(x,noopt=0)
   %% function y = fbasic(x)
   %%
   %% Evaluation function for the minimization routine. This function is meant
@@ -8,7 +8,8 @@ function y = fbasic(x)
   %% calculations are carried out, and the cost function for the DCP
   %% given by x is calculated, and returned as y.
   
-  global dcp db prefix nstep verbose run_inputs ycur dcpfin costmin
+  global dcp db prefix nstep verbose run_inputs ycur dcpfin ...
+         costmin usechk stime0 astep dcpeval
   
   ## Yet another function evaluation.
   nstep++;
@@ -30,11 +31,20 @@ function y = fbasic(x)
     writedcp(dcp);
   endif
 
+  ## Create the prefix directory if it doesn't exist yet
+  if (!exist(prefix,"dir"))
+    [s out] = system(sprintf("mkdir %s",prefix));
+    if (s != 0)
+      error(sprintf("Could not create directory %s",prefix));
+    endif
+  endif
+
   ## If any of the exponents is positive, return Inf
   if (any(x(1:2:end) < 0))
     y = Inf;
-    if (verbose)
-      printf("# Cost function: %.10f\n",y)
+    if (!noopt)
+      printf("#xx# | %2d | %5d | %15.7f | %7.4f | %7.4f | %7.4f | %d |\n",astep,nstep,y,Inf,Inf,Inf,time()-stime0);
+      stime0 = time();
     endif
   else
     ## Set up the Gaussian input files
@@ -46,16 +56,62 @@ function y = fbasic(x)
       printf("# Running the %d input files: \n",length(ilist));
     endif
 
+    ## Prune the list to eliminate those inputs that are exactly the same
+    ilist0 = ilist;
+    ipoint = zeros(1,length(ilist0));
+    ilist = {};
+    for i = 1:length(ilist0)
+      found = 0;
+      for j = 1:i-1
+        [s out] = system(sprintf("diff -q -I '^%%chk=' %s.gjf %s.gjf",ilist0{i},ilist0{j}));
+        if (s == 0)
+          found = 1;
+          ipoint(i) = j;
+          break
+        endif
+      endfor
+      if (!found)
+        ilist = {ilist{:} ilist0{i}};
+      endif
+    endfor
+
+    ## Prepare the checkpoint files
+    unstash_checkpoints(ilist)
+
     ## Run all inputs
-    s = run_inputs(ilist);
-    if (s != 0)
+    srun = run_inputs(ilist);
+
+    ## Propagate outputs, unprune
+    for i = 1:length(ilist0)
+      if (ipoint(i))
+        [s1 out] = system(sprintf("cp -f %s.log %s.log",ilist0{ipoint(i)},ilist0{i}));
+        if (s != 0)
+          error(sprintf("Could not propagate outputs %s.log -> %s.log",ilist0{ipoint(i)},ilist0{i}));
+        endif
+        if (usechk && exist(sprintf("%s.chk",ilist0{ipoint(i)}),"file"))
+          [s out] = system(sprintf("cp -f %s.chk %s.chk",ilist0{ipoint(i)},ilist0{i}));
+          if (s != 0)
+            error(sprintf("Could not propagate outputs %s.log -> %s.log",ilist0{ipoint(i)},ilist0{i}));
+          endif
+        endif
+      endif
+    endfor
+    ilist = ilist0;
+
+    ## If any of the Gaussian outputs are wrong, return Inf to the caller
+    if (srun != 0)
       y = Inf;
       stash_inputs_outputs(ilist);
-      if (verbose)
-        printf("# Cost function: %.10f\n",y)
+      clear_checkpoints(ilist);
+      if (!noopt)
+        printf("#xx# | %2d | %5d | %15.7f | %7.4f | %7.4f | %7.4f | %d |\n",astep,nstep,y,Inf,Inf,Inf,time()-stime0);
+        stime0 = time();
       endif
       return
     endif
+
+    ## Send checkpoint files to the stash
+    stash_checkpoints(ilist)
 
     ## Collect the results and compare to the reference data
     dy = ycalc = yref = zeros(length(db),1);
@@ -75,22 +131,43 @@ function y = fbasic(x)
     y = sum(wei .* dy.^2);
 
     ## Print summary to output
+    if (!noopt)
+      printf("#xx# | %2d | %5d | %15.7f | %7.4f | %7.4f | %7.4f | %d |\n",astep,nstep,...
+             y,sqrt(y/sum(wei)),sqrt(mean((yref-ycalc).^2)),mean(abs(yref-ycalc)),...
+             time()-stime0);
+      stime0 = time();
+    endif
     if (verbose)
       printf("| Id | Name | weig | yref | ycalc | dy |\n")
       for i = 1:length(db)
         printf("| %d | %s | %.4f | %.4f | %.4f | %.4f |\n",...
                i,db{i}.name,wei(i),yref(i),ycalc(i),dy(i))
       endfor
-      printf("# Cost function: %.10f\n",y);
-      printf("# Weighted RMS: %.3f\n",sqrt(y/sum(wei)));
-      printf("# RMS: %.3f\n",sqrt(mean((yref-ycalc).^2)));
-      printf("# MAE: %.3f\n",mean(abs(yref-ycalc)));
     endif
     
+    ## Save this DCP to the stash
+    writedcp(dcp,sprintf("%s/%s_%4.4d.dcp",prefix,prefix,nstep));
+
     ## Write the DCP if this is the best we have
     if (y < costmin)
-      writedcp(dcp,dcpfin);
+      if (length(dcpfin) > 0)
+        writedcp(dcp,dcpfin);
+      endif
       costmin = y;
+      if (length(dcpeval) > 0)
+        fid = fopen(dcpeval,"w");
+        fprintf(fid,"| Id | Name | weig | yref | ycalc | dy |\n")
+        for i = 1:length(db)
+          fprintf(fid,"| %d | %s | %.4f | %.4f | %.4f | %.4f |\n",...
+                  i,db{i}.name,wei(i),yref(i),ycalc(i),dy(i))
+        endfor
+        fprintf(fid,"# MAE = %.4f\n",mean(abs(yref-ycalc)));
+        fprintf(fid,"# MAPE = %.4f\n",mean(abs((yref-ycalc)./yref))*100);
+        fprintf(fid,"# RMS = %.4f\n",sqrt(mean((yref-ycalc).^2)));
+        fprintf(fid,"# wRMS = %.4f\n",sqrt(sum(wei .* (yref-ycalc).^2)/sum(wei)));
+        fprintf(fid,"# Cost function minimum: %.10f\n",costmin);
+        fclose(fid);
+      endif
     endif
   endif
 

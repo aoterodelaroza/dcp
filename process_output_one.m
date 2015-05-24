@@ -13,7 +13,7 @@ function [dy ycalc yref] = process_output_one(ent)
 
   if (strcmp(ent.type,"be_frozen_monomer"))
     ## Read the energy for the dimer
-    file = sprintf("%s_%3.3d_%s_mol.log",prefix,nstep,ent.name);
+    file = sprintf("%s_%4.4d_%s_mol.log",prefix,nstep,ent.name);
     if (!exist(file,"file"))
       error(sprintf("Output file not found %s in output processing for entry %s",file,ent.name));
     endif
@@ -28,7 +28,7 @@ function [dy ycalc yref] = process_output_one(ent)
 
     ## Then the monomer 1
     if (ent.mon1.nat > 0)
-      file = sprintf("%s_%3.3d_%s_mon1.log",prefix,nstep,ent.name);
+      file = sprintf("%s_%4.4d_%s_mon1.log",prefix,nstep,ent.name);
       if (!exist(file,"file"))
         error(sprintf("Output file not found %s in output processing for entry %s",file,ent.name));
       endif
@@ -46,7 +46,7 @@ function [dy ycalc yref] = process_output_one(ent)
 
     ## Then the monomer 2
     if (ent.mon2.nat > 0)
-      file = sprintf("%s_%3.3d_%s_mon2.log",prefix,nstep,ent.name);
+      file = sprintf("%s_%4.4d_%s_mon2.log",prefix,nstep,ent.name);
       if (!exist(file,"file"))
         error(sprintf("Output file not found %s in output processing for entry %s",file,ent.name));
       endif

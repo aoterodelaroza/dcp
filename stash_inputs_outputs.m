@@ -19,11 +19,11 @@ function stash_inputs_outputs(ilist)
   for i = 1:length(ilist)
     str = sprintf("%s %s.gjf %s.log",str,ilist{i},ilist{i});
   endfor
-  [s out] = system(sprintf("tar cjvf %s_%3.3d.tar.bz2 %s",prefix,nstep,str));
+  [s out] = system(sprintf("tar cjvf %s_%4.4d.tar.bz2 %s",prefix,nstep,str));
   if (s != 0)
     error(sprintf("Could not tar inputs/outputs for iteration %d",nstep));
   endif
-  [s out] = system(sprintf("mv %s_%3.3d.tar.bz2 %s",prefix,nstep,prefix));
+  [s out] = system(sprintf("mv %s_%4.4d.tar.bz2 %s",prefix,nstep,prefix));
   if (s != 0)
     error(sprintf("Could not move compressed inputs/outputs for iteration %d",nstep));
   endif

@@ -6,7 +6,9 @@ function s = run_inputs_grex(ilist)
   %% routine handles the environment details: where Gaussian is, 
   %% talking to the queue system, etc. The (expected) behavior of 
   %% this routine is that, after completion, the log files for
-  %% all the inputs in ilist will also be in the CWD.
+  %% all the inputs in ilist will also be in the CWD. Optionally,
+  %% all checkpoint files (with the same name) should also be
+  %% in the CWD.
   %%
   %% This version of run_inputs creates submission scripts for all
   %% inputs in the list and submits them to grex. After that,
@@ -98,25 +100,37 @@ function s = run_inputs_grex(ilist)
     endif
   endfor
 
-  ## Wait until all the calcs are done (see at the end of the file for
-  ## an alternative that doesn't work because of the unreliability
-  ## of qstat).
+  ## Wait until all the calcs and jobs are done
   done = zeros(1,length(ilist));
+  jdone = zeros(1,length(jobname));
   nslept = 0;
   nslept0 = 0;
   do 
      sleep(sleeptime);
-     nslept += sleeptime;
      nslept0 += sleeptime;
-     ## See if calcs are done, reset the nslept if a new output was found
+     ## Check we didn't exceed the sleeptime
+     if (nslept > maxtime)
+       error(sprintf("Maximum sleep time %f exceeded: no qstat available.",maxtime));
+     endif
+     ## See if jobs are done
+     [s out] = system("qstat 2>&1");
+     if (s != 0) 
+       nslept += sleeptime;
+       continue
+     endif
+     for i = find(!jdone)
+       if (!findstr(out,jobnum{i}))
+         jdone(i) = 1;
+       endif
+     endfor
+     ## See if calcs are done
      for i = find(!done)
        if (exist(sprintf("%s.done",ilist{i}),"file"))
          done(i) = 1;
-         nslept = 0;
        endif
      endfor
-     if (nslept > maxtime)
-       error(sprintf("Maximum sleep time %f exceeded.",maxtime));
+     if (all(jdone) && !all(done))
+       error("All jobs have finished but not all done files are present, aborting");
      endif
   until(all(done))
   if (verbose)
@@ -131,6 +145,7 @@ function s = run_inputs_grex(ilist)
   ## Calculate the load for subsequent runs
   iload = read_jobload(ilist,iload);
   if (verbose)
+    printf("# Job load\n")
     printf("| Id | Name | Load (s) |\n")
     for i = 1:length(ilist)
       printf("| %d | %s | %.1f |\n",...
@@ -155,27 +170,25 @@ function s = run_inputs_grex(ilist)
 
 endfunction
 
+##  ## Wait until all the calcs are done
 ##  done = zeros(1,length(ilist));
-##  jdone = zeros(1,length(jobname));
+##  nslept = 0;
+##  nslept0 = 0;
 ##  do 
 ##     sleep(sleeptime);
-##     ## See if jobs are done
-##     [s out] = system("qstat");
-##     if (s != 0) 
-##       error("Error using qstat");
-##     endif
-##     for i = find(!jdone)
-##       if (!findstr(out,jobnum{i}))
-##         jdone(i) = 1;
-##       endif
-##     endfor
-##     ## See if calcs are done
+##     nslept += sleeptime;
+##     nslept0 += sleeptime;
+##     ## See if calcs are done, reset the nslept if a new output was found
 ##     for i = find(!done)
 ##       if (exist(sprintf("%s.done",ilist{i}),"file"))
 ##         done(i) = 1;
+##         nslept = 0;
 ##       endif
 ##     endfor
-##     if (all(jdone) && !all(done))
-##       error("All jobs have finished but not all done files are present, aborting");
+##     if (nslept > maxtime)
+##       error(sprintf("Maximum sleep time %f exceeded.",maxtime));
 ##     endif
 ##  until(all(done))
+##  if (verbose)
+##    printf("All Gaussian outputs are ready after %d seconds\n",nslept0);
+##  endif

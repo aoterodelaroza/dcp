@@ -69,10 +69,10 @@ function db = filldb(db,weis=[],method=[],extragau,ncpu,mem);
       endif
       ## Monomer 1
       if (!isfield(db{i},"mon1"))
-        error(sprintf("Entry %s has no dimer structure",db{i}.file))
+        error(sprintf("Entry %s has no monomer 1 structure",db{i}.file))
       endif
       if (!isfield(db{i}.mon1,"nat") || db{i}.mon1.nat < 0)
-        error(sprintf("Dimer in entry %s has no atoms",db{i}.file))
+        error(sprintf("Monomer 1 in entry %s has no atoms",db{i}.file))
       endif
       if (db{i}.mon1.nat > 0)
         if (!isfield(db{i}.mon1,"q"))
@@ -82,15 +82,15 @@ function db = filldb(db,weis=[],method=[],extragau,ncpu,mem);
           db{i}.mon1.mult = 1;
         endif
         if (!isfield(db{i}.mon1,"at") || !isfield(db{i}.mon1,"x"))
-          error(sprintf("Dimer in entry %s is not sane",db{i}.file))
+          error(sprintf("Monomer 1 in entry %s is not sane",db{i}.file))
         endif
       endif
       ## Monomer 2
       if (!isfield(db{i},"mon2"))
-        error(sprintf("Entry %s has no dimer structure",db{i}.file))
+        error(sprintf("Entry %s has no monomer 2 structure",db{i}.file))
       endif
       if (!isfield(db{i}.mon2,"nat") || db{i}.mon2.nat < 0)
-        error(sprintf("Dimer in entry %s has no atoms",db{i}.file))
+        error(sprintf("Monomer 2 in entry %s has no atoms",db{i}.file))
       endif
       if (db{i}.mon2.nat > 0) 
         if (!isfield(db{i}.mon2,"q"))
@@ -100,7 +100,7 @@ function db = filldb(db,weis=[],method=[],extragau,ncpu,mem);
           db{i}.mon2.mult = 1;
         endif
         if (!isfield(db{i}.mon2,"at") || !isfield(db{i}.mon2,"x"))
-          error(sprintf("Dimer in entry %s is not sane",db{i}.file))
+          error(sprintf("Monomer 2 in entry %s is not sane",db{i}.file))
         endif
       endif
       ## Fill missing fields in the database with default values
