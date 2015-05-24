@@ -84,7 +84,7 @@ function y = fbasic(x,noopt=0)
     ## Propagate outputs, unprune
     for i = 1:length(ilist0)
       if (ipoint(i))
-        [s1 out] = system(sprintf("cp -f %s.log %s.log",ilist0{ipoint(i)},ilist0{i}));
+        [s out] = system(sprintf("cp -f %s.log %s.log",ilist0{ipoint(i)},ilist0{i}));
         if (s != 0)
           error(sprintf("Could not propagate outputs %s.log -> %s.log",ilist0{ipoint(i)},ilist0{i}));
         endif
