@@ -55,47 +55,11 @@ function y = fbasic(x)
       printf("# Running the %d input files: \n",length(ilist));
     endif
 
-    ## Prune the list to eliminate those inputs that are exactly the same
-    ilist0 = ilist;
-    ipoint = zeros(1,length(ilist0));
-    ilist = {};
-    for i = 1:length(ilist0)
-      found = 0;
-      for j = 1:i-1
-        [s out] = system(sprintf("diff -q -I '^%%chk=' %s.gjf %s.gjf",ilist0{i},ilist0{j}));
-        if (s == 0)
-          found = 1;
-          ipoint(i) = j;
-          break
-        endif
-      endfor
-      if (!found)
-        ilist = {ilist{:} ilist0{i}};
-      endif
-    endfor
-
     ## Prepare the checkpoint files
     unstash_checkpoints(ilist)
 
     ## Run all inputs
     srun = run_inputs(ilist);
-
-    ## Propagate outputs, unprune
-    for i = 1:length(ilist0)
-      if (ipoint(i))
-        [s1 out] = system(sprintf("cp -f %s.log %s.log",ilist0{ipoint(i)},ilist0{i}));
-        if (s != 0)
-          error(sprintf("Could not propagate outputs %s.log -> %s.log",ilist0{ipoint(i)},ilist0{i}));
-        endif
-        if (usechk && exist(sprintf("%s.chk",ilist0{ipoint(i)}),"file"))
-          [s out] = system(sprintf("cp -f %s.chk %s.chk",ilist0{ipoint(i)},ilist0{i}));
-          if (s != 0)
-            error(sprintf("Could not propagate outputs %s.log -> %s.log",ilist0{ipoint(i)},ilist0{i}));
-          endif
-        endif
-      endif
-    endfor
-    ilist = ilist0;
 
     ## If any of the Gaussian outputs are wrong, return Inf to the caller
     if (srun != 0)
