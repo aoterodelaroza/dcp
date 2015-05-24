@@ -29,9 +29,9 @@ function s = run_inputs_grex(ilist,cont=0)
   sleeptime = 5; ## time in seconds between job completion checks
   usenodes = 6; ## pack all available jobs so that only usenodes number of nodes 
                 ## are used. If usenodes = -1, submit one job per Gaussian input.
-  maxtime = 1000; ## maximum sleep time in seconds. Crash if the script sleeps
-                  ## for longer than this number without a new Gaussian output
-                  ## being written.
+  maxtime = Inf; ## maximum sleep time in seconds. Crash if the script sleeps
+                 ## for longer than this number without a new Gaussian output
+                 ## being written.
 
   if (usenodes > 0) 
     every = ceil(length(ilist) / usenodes);
@@ -112,25 +112,18 @@ function s = run_inputs_grex(ilist,cont=0)
   do 
      sleep(sleeptime);
      nslept0 += sleeptime;
+     nslept += sleeptime;
      ## Check we didn't exceed the sleeptime
      if (nslept > maxtime)
        error(sprintf("Maximum sleep time %f exceeded: no qstat available.",maxtime));
      endif
-     ## See if jobs are done
-     [s out] = system(sprintf("qstat %s 2>&1 | grep Unknown | wc -l",jobstr));
-     if (s != 0)
-       nslept += sleeptime;
-     endif
-     jdone = (str2num(out) == length(jobname));
      ## See if calcs are done
      for i = find(!done)
        if (exist(sprintf("%s.done",ilist{i}),"file"))
          done(i) = 1;
+         nslept = 0;
        endif
      endfor
-     if (!all(done) && jdone)
-       error("All jobs have finished but not all done files are present, aborting");
-     endif
   until(all(done))
   if (verbose)
     printf("All Gaussian outputs are ready after %d seconds\n",nslept0);
