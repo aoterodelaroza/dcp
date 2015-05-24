@@ -19,17 +19,17 @@ method="blyp";
 basis="basis.ini";
 
 ## Extra bits for gaussian (do not include pseudo=read here)
-# extragau="EmpiricalDispersion=GD3BJ SCF=(Conver=5, MaxCycle=40) Symm=Loose";
-extragau="SCF=(Conver=5, MaxCycle=40) Symm=Loose";
+extragau="EmpiricalDispersion=GD3BJ SCF=(Conver=5, MaxCycle=40) Symm=Loose";
+# extragau="SCF=(Conver=5, MaxCycle=40) Symm=Loose";
 
 ## Number of CPUs and memory (in GB) for Gaussian runs
 ncpu=6;
 mem=2;
 
 ## List of database files to use in DCP optimization
-listdb={...
-        "db/bde_c-h.db","db/bde_ch-h.db","db/bde_ch2-h.db","db/bde_ch3-ch3.db","db/bde_c2h5-h.db",...
-       };
+[s out] = system("ls db/s66_*.db");
+listdb = strsplit(out,"\n");
+listdb = listdb(1:end-1);
 
 ## List of DCP files to evaluate (you can use a cell array of files
 ## here, like {"C.dcp","H.dcp"}, or a single string "bleh.dcp")
@@ -89,38 +89,8 @@ for idcp = 1:length(dcpini)
   endfor
 endfor
 
-## Prune the list to eliminate those inputs that are exactly the same
-ilist0 = ilist;
-ipoint = zeros(1,length(ilist0));
-ilist = {};
-for i = 1:length(ilist0)
-  found = 0;
-  for j = 1:i-1
-    [s out] = system(sprintf("diff -q -I '^%%chk=' %s.gjf %s.gjf",ilist0{i},ilist0{j}));
-    if (s == 0)
-      found = 1;
-      ipoint(i) = j;
-      break
-    endif
-  endfor
-  if (!found)
-    ilist = {ilist{:} ilist0{i}};
-  endif
-endfor
-
 ## Run all inputs
 srun = run_inputs(ilist,1);
-
-## Propagate outputs, unprune
-for i = 1:length(ilist0)
-  if (ipoint(i) && exist(sprintf("%s.log",ilist0{ipoint(i)}),"file"))
-    [s1 out] = system(sprintf("cp -f %s.log %s.log",ilist0{ipoint(i)},ilist0{i}));
-    if (s != 0)
-      error(sprintf("Could not propagate outputs %s.log -> %s.log",ilist0{ipoint(i)},ilist0{i}));
-    endif
-  endif
-endfor
-ilist = ilist0;
 
 ## Collect the results and compare to the reference data
 for idcp = 1:length(dcpini)
