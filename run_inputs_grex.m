@@ -92,21 +92,21 @@ function s = run_inputs_grex(ilist,cont=0)
   endif
 
   ## Submit all the scripts to the queue
-  jobnum = cell(1,length(jobname));
+  jobstr = "";
   for i = 1:length(jobname)
     [s out] = system(sprintf("qsub %s",jobname{i}));
     if (s != 0)
       error("Could not submit script: %s",jobname{i});
     endif
-    jobnum{i} = strtrim(out);
+    aux = strsplit(strtrim(out),".");
     if (verbose)
-      printf("Job %s submitted for %s\n",jobnum{i},jobname{i});
+      printf("Job %s submitted for %s\n",aux{1},jobname{i});
     endif
+    jobstr = sprintf("%s %s",jobstr,aux{1});
   endfor
 
   ## Wait until all the calcs and jobs are done
   done = zeros(1,length(ilist));
-  jdone = zeros(1,length(jobname));
   nslept = 0;
   nslept0 = 0;
   do 
@@ -117,23 +117,18 @@ function s = run_inputs_grex(ilist,cont=0)
        error(sprintf("Maximum sleep time %f exceeded: no qstat available.",maxtime));
      endif
      ## See if jobs are done
-     [s out] = system("qstat 2>&1");
-     if (s != 0) 
+     [s out] = system(sprintf("qstat %s 2>&1 | grep Unknown | wc -l",jobstr));
+     if (s != 0)
        nslept += sleeptime;
-       continue
      endif
-     for i = find(!jdone)
-       if (!findstr(out,jobnum{i}))
-         jdone(i) = 1;
-       endif
-     endfor
+     jdone = (str2num(out) == length(jobname));
      ## See if calcs are done
      for i = find(!done)
        if (exist(sprintf("%s.done",ilist{i}),"file"))
          done(i) = 1;
        endif
      endfor
-     if (all(jdone) && !all(done))
+     if (!all(done) && jdone)
        error("All jobs have finished but not all done files are present, aborting");
      endif
   until(all(done))
