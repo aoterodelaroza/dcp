@@ -33,7 +33,7 @@ listdb = listdb(1:end-1);
 
 ## List of DCP files to evaluate (you can use a cell array of files
 ## here, like {"C.dcp","H.dcp"}, or a single string "bleh.dcp")
-dcpini={"dcp3.fin","dcp3bis.fin"};
+dcpini={"bleh_0101.dcp","bleh_0127.dcp"};
 
 ## Prefix for the calculations. If prefix is "bleh", then all the
 ## inputs and outputs will be stored in subdirectory bleh/ of the
