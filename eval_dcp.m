@@ -52,9 +52,6 @@ funeval = "fbasic";
 run_inputs = @run_inputs_serial; ## Run all Gaussian inputs sequentially on the same node
 ## run_inputs = @run_inputs_grex; ## Submit inputs to the queue, wait for all to finish. Grex version.
 
-## Tolerance criteria for the minimization (maximum simplex size)
-ptol = 1000; ## parameter change tolerance, default 1e-6
-
 ## Carry over Gaussian checkpoint files from one iteration to the next.
 ## Use them as the initial guess in Gaussian.
 ## usechk = "" ## do not use checkpoint files
