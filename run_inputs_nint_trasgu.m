@@ -38,10 +38,16 @@ function s = run_inputs_nint_trasgu(ilist,cont=0)
     if (fid < 0) 
       error("Could not create submission script: %s.sub",name);
     endif
-    fprintf(fid,"#! /bin/bash\n");
+    fprintf(fid,"export g03root='/home/delarozao/src'\n");
+    fprintf(fid,". $g03root/g03/bsd/g03.profile\n");
+    fprintf(fid,"\n");
+    fprintf(fid,"export SCRATCH=/state/partition1/scratch_local/${PBS_JOBID%%%%.*}\n");
+    fprintf(fid,"export GAUSS_SCRDIR=/state/partition1/scratch_local/${PBS_JOBID%%%%.*}\n");
+    fprintf(fid,"mkdir $SCRATCH\n");
+    fprintf(fid,"\n");
     fprintf(fid,"cd %s\n",pwd());
     fprintf(fid,"g03 %s.gjf\n",name);
-    fprintf(fid,"rm -f $SCRATCH/*\n");
+    fprintf(fid,"rm -f $SCRATCH\n");
     fprintf(fid,"touch %s.done\n",name);
     fclose(fid);
     jobname = {jobname{:} sprintf("%s.sub",name)};
