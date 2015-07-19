@@ -35,7 +35,7 @@ function dcp = parsedcp(alist)
         continue
       endif
       ## This is the 'Atom 0' line at the beginning
-      anew = strsplit(line," ");
+      anew = strfields(line);
       if (length(anew) != 2)
         error(sprintf("Incorrect Gaussian ECP format in file %s, line '%s'",alist{i},line));
       endif
@@ -47,7 +47,7 @@ function dcp = parsedcp(alist)
       if (!ischar(line) || length(line) == 0)
         error(sprintf("Incorrect Gaussian ECP format in file %s, line '%s'",alist{i},line));
       end
-      anew = strsplit(line," ");
+      anew = strfields(line);
       if (length(anew) != 3)
         error(sprintf("Incorrect Gaussian ECP format in file %s, line '%s'",alist{i},line));
       endif

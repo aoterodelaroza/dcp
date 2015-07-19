@@ -11,7 +11,7 @@ function writegjf(file,dcp,basis,at,x,q,mult,ent,chk="");
   atlist = {};
   for i = 1:length(at)
     if (!any(ismember(at{i},atlist)))
-      atlist = [atlist, at{i}];
+      atlist = {atlist{:} at{i}};
     endif
   endfor
 

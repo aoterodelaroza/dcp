@@ -44,7 +44,7 @@ function basis = parsebasis(alist)
       endif
       ## This is the 'Atom 0' line at the beginning
       curatoms = {};
-      anew = strsplit(line," ");
+      anew = strfields(line);
       if (anew{end} != "0")
         error(sprintf("Incorrect Gaussian basis format in file %s, line '%s'",alist{i},line));
       endif

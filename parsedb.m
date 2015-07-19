@@ -38,7 +38,7 @@ function db = parsedb(files)
         continue
       end
       ## Parse the keyword
-      anew = strsplit(line," ");
+      anew = strfields(line);
       keyw = lower(anew{1});
       if (strcmp(keyw,"type"))
         db{ndb}.type = lower(anew{2});
@@ -47,6 +47,7 @@ function db = parsedb(files)
       elseif (strcmp(keyw,"ref"))
         db{ndb}.ref = str2num(anew{2});
       elseif (strcmp(keyw,"mol"))
+        db{ndb}.mol = struct();
         if (length(anew) == 3)
           db{ndb}.mol.q = str2num(anew{2});
           db{ndb}.mol.mult = str2num(anew{3});
@@ -69,6 +70,7 @@ function db = parsedb(files)
         until (!ischar(line))
         db{ndb}.mol.nat = n;
       elseif (strcmp(keyw,"mon1"))
+        db{ndb}.mon1 = struct();
         if (length(anew) == 3)
           db{ndb}.mon1.q = str2num(anew{2});
           db{ndb}.mon1.mult = str2num(anew{3});
@@ -94,6 +96,7 @@ function db = parsedb(files)
         until (!ischar(line))
         db{ndb}.mon1.nat = n;
       elseif (strcmp(keyw,"mon2"))
+        db{ndb}.mon2 = struct();
         if (length(anew) == 3)
           db{ndb}.mon2.q = str2num(anew{2});
           db{ndb}.mon2.mult = str2num(anew{3});

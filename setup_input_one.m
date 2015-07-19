@@ -18,7 +18,7 @@ function ilist = setup_input_one(ent,dcp)
     endif
     file = sprintf("%s_%4.4d_%s_mol.gjf",prefix,nstep,ent.name);
     writegjf(file,dcp,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult,ent,chk)
-    ilist = [ilist, sprintf("%s_%4.4d_%s_mol",prefix,nstep,ent.name)];
+    ilist = {ilist{:} sprintf("%s_%4.4d_%s_mol",prefix,nstep,ent.name)};
 
     ## Then the monomer 1
     if (ent.mon1.nat > 0)
@@ -29,7 +29,7 @@ function ilist = setup_input_one(ent,dcp)
       endif
       file = sprintf("%s_%4.4d_%s_mon1.gjf",prefix,nstep,ent.name);
       writegjf(file,dcp,basis,ent.mon1.at,ent.mon1.x,ent.mon1.q,ent.mon1.mult,ent,chk)
-      ilist = [ilist, sprintf("%s_%4.4d_%s_mon1",prefix,nstep,ent.name)];
+      ilist = {ilist{:} sprintf("%s_%4.4d_%s_mon1",prefix,nstep,ent.name)};
     endif
 
     ## Then the monomer 2
@@ -41,7 +41,7 @@ function ilist = setup_input_one(ent,dcp)
       endif
       file = sprintf("%s_%4.4d_%s_mon2.gjf",prefix,nstep,ent.name);
       writegjf(file,dcp,basis,ent.mon2.at,ent.mon2.x,ent.mon2.q,ent.mon2.mult,ent,chk)
-      ilist = [ilist, sprintf("%s_%4.4d_%s_mon2",prefix,nstep,ent.name)];
+      ilist = {ilist{:} sprintf("%s_%4.4d_%s_mon2",prefix,nstep,ent.name)};
     endif
   else
     ## I don't know what that type is
