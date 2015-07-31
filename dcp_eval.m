@@ -2,7 +2,7 @@
 
 format long
 global dcp basis db prefix nstep verbose run_inputs ycur...
-       dcpfin costmin iload usechk stime0 astep 
+       dcpfin costmin iload stime0 astep 
 
 #### Modify this to change the input behavior ####
 
@@ -61,7 +61,6 @@ db = filldb(db,[],method,extragau,ncpu,mem);
 
 ## Initialization
 verbose = 0;
-usechk = 0;
 if (!iscell(dcpini))
   dcpini = {dcpini};
 endif
@@ -82,7 +81,7 @@ for idcp = 1:length(dcpini)
 
   ## Set up the Gaussian input files
   for i = 1:length(db)
-    ilist = [ilist, setup_input_one(db{i},dcp)];
+    ilist = {ilist{:}, setup_input_one(db{i},dcp)};
   endfor
 endfor
 
@@ -95,7 +94,7 @@ for idcp = 1:length(dcpini)
 
   dy = ycalc = yref = zeros(length(db),1);
   for i = 1:length(db)
-    [dy(i) ycalc(i) yref(i)] = process_output_one(db{i});
+    [dy(i) ycalc(i) yref(i)] = process_output_one(db{i},0);
   endfor
   if (any(ycalc == Inf))
     mae = Inf;

@@ -1,5 +1,5 @@
-function s = run_inputs_nint_trasgu(ilist,cont=0)
-  %% function run_inputs_nint_trasgu(ilist,cont=0)
+function s = run_inputs_plonk(ilist,cont=0)
+  %% function run_inputs_plonk(ilist,cont=0)
   %% 
   %% Run all the inputs in the job list (ilist). The jobs should be  
   %% in the current working directory, with extension gjf. This
@@ -15,10 +15,10 @@ function s = run_inputs_nint_trasgu(ilist,cont=0)
   %% success/failure state in ifail
   %%
   %% This version of run_inputs creates submission scripts for all
-  %% inputs in the list and submits them to grex. After that,
-  %% the routine enters a waiting loop and checks periodically for
-  %% the calc results. When all jobs are done, control is given back
-  %% to the caller.
+  %% inputs in the list and submits them to a private queue. After
+  %% that, the routine enters a waiting loop and checks periodically
+  %% for the calc results. When all jobs are done, control is given
+  %% back to the caller.
   
   global verbose iload
   
@@ -27,7 +27,7 @@ function s = run_inputs_nint_trasgu(ilist,cont=0)
   maxtime = Inf; ## maximum sleep time in seconds. Crash if the script sleeps
                  ## for longer than this number without a new Gaussian output
                  ## being written.
-  jobfile = "/home/delarozao/cron/trasgu.jobs"; 
+  jobfile = "~/plonk.jobs"; 
 
   ## Create submission scripts for all inputs on the list
   fid = -1;
@@ -38,16 +38,8 @@ function s = run_inputs_nint_trasgu(ilist,cont=0)
     if (fid < 0) 
       error("Could not create submission script: %s.sub",name);
     endif
-    fprintf(fid,"export g03root='/home/delarozao/src'\n");
-    fprintf(fid,". $g03root/g03/bsd/g03.profile\n");
-    fprintf(fid,"\n");
-    fprintf(fid,"export SCRATCH=/state/partition1/scratch_local/${PBS_JOBID%%%%.*}\n");
-    fprintf(fid,"export GAUSS_SCRDIR=/state/partition1/scratch_local/${PBS_JOBID%%%%.*}\n");
-    fprintf(fid,"mkdir $SCRATCH\n");
-    fprintf(fid,"\n");
     fprintf(fid,"cd %s\n",pwd());
-    fprintf(fid,"g03 %s.gjf\n",name);
-    fprintf(fid,"rm -f $SCRATCH\n");
+    fprintf(fid,"g09 %s.gjf\n",name);
     fprintf(fid,"touch %s.done\n",name);
     fclose(fid);
     jobname = {jobname{:} sprintf("%s.sub",name)};

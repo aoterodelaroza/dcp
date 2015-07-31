@@ -24,7 +24,7 @@ function iload = read_jobload(ilist,iload0=[])
         iload(i) = 1000; 
       endif
     else
-      [s out] = system(sprintf("grep 'Job cpu time' %s.log | awk '{print $10+60*($8+60*($6+24*($4)))}'",ilist{i}));
+      [s out] = system(sprintf("grep 'Job cpu time' %s.log | head -n 1 | awk '{print $10+60*($8+60*($6+24*($4)))}'",ilist{i}));
       if (s != 0) 
         error("Error in read_jobload: could not find 'Job cpu time' string.");
       endif

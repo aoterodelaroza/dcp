@@ -17,7 +17,7 @@ function stash_inputs_outputs(ilist)
   ## Tar all the inputs and outputs and move to the stash
   str = "";
   for i = 1:length(ilist)
-    str = sprintf("%s %s.gjf %s.log",str,ilist{i},ilist{i});
+    str = sprintf("%s %s.gjf %s.log %s.err %s.chk",str,ilist{i},ilist{i});
   endfor
   [s out] = system(sprintf("tar cjvf %s_%4.4d.tar.bz2 %s",prefix,nstep,str));
   if (s != 0)

@@ -1,17 +1,19 @@
-function writegjf(file,dcp,basis,at,x,q,mult,ent,chk="");
+function writegjf(file,dcp,basis,at,x,q,mult,ent,chk="",derivs=0)
   %% function writegjf(file,dcp,at,x,q,mult,ent,chk="");
   %%
-  %% Write a Gaussian input file (gjf) in filename file. Use the 
-  %% DCP information contained in the dcp argument, the geometry
-  %% in at (cell array of atomic symbols), x (array of atomic
-  %% coordinates), q (charge), mult (multiplicity), and the method,
-  %% basis, route section, etc. contained in the database entry ent. 
-  %% chk is the (optional) checkpoint file.
+  %% Write a Gaussian input file (gjf) in filename file. Use the DCP
+  %% information contained in the dcp argument, the geometry in at
+  %% (cell array of atomic symbols), x (array of atomic coordinates),
+  %% q (charge), mult (multiplicity), and the method, basis, route
+  %% section, etc. contained in the database entry ent.  chk is the
+  %% (optional) checkpoint file. If derivs is not zero, then include
+  %% post-SCF calculations for the DCP energy derivatives up to derivs
+  %% order.
   
   atlist = {};
   for i = 1:length(at)
     if (!any(ismember(at{i},atlist)))
-      atlist = {atlist{:} at{i}};
+      atlist = {atlist{:}, at{i}};
     endif
   endfor
 
@@ -19,7 +21,7 @@ function writegjf(file,dcp,basis,at,x,q,mult,ent,chk="");
   if (fid <= 0) 
     error(sprintf("Could not open Gaussian input file for writing: %s",file));
   endif
-  if (length(chk) > 0) 
+  if (length(chk) > 0 || derivs) 
     fprintf(fid,"%%chk=%s\n",chk);
     chkstr = "guess=(read,tcheck)";
   else
@@ -47,6 +49,62 @@ function writegjf(file,dcp,basis,at,x,q,mult,ent,chk="");
   writedcp(dcp,fid,at);
   fprintf(fid,"\n");
 
+  if (derivs)
+    ## The same calculation without any DCP
+    fprintf(fid,"--Link1--\n");
+    fprintf(fid,"%%chk=%s\n",chk);
+    fprintf(fid,"%%mem=%dGB\n",ent.mem);
+    fprintf(fid,"%%nproc=%d\n",ent.ncpu);
+    if (iscell(basis))
+      fprintf(fid,"#p %s gen %s\n",ent.method,ent.extragau);
+    else
+      fprintf(fid,"#p %s %s %s\n",ent.method,basis,ent.extragau);
+    endif
+    fprintf(fid,"   scf=(maxcycle=1) guess=(read) geom=(check) iop(5/13=1,99/5=2,3/53=10)\n");
+    fprintf(fid,"\n");
+    fprintf(fid,"title\n");
+    fprintf(fid,"\n");
+    fprintf(fid,"%d %d\n",q,mult);
+    fprintf(fid,"\n");
+    if (iscell(basis))
+      writebasis(basis,fid,at);
+      fprintf(fid,"\n");
+    endif
+
+    ## Pack and count the number of DCP coefficients/exponents
+    x0 = packdcp(dcp);
+    n = length(x0) / 2;
+
+    ## First derivatives wrt the coefficients.
+    for i = 1:n
+      xtmp = x0;
+      xtmp(2:2:2*n) = 0;
+      xtmp(2*i) = 1;
+      dcptmp = unpackdcp(xtmp,dcp);
+      fprintf(fid,"--Link1--\n");
+      fprintf(fid,"%%chk=%s\n",chk);
+      fprintf(fid,"%%mem=%dGB\n",ent.mem);
+      fprintf(fid,"%%nproc=%d\n",ent.ncpu);
+      if (iscell(basis))
+        fprintf(fid,"#p %s gen %s\n",ent.method,ent.extragau);
+      else
+        fprintf(fid,"#p %s %s %s\n",ent.method,basis,ent.extragau);
+      endif
+      fprintf(fid,"   pseudo=read scf=(maxcycle=1) guess=(read) geom=(check) iop(5/13=1,99/5=2,3/53=10)\n");
+      fprintf(fid,"\n");
+      fprintf(fid,"title\n");
+      fprintf(fid,"\n");
+      fprintf(fid,"%d %d\n",q,mult);
+      fprintf(fid,"\n");
+      if (iscell(basis))
+        writebasis(basis,fid,at);
+        fprintf(fid,"\n");
+      endif
+      writedcp(dcptmp,fid,at);
+      fprintf(fid,"\n");
+    endfor
+
+  endif
   fclose(fid);
 
 endfunction

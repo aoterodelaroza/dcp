@@ -2,7 +2,7 @@
 
 format long
 global dcp basis db prefix nstep verbose run_inputs ycur dcpfin...
-       costmin iload usechk stime0 astep dcpeval
+       costmin iload stime0 astep dcpeval
 
 #### Modify this to change the input behavior ####
 
@@ -22,11 +22,11 @@ method="blyp";
 basis="basis.ini";
 
 ## Extra bits for gaussian (do not include pseudo=read here)
-extragau="EmpiricalDispersion=GD3BJ SCF=(Conver=5, MaxCycle=40) Symm=Loose";
-# extragau="SCF=(Conver=5, MaxCycle=40) Symm=Loose";
+extragau="EmpiricalDispersion=GD3BJ SCF=(Conver=9, MaxCycle=40) Symm=Loose";
+# extragau="SCF=(Conver=9, MaxCycle=40) Symm=Loose";
 
 ## Number of CPUs and memory (in GB) for Gaussian runs
-ncpu=8;
+ncpu=6;
 mem=2;
 
 ## List of database files to use in DCP optimization
@@ -73,35 +73,17 @@ dcpeval="dcp.eval";
 prefix="bleh";
 
 ## Name of the function to be minimized
-funeval = "fbasic";
+funeval   = "fbasic";
+funevald1 = "fbasicd1";
+funevald2 = "fbasicd2";
 
 ## Name of the Gaussian input runner routine
 ## run_inputs = @run_inputs_serial; ## Run all Gaussian inputs sequentially on the same node
 ## run_inputs = @run_inputs_grex; ## Submit inputs to the queue, wait for all to finish. Grex version.
-run_inputs = @run_inputs_nint_trasgu; ## Submit inputs to the queue, wait for all to finish. Grex version.
+run_inputs = @run_inputs_plonk; ## Submit inputs to the queue, wait for all to finish. plonk version.
 
 ## Tolerance criteria for the minimization (maximum simplex size)
-ptol = 1d-3; ## parameter change tolerance, default 1e-6
-
-## Initial simplex size parameter. If dcp.ini is x, then the points in
-## the initial simplex are:  
-## [x(1) * (1+isz), x(2), x(3), ... x(n)]
-## [x(1), x(2) * (1+isz), x(3), ... x(n)]
-## [x(1), x(2), x(3) * (1+isz), ... x(n)]
-## ...
-## [x(1), x(2), x(3), ... x(n) * (1+isz)]
-isz = 10;
-
-## Save the amoeba internal variables to this restart file. If the
-## restart file is present, use it. Be sure to remove stale
-## restart files.
-## asave = "" ## do not use a restart file
-asave = sprintf("%s.who",prefix);
-
-## Carry over Gaussian checkpoint files from one iteration to the next.
-## Use them as the initial guess in Gaussian.
-## usechk = "" ## do not use checkpoint files
-usechk = 1;
+ftol = 1d-4; ## function change tolerance
 
 #### No touching past this point. ####
 
@@ -149,17 +131,15 @@ endfor
 
 ## Run the minimization, initialize global variables
 nstep = 0;
+astep = 0;
 costmin = Inf;
 iload = [];
 stime0 = time();
 xini = packdcp(dcp);
 
 ## Minimize
-[xmin ymin] = amoeba_dcp(funeval,{xini},struct('crit',2,'tol',ptol,'isz',isz,'asave',asave));
+[xmin, ymin] = d2_min(funeval,funevald2,xini,ftol)
 dcp = unpackdcp(xmin,dcp);
-
-## Delete the checkpoint files
-clear_checkpoints()
 
 ## Write the final DCP
 writedcp(dcp,dcpfin)

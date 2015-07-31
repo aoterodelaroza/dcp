@@ -1,12 +1,13 @@
-function y = fbasic(x)
-  %% function y = fbasic(x)
+function [y dy d2y] = fbasicd2(x)
+  %% function [y dy d2y] = fbasicd2(x)
   %%
-  %% Evaluation function for the minimization routine. This function is meant
-  %% to be used as argument for one of the optim routines (like bfgsmin,
-  %% minimize, or nonlin_min). The argument are the DCP coefficients
-  %% and exponents, packed into a convenient array. The appropriate Gaussian
-  %% calculations are carried out, and the cost function for the DCP
-  %% given by x is calculated, and returned as y.
+  %% Evaluation function for the minimization routine; calculates
+  %% first and second derivatives of the cost function. This function
+  %% is meant to be used as argument for one of the optim routines
+  %% (like bfgsmin, minimize, or nonlin_min). The argument are the DCP
+  %% coefficients and exponents, packed into a convenient array. The
+  %% appropriate Gaussian calculations are carried out, and the cost
+  %% function for the DCP given by x is calculated, and returned as y.
   
   global dcp db prefix nstep verbose run_inputs ycur dcpfin ...
          costmin stime0 astep dcpeval
@@ -15,7 +16,7 @@ function y = fbasic(x)
   nstep++;
   
   if (verbose)
-    printf("### Iteration %d ### [ %s ]\n",nstep,strtrim(ctime(time())));
+    printf("### Iteration %d (with derivatives) ### [ %s ]\n",nstep,strtrim(ctime(time())));
   endif
 
   ## Crash if any of the parameters is a nan
@@ -44,13 +45,13 @@ function y = fbasic(x)
   ## Set up the Gaussian input files
   ilist = {};
   for i = 1:length(db)
-    anew = setup_input_one(db{i},dcp,0);
+    anew = setup_input_one(db{i},dcp,2);
     ilist = {ilist{:}, anew{:}};
   endfor
   if (verbose)
     printf("# Running the %d input files: \n",length(ilist));
   endif
-  
+
   ## Run all inputs
   srun = run_inputs(ilist);
 
@@ -58,30 +59,38 @@ function y = fbasic(x)
   if (srun != 0)
     y = Inf;
     stash_inputs_outputs(ilist);
-    printf("#x0# | %2d | %5d | %15.7f | %7.4f | %7.4f | %7.4f | %d |\n",astep,nstep,y,Inf,Inf,Inf,time()-stime0);
+    printf("#x2# | %2d | %5d | %15.7f | %7.4f | %7.4f | %7.4f | %d |\n",astep,nstep,y,Inf,Inf,Inf,time()-stime0);
     stime0 = time();
     return
   endif
 
-  ## Collect the results and compare to the reference data
-  dy = ycalc = yref = zeros(length(db),1);
+  ## Collect the results, compare to the reference data, calculate the cost function
+  erry = ycalc = yref = zeros(length(db),1);
+  wei = zeros(length(db),1);
+  y = 0;
+  dy = zeros(size(x));
+  d2y = eye(length(x));
+  for j = 2:2:length(x)
+    d2y(j) = 0;
+  endfor
   for i = 1:length(db)
-    [dy(i) ycalc(i) yref(i)] = process_output_one(db{i},0);
+    wei(i) = db{i}.wei;
+    [erry(i) ycalc(i) yref(i) ay] = process_output_one(db{i},1);
+    y += wei(i) * erry(i)^2;
+    for j = 1:length(ay)
+      dy(2*j) += 2 * wei(i) * erry(i) * ay(j);
+      for k = 1:length(ay)
+        d2y(2*j,2*k) += 2 * wei(i) * ay(j) * ay(k);
+      endfor
+    endfor
   endfor
   ycur = ycalc;
 
   ## Send the inputs and outputs to the stash
   stash_inputs_outputs(ilist);
 
-  ## Calculate the cost function, use the weights
-  wei = zeros(length(db),1);
-  for i = 1:length(db)
-    wei(i) = db{i}.wei;
-  endfor
-  y = sum(wei .* dy.^2);
-
   ## Print summary to output
-  printf("#x0# | %2d | %5d | %15.7f | %7.4f | %7.4f | %7.4f | %d |\n",astep,nstep,...
+  printf("#x2# | %2d | %5d | %15.7f | %7.4f | %7.4f | %7.4f | %d |\n",astep,nstep,...
          y,sqrt(y/sum(wei)),sqrt(mean((yref-ycalc).^2)),mean(abs(yref-ycalc)),...
          time()-stime0);
   stime0 = time();
@@ -89,7 +98,7 @@ function y = fbasic(x)
     printf("| Id | Name | weig | yref | ycalc | dy |\n")
     for i = 1:length(db)
       printf("| %d | %s | %.4f | %.4f | %.4f | %.4f |\n",...
-             i,db{i}.name,wei(i),yref(i),ycalc(i),dy(i))
+             i,db{i}.name,wei(i),yref(i),ycalc(i),erry(i))
     endfor
   endif
   
@@ -107,7 +116,7 @@ function y = fbasic(x)
       fprintf(fid,"| Id | Name | weig | yref | ycalc | dy |\n")
       for i = 1:length(db)
         fprintf(fid,"| %d | %s | %.4f | %.4f | %.4f | %.4f |\n",...
-                i,db{i}.name,wei(i),yref(i),ycalc(i),dy(i))
+                i,db{i}.name,wei(i),yref(i),ycalc(i),erry(i))
       endfor
       fprintf(fid,"# MAE = %.4f\n",mean(abs(yref-ycalc)));
       fprintf(fid,"# MAPE = %.4f\n",mean(abs((yref-ycalc)./yref))*100);
