@@ -41,7 +41,7 @@ function [xbest,vbest] = d2_min (f,d2f,x0,tol)
     d = d(:);
 
     ## Write down the first step as best
-    xbest = x ;
+    xold = xbest = x ;
     vold = vbest = v ;
 
     dnewton = -h*d; ## Newton step
@@ -120,8 +120,8 @@ function [xbest,vbest] = d2_min (f,d2f,x0,tol)
     end
 
     ## Print message
-    printf("#### d2_min | step %d | cost %.10f | diff %.2e (tol %.2e)| nstep %.2e dstep %.2e | %s\n",...
-           astep, vbest, abs(vold-vbest), tol, norm(dbest), max(abs(dbest)), strtrim(ctime(time())));
+    printf("#### d2_min | step %d | cost %.10f | diff %.2e (tol %.2e)| normstep %.2e | maxstep %.2e | %s\n",...
+           astep, vbest, abs(vold-vbest), tol, norm(x-xold), max(abs(x-xold)), strtrim(ctime(time())));
                                                                                                             
     if (abs(vold-vbest) < tol)
       break
