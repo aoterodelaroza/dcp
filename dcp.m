@@ -80,7 +80,8 @@ funevald2 = "fbasicd2";
 ## Name of the Gaussian input runner routine
 ## run_inputs = @run_inputs_serial; ## Run all Gaussian inputs sequentially on the same node
 ## run_inputs = @run_inputs_grex; ## Submit inputs to the queue, wait for all to finish. Grex version.
-run_inputs = @run_inputs_plonk; ## Submit inputs to a private queue, plonk version.
+## run_inputs = @run_inputs_plonk; ## Submit inputs to a private queue, plonk version.
+run_inputs = @run_inputs_nint_trasgu; ##
 
 ## Tolerance criteria for the minimization (function difference between successive steps)
 ftol = 1d-4; ## function change tolerance

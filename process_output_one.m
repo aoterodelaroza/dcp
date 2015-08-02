@@ -68,7 +68,7 @@ function [dy ycalc yref dery] = process_output_one(ent,derivs=0)
       dy = ycalc - yref;
       dery = 0;
     else
-      ## Derivatives calculation
+      ## Derivatives/term contribution calculation
       n = length(e2);
       if (length(e1a) != n)
         e1a = zeros(size(e2));

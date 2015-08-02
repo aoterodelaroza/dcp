@@ -4,9 +4,10 @@ function ilist = setup_input_one(ent,dcp,derivs=0)
   %% Set up all the inputs necessary to perform the calculation
   %% indicated in database entry ent for the given DCP. Returns the
   %% list of input names (without the gjf) and writes those same
-  %% inputs to the current working directory. If derivs is not zero,
-  %% then generate the gjfs for the derivatives calculation up to
-  %% derivs order.
+  %% inputs to the current working directory. If derivs is not zero
+  %% and positive, generate the gjfs for the derivatives calculation
+  %% up to derivs order. If derivs is negative, prepare the inputs for
+  %% theevaluation of the DCP terms.
 
   global prefix nstep basis
 

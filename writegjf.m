@@ -6,9 +6,10 @@ function writegjf(file,dcp,basis,at,x,q,mult,ent,chk="",derivs=0)
   %% (cell array of atomic symbols), x (array of atomic coordinates),
   %% q (charge), mult (multiplicity), and the method, basis, route
   %% section, etc. contained in the database entry ent.  chk is the
-  %% (optional) checkpoint file. If derivs is not zero, then include
-  %% post-SCF calculations for the DCP energy derivatives up to derivs
-  %% order.
+  %% (optional) checkpoint file. If derivs is not zero and positive,
+  %% generate the gjfs for the derivatives calculation up to derivs
+  %% order. If derivs is negative, prepare the inputs for
+  %% theevaluation of the DCP terms.
   
   atlist = {};
   for i = 1:length(at)
@@ -75,11 +76,17 @@ function writegjf(file,dcp,basis,at,x,q,mult,ent,chk="",derivs=0)
     x0 = packdcp(dcp);
     n = length(x0) / 2;
 
-    ## First derivatives wrt the coefficients.
+    ## First derivatives wrt the coefficients/term evaluation
     for i = 1:n
       xtmp = x0;
       xtmp(2:2:2*n) = 0;
-      xtmp(2*i) = 1;
+      if (derivs > 0)
+        ## Calculation of the first derivatives
+        xtmp(2*i) = 1;
+      else
+        ## Keep the original coefficient to evaluate this term
+        xtmp(2*i) = x0(2*i);
+      endif
       dcptmp = unpackdcp(xtmp,dcp);
       fprintf(fid,"--Link1--\n");
       fprintf(fid,"%%chk=%s\n",chk);
@@ -103,7 +110,6 @@ function writegjf(file,dcp,basis,at,x,q,mult,ent,chk="",derivs=0)
       writedcp(dcptmp,fid,at);
       fprintf(fid,"\n");
     endfor
-
   endif
   fclose(fid);
 

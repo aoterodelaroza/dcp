@@ -19,21 +19,28 @@ method="blyp";
 basis="basis.ini";
 
 ## Extra bits for gaussian (do not include pseudo=read here)
-extragau="EmpiricalDispersion=GD3BJ SCF=(Conver=5, MaxCycle=40) Symm=Loose";
+extragau="EmpiricalDispersion=GD3BJ SCF=(Conver=9, MaxCycle=40) Symm=Loose";
 # extragau="SCF=(Conver=5, MaxCycle=40) Symm=Loose";
 
 ## Number of CPUs and memory (in GB) for Gaussian runs
 ncpu=6;
 mem=2;
 
-## List of database files to use in DCP optimization
-[s out] = system("ls db/s66_*.db");
-listdb = strsplit(out,"\n");
-listdb = listdb(1:end-1);
+## List of database files to use in the DCP evaluation
+listdb={...
+        "db/bde_c-h.db","db/bde_ch-h.db","db/bde_ch2-h.db","db/bde_ch3-ch3.db","db/bde_c2h5-h.db",... ## bdes
+        "db/bde_cyclobutene-perits.db","db/bde_cyclopentadiene-perits.db","db/bde_darc-ethine-butadiene.db","db/bde_dim-13cyclopentadiene.db",... ## bdes
+        "db/pes_c2h6-35.db","db/pes_c2h6-39.db","db/pes_c2h6-41.db","db/pes_c2h6-43.db","db/pes_c2h6-50.db","db/pes_c2h6-100.db",... ## c2h6
+        "db/pes_c3h8-40.db","db/pes_c3h8-42.db","db/pes_c3h8-44.db","db/pes_c3h8-46.db","db/pes_c3h8-60.db","db/pes_c3h8-100.db",... ## c3h8
+        "db/pes_c6h6s-09.db","db/pes_c6h6s-10.db","db/pes_c6h6s-12.db","db/pes_c6h6s-15.db","db/pes_c6h6s-20.db",... ## c6h6s
+        "db/pes_c6h6t-09.db","db/pes_c6h6t-10.db","db/pes_c6h6t-12.db","db/pes_c6h6t-15.db","db/pes_c6h6t-20.db",... ## c6h6t
+        "db/pes_ch4c-375.db","db/pes_ch4c-385.db","db/pes_ch4c-410.db","db/pes_ch4c-450.db","db/pes_ch4c-500.db","db/pes_ch4c-1000.db",... ## ch4c
+        "db/pes_ch4g-325.db","db/pes_ch4g-350.db","db/pes_ch4g-365.db","db/pes_ch4g-425.db","db/pes_ch4g-500.db","db/pes_ch4g-1000.db",... ## ch4g
+        };
 
 ## List of DCP files to evaluate (you can use a cell array of files
 ## here, like {"C.dcp","H.dcp"}, or a single string "bleh.dcp")
-dcpini={"bleh_0101.dcp","bleh_0127.dcp"};
+dcpini="dcp.ini";
 
 ## Prefix for the calculations. If prefix is "bleh", then all the
 ## inputs and outputs will be stored in subdirectory bleh/ of the
@@ -41,16 +48,19 @@ dcpini={"bleh_0101.dcp","bleh_0127.dcp"};
 ## where xx is the DCP optimization evaluation number. The archive
 ## contains files bleh_xx_name, where name is the identifier for the
 ## database entry. 
-prefix="test";
+prefix="bleh";
 
 ## Name of the Gaussian input runner routine
 ## run_inputs = @run_inputs_serial; ## Run all Gaussian inputs sequentially on the same node
+## run_inputs = @run_inputs_serial; ## Run all Gaussian inputs sequentially on the same node
 run_inputs = @run_inputs_grex; ## Submit inputs to the queue, wait for all to finish. Grex version.
+## run_inputs = @run_inputs_plonk; ## Submit inputs to a private queue, plonk version.
+## run_inputs = @run_inputs_nint_trasgu; ##
 
 #### No touching past this point. ####
 
 ## Header
-printf("### DCP evaluation started on %s ###\n",strtrim(ctime(time())));
+printf("### DCP terms started on %s ###\n",strtrim(ctime(time())));
 
 ## Read the basis set
 basis = parsebasis(basis);
@@ -81,7 +91,7 @@ for idcp = 1:length(dcpini)
 
   ## Set up the Gaussian input files
   for i = 1:length(db)
-    anew = setup_input_one(db{i},dcp);
+    anew = setup_input_one(db{i},dcp,-1);
     ilist = {ilist{:}, anew{:}};
   endfor
 endfor
@@ -91,32 +101,34 @@ srun = run_inputs(ilist,1);
 
 ## Collect the results and compare to the reference data
 for idcp = 1:length(dcpini)
-  nstep = idcp;
-
-  dy = ycalc = yref = zeros(length(db),1);
+  printf("## DCP = %s\n",dcpini{idcp});
+  ymean = [];
+  yamean = [];
   for i = 1:length(db)
-    [dy(i) ycalc(i) yref(i)] = process_output_one(db{i},0);
+    [dy ycalc yref ay] = process_output_one(db{i},-1);
+    if (isempty(ymean))
+         ymean = zeros(size(ay(:)));
+         yamean = zeros(size(abs(ay(:))));
+    endif
+    yamean = yamean + abs(ay(:));
+    ymean = ymean + ay(:);
   endfor
-  if (any(ycalc == Inf))
-    mae = Inf;
-    mape = Inf;
-    rms = Inf;
-  else
-    dyr = dy(find(dy != Inf));
-    yrefr = yref(find(yref != Inf));
-    mae = mean(abs(dyr));
-   mape = mean(abs(dyr./yrefr))*100;
-   rms = sqrt(mean(dyr.^2));
-  endif
+  yamean = yamean / length(db);
+  ymean = ymean / length(db);
 
-  ## Write the results at the minimum
-  printf("# DCP %d (%s) | MAE = %.4f | MAPE = %.4f | RMS = %.4f |\n",idcp,dcpini{idcp},...
-         mae,mape,rms);
-  
-  printf("| Id|           Name       |       yref   |      ycalc   |       dy     |\n");
-  for i = 1:length(db)
-    printf("| %d | %20s | %12.4f | %12.4f | %12.4f |\n",...
-           i,db{i}.name,yref(i),ycalc(i),dy(i));
+  dcp = parsedcp(dcpini{idcp});
+  n = 0;
+  printf("| term | at | channel | exponent | coefficient | sign | abs |\n");
+  for i = 1:length(dcp)
+    at = dcp{i}.atom;
+    for j = 1:dcp{i}.nblock
+      name = dcp{i}.block{j}.name;
+      for k = 1:dcp{i}.block{j}.nterm
+        n++;
+        printf("| %d | %s | %s | %.10f | %.10f | %.3f | %.3f |\n",n,at,name,...
+               dcp{i}.block{j}.exp(k),dcp{i}.block{j}.coef(k),ymean(n),yamean(n));
+      endfor
+    endfor
   endfor
   printf("\n");
 endfor
