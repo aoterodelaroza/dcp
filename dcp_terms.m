@@ -53,8 +53,8 @@ prefix="bleh";
 ## Name of the Gaussian input runner routine
 ## run_inputs = @run_inputs_serial; ## Run all Gaussian inputs sequentially on the same node
 ## run_inputs = @run_inputs_serial; ## Run all Gaussian inputs sequentially on the same node
-run_inputs = @run_inputs_grex; ## Submit inputs to the queue, wait for all to finish. Grex version.
-## run_inputs = @run_inputs_plonk; ## Submit inputs to a private queue, plonk version.
+## run_inputs = @run_inputs_grex; ## Submit inputs to the queue, wait for all to finish. Grex version.
+run_inputs = @run_inputs_plonk; ## Submit inputs to a private queue, plonk version.
 ## run_inputs = @run_inputs_nint_trasgu; ##
 
 #### No touching past this point. ####
@@ -104,8 +104,10 @@ for idcp = 1:length(dcpini)
   printf("## DCP = %s\n",dcpini{idcp});
   ymean = [];
   yamean = [];
+  yade = zeros(length(db),1);
   for i = 1:length(db)
     [dy ycalc yref ay] = process_output_one(db{i},-1);
+    yade(i) = process_output_one_echange(db{i});
     if (isempty(ymean))
          ymean = zeros(size(ay(:)));
          yamean = zeros(size(abs(ay(:))));
@@ -118,6 +120,7 @@ for idcp = 1:length(dcpini)
 
   dcp = parsedcp(dcpini{idcp});
   n = 0;
+  printf("## DCP average total contributions per channel (kcal/mol) \n");
   printf("| term | at | channel | exponent | coefficient | sign | abs |\n");
   for i = 1:length(dcp)
     at = dcp{i}.atom;
@@ -129,6 +132,11 @@ for idcp = 1:length(dcpini)
                dcp{i}.block{j}.exp(k),dcp{i}.block{j}.coef(k),ymean(n),yamean(n));
       endfor
     endfor
+  endfor
+  printf("\n");
+  printf("## Total absolute energy changes for the dimers (Hartree) \n");
+  for i = 1:length(db)
+    printf("| %d | %s | %.10f |\n",i,db{i}.name,yade(i));
   endfor
   printf("\n");
 endfor
