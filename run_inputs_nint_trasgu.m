@@ -28,6 +28,7 @@ function s = run_inputs_nint_trasgu(ilist,cont=0)
                  ## for longer than this number without a new Gaussian output
                  ## being written.
   jobfile = "/home/delarozao/cron/trasgu.jobs"; 
+  lockdir = "/home/delarozao/cron/trasgu.lock";
 
   ## Create submission scripts for all inputs on the list
   fid = -1;
@@ -53,12 +54,20 @@ function s = run_inputs_nint_trasgu(ilist,cont=0)
     jobname = {jobname{:} sprintf("%s.sub",name)};
   endfor
 
+  ## Grab the lock
+  while (exist(lockdir,"dir") || system(sprintf("mkdir %s",lockdir)))
+    sleep(1)
+  endwhile
+
   ## Submit all the scripts to the queue
   fid = fopen(jobfile,"a");
   for i = 1:length(jobname)
     fprintf(fid,sprintf("%s/%s\n",pwd(),jobname{i}));
   endfor
   fclose(fid);
+
+  ## Release the lock
+  system(sprintf("rm -rf %s",lockdir));
 
   ## Wait until all the calcs and jobs are done
   done = zeros(1,length(ilist));
