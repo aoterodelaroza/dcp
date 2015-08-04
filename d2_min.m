@@ -11,7 +11,8 @@ function [xbest,vbest] = d2_min (f,d2f,x0,tol)
   printf("#xx# |Step|  Iter |  Cost function  |   wRMS  |   RMS   |   MAE   | time(s) |\n")
 
   ## Maximum norm for the displacement
-  maxnorm = 0.1;
+  maxnorm_grad = 1d-6;
+  maxnorm_newton = 1d-4;
 
   tcoeff = 0.5; ## Discount on total weight
   ncoeff = 0.5; ## Discount on weight of newton
@@ -49,17 +50,12 @@ function [xbest,vbest] = d2_min (f,d2f,x0,tol)
     ## Normalize to the maximum norm
     dnorm = norm(d);
     dnnorm = norm(dnewton);
-    if (dnorm > maxnorm)
-      d = d / dnorm * maxnorm;
+    if (dnorm > maxnorm_grad)
+      d = d / dnorm * maxnorm_grad;
     endif
-    if (dnnorm > maxnorm)
-      dnewton = dnewton / dnnorm * maxnorm;
+    if (dnnorm > maxnorm_newton)
+      dnewton = dnewton / dnnorm * maxnorm_newton;
     endif
-
-    ## Heuristic for negative hessian
-    if (dnewton'*d > 0) 
-      dnewton = -100*d; 
-    end
 
     ## Weight of Newton step
     wn = 1 ;		
