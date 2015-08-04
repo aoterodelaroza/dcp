@@ -71,6 +71,10 @@ function [xbest,vbest] = d2_min (f,d2f,x0,tol)
       dx = wt*(wn*dnewton - (1-wn)*d);
       xnew = x + dx;
 
+      if (norm(dx) < 1e-9)
+        return
+      endif
+
       ## Evaluate the new point
       vnew = feval(f,reshape(xnew,sz));
 
