@@ -139,7 +139,7 @@ stime0 = time();
 xini = packdcp(dcp);
 
 ## Minimize
-[xmin, ymin] = d2_min(funeval,funevald2,xini,ftol)
+[xmin, ymin] = d2_min(funeval,funevald2,xini,ftol);
 dcp = unpackdcp(xmin,dcp);
 
 ## Write the final DCP
