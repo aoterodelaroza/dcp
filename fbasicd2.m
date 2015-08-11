@@ -10,7 +10,7 @@ function [y dy d2y] = fbasicd2(x)
   %% function for the DCP given by x is calculated, and returned as y.
   
   global dcp db prefix nstep verbose run_inputs ycur dcpfin ...
-         costmin stime0 astep dcpeval
+         costmin stime0 astep dcpeval maxnorm
   
   ## Yet another function evaluation.
   nstep++;
@@ -22,6 +22,16 @@ function [y dy d2y] = fbasicd2(x)
   ## Crash if any of the parameters is a nan
   if (any(isnan(x)))
     error(sprintf("Optimization procedure tried to use a NaN parameter in step %d\n",nstep));
+  endif
+
+  ## If the maxnorm is exceeded, return Inf
+  if (exist("maxnorm","var") && norm(x(2:2:end)) > maxnorm)
+    norm(x(2:2:end))
+    y = Inf;
+    printf("#x2# | %2d | %5d | %15.7f | %7.4f | %7.4f | %7.4f | %7.4e | %d |\n",astep,nstep,y,...
+           Inf,Inf,Inf,norm(x(2:2:end)),time()-stime0);
+    stime0 = time();
+    return
   endif
 
   ## Unpack the DCP coefficients and exponents
@@ -59,7 +69,8 @@ function [y dy d2y] = fbasicd2(x)
   if (srun != 0)
     y = Inf;
     stash_inputs_outputs(ilist);
-    printf("#x2# | %2d | %5d | %15.7f | %7.4f | %7.4f | %7.4f | %d |\n",astep,nstep,y,Inf,Inf,Inf,time()-stime0);
+    printf("#x2# | %2d | %5d | %15.7f | %7.4f | %7.4f | %7.4f | %7.4e | %d |\n",astep,nstep,y,...
+           Inf,Inf,Inf,norm(x(2:2:end)),time()-stime0);
     stime0 = time();
     return
   endif
@@ -90,9 +101,9 @@ function [y dy d2y] = fbasicd2(x)
   stash_inputs_outputs(ilist);
 
   ## Print summary to output
-  printf("#x2# | %2d | %5d | %15.7f | %7.4f | %7.4f | %7.4f | %d |\n",astep,nstep,...
+  printf("#x2# | %2d | %5d | %15.7f | %7.4f | %7.4f | %7.4f | %7.4e | %d |\n",astep,nstep,...
          y,sqrt(y/sum(wei)),sqrt(mean((yref-ycalc).^2)),mean(abs(yref-ycalc)),...
-         time()-stime0);
+         norm(x(2:2:end)),time()-stime0);
   stime0 = time();
   if (verbose)
     printf("| Id | Name | weig | yref | ycalc | dy |\n")

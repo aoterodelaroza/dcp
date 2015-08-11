@@ -8,7 +8,7 @@ function [xbest,vbest] = d2_min (f,d2f,x0,tol)
   ## Initialize and header
   astep = 0;
   printf("#### Levenberg-Marquardt started ####\n");
-  printf("#xx# |Step|  Iter |  Cost function  |   wRMS  |   RMS   |   MAE   | time(s) |\n")
+  printf("#xx# |Step|  Iter |  Cost function  |   wRMS  |   RMS   |   MAE   |  norm  | time(s) |\n")
 
   ## Maximum norm for the displacement
   maxnorm_grad = 1d-6;

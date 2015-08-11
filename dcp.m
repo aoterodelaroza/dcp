@@ -2,7 +2,7 @@
 
 format long
 global dcp basis db prefix nstep verbose run_inputs ycur dcpfin...
-       costmin iload stime0 astep dcpeval
+       costmin iload stime0 astep dcpeval maxnorm
 
 #### Modify this to change the input behavior ####
 
@@ -19,14 +19,14 @@ method="blyp";
 ## If a file is found, it is parsed and the basis-set information read,
 ## then information for the relevant atoms passed to the inputs. 
 ## Several basis set files can be used (e.g. {"basis1","basis2"}).
-basis="basis.ini";
+basis="sto-3g";
 
 ## Extra bits for gaussian (do not include pseudo=read here)
-extragau="EmpiricalDispersion=GD3BJ SCF=(Conver=9, MaxCycle=40) Symm=Loose";
-# extragau="SCF=(Conver=9, MaxCycle=40) Symm=Loose";
+# extragau="EmpiricalDispersion=GD3BJ SCF=(Conver=9, MaxCycle=40) Symm=Loose";
+extragau="SCF=(Conver=9, MaxCycle=40) Symm=Loose";
 
 ## Number of CPUs and memory (in GB) for Gaussian runs
-ncpu=6;
+ncpu=8;
 mem=2;
 
 ## List of database files to use in DCP optimization
@@ -78,13 +78,16 @@ funevald1 = "fbasicd1";
 funevald2 = "fbasicd2";
 
 ## Name of the Gaussian input runner routine
-## run_inputs = @run_inputs_serial; ## Run all Gaussian inputs sequentially on the same node
+run_inputs = @run_inputs_serial; ## Run all Gaussian inputs sequentially on the same node
 ## run_inputs = @run_inputs_grex; ## Submit inputs to the queue, wait for all to finish. Grex version.
 ## run_inputs = @run_inputs_plonk; ## Submit inputs to a private queue, plonk version.
-run_inputs = @run_inputs_nint_trasgu; ##
+## run_inputs = @run_inputs_nint_trasgu; ##
 
 ## Tolerance criteria for the minimization (function difference between successive steps)
 ftol = 1d-4; ## function change tolerance
+
+## Maximum norm
+maxnorm = 1d-1;
 
 #### No touching past this point. ####
 
