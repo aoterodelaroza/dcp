@@ -3,7 +3,7 @@
 
 function [xbest,vbest] = d2_min (f,d2f,x0,tol)
 
-  global astep
+  global astep fixnorm
 
   ## Initialize and header
   astep = 0;
@@ -23,9 +23,12 @@ function [xbest,vbest] = d2_min (f,d2f,x0,tol)
   end
 
   ## Initial parameters
-  x = x0;
-  sz = size (x); 
-  N = prod (sz);
+  if (exist("fixnorm","var") && fixnorm > 0)
+    x = x0(1:end-1);
+  else
+    x = x0;
+  endif
+  sz = size(x0); 
   xbest = x = x(:);
 
   ## Initial evaluation
@@ -33,9 +36,43 @@ function [xbest,vbest] = d2_min (f,d2f,x0,tol)
 
   ## Outer loop
   while true
+
     ## Next step, calculate the derivatives
     astep += 1;
-    [v,d,h] = feval(d2f,reshape(x,sz));
+    if (exist("fixnorm","var") && fixnorm > 0)
+      xex = [x(:); sqrt(fixnorm^2 - sum(x(2:2:end).^2))];
+    else
+      xex = x;
+    endif
+    [v,d,h] = feval(d2f,reshape(xex,sz));
+
+    ## fixnorm: apply the chain rule
+    if (exist("fixnorm","var") && fixnorm > 0)
+      n = length(xex);
+      u = xex(n);
+      du = d(n);
+      d2u = h(n,n);
+      
+      ## transform the first derivatives
+      d = d(1:n-1);
+      for j = 2:2:n-1
+        d(j) = d(j) - du / u * xex(j);
+      endfor
+
+      ## transform the second derivatives, ii
+      for j = 2:2:n-1
+        h(j,j) = h(j,j) - 2 * xex(j)/u * h(j,n) + (xex(j)/u)^2 * d2u - du * (1/u + xex(j)^2 / u^3);
+      endfor
+      
+      ## transform the second derivatives, ij
+      for j = 2:2:n-1
+        for k = 2:2:j-1
+          h(j,k) = h(j,k) - xex(j)/u * h(j,n) - xex(k)/u * h(k,n) + (xex(j)*xex(k)/u^2) * d2u - du * xex(j)*xex(k) / u^3;
+          h(k,j) = h(j,k);
+        endfor
+      endfor
+      h = h(1:n-1,1:n-1);
+    endif
 
     ## Invert the Hessian and get the gradient
     h = pinv(h);
@@ -72,11 +109,16 @@ function [xbest,vbest] = d2_min (f,d2f,x0,tol)
       xnew = x + dx;
 
       if (norm(dx) < 1e-9)
-        return
+        break
       endif
 
       ## Evaluate the new point
-      vnew = feval(f,reshape(xnew,sz));
+      if (exist("fixnorm","var") && fixnorm > 0)
+        xex = [xnew; sqrt(fixnorm^2 - sum(xnew(2:2:end).^2))];
+      else
+        xex = xnew;
+      endif
+      vnew = feval(f,reshape(xex,sz));
 
       ## Stash best values
       if (vnew < vbest)		
@@ -102,7 +144,12 @@ function [xbest,vbest] = d2_min (f,d2f,x0,tol)
     ## Evaluate at the new point
     wn = ocoeff ;
     xnew = x + wn*dbest;
-    vnew = feval(f,reshape(xnew,sz));
+    if (exist("fixnorm","var") && fixnorm > 0)
+      xex = [xnew; sqrt(fixnorm^2 - sum(xnew(2:2:end).^2))];
+    else
+      xex = xnew;
+    endif
+    vnew = feval(f,reshape(xex,sz));
 
     ## Stash best values
     while (vnew < vbest)
@@ -111,7 +158,13 @@ function [xbest,vbest] = d2_min (f,d2f,x0,tol)
       xbest = xnew; 
       wn = wn*ocoeff ;
       xnew = x+wn*dbest;
-      vnew = feval(f,reshape(xnew,sz));
+      ## Evaluate the new point
+      if (exist("fixnorm","var") && fixnorm > 0)
+        xex = [xnew; sqrt(fixnorm^2 - sum(xnew(2:2:end).^2))];
+      else
+        xex = xnew;
+      endif
+      vnew = feval(f,reshape(xex,sz));
     end
 
     if vbest < vold
@@ -128,6 +181,9 @@ function [xbest,vbest] = d2_min (f,d2f,x0,tol)
     end
   end ## end of outer loop
 
-  xbest = reshape (xbest, sz);
+  if (exist("fixnorm","var") && fixnorm > 0)
+    xbest = [xbest; sqrt(fixnorm^2 - sum(xbest(2:2:end).^2))];
+  endif
+  xbest = reshape(xbest,sz);
 
 endfunction
