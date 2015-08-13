@@ -2,7 +2,7 @@
 
 format long
 global dcp basis db prefix nstep verbose run_inputs ycur dcpfin...
-       costmin iload stime0 astep dcpeval maxnorm
+       costmin iload stime0 astep dcpeval maxnorm fixnorm
 
 #### Modify this to change the input behavior ####
 
@@ -19,11 +19,11 @@ method="blyp";
 ## If a file is found, it is parsed and the basis-set information read,
 ## then information for the relevant atoms passed to the inputs. 
 ## Several basis set files can be used (e.g. {"basis1","basis2"}).
-basis="sto-3g";
+basis="basis.ini";
 
 ## Extra bits for gaussian (do not include pseudo=read here)
-# extragau="EmpiricalDispersion=GD3BJ SCF=(Conver=9, MaxCycle=40) Symm=Loose";
-extragau="SCF=(Conver=9, MaxCycle=40) Symm=Loose";
+extragau="EmpiricalDispersion=GD3BJ SCF=(Conver=9, MaxCycle=40) Symm=Loose";
+# extragau="SCF=(Conver=9, MaxCycle=40) Symm=Loose";
 
 ## Number of CPUs and memory (in GB) for Gaussian runs
 ncpu=8;
@@ -86,8 +86,14 @@ run_inputs = @run_inputs_serial; ## Run all Gaussian inputs sequentially on the 
 ## Tolerance criteria for the minimization (function difference between successive steps)
 ftol = 1d-4; ## function change tolerance
 
-## Maximum norm
-maxnorm = 1d-1;
+## Maximum norm: when the norm of the coefficients (square root of the
+## sum of the squares), the cost function is Inf. This limits the
+## minimizer search to a ball of radius maxnorm around zero.
+## maxnorm = 1d-3;
+
+## Norm constraint: the norm of the coefficients is constrained to
+## this value.
+## fixnorm = 1d-1;
 
 #### No touching past this point. ####
 
@@ -140,6 +146,10 @@ costmin = Inf;
 iload = [];
 stime0 = time();
 xini = packdcp(dcp);
+
+if (exist("fixnorm","var") && fixnorm > 0)
+  xini(end) = sqrt(fixnorm^2 - sum(xini(2:2:end).^2));
+endif
 
 ## Minimize
 [xmin, ymin] = d2_min(funeval,funevald2,xini,ftol);
