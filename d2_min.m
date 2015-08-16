@@ -81,6 +81,7 @@ function [xbest,vbest] = d2_min (f,d2f,x0,tol)
     ## Write down the first step as best
     xold = xbest = x ;
     vold = vbest = v ;
+    dbest = zeros(size(x));
 
     dnewton = -h*d; ## Newton step
 
