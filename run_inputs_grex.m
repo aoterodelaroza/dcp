@@ -88,7 +88,7 @@ function s = run_inputs_grex(ilist,cont=0,xdm=[],xdmfun="")
         fprintf(fid,"~/git/postg/postg %.10f %.10f %s.wfx %s > %s.pgout\n",xdm(1),xdm(2),name,xdmfun,name);
       endif
       fprintf(fid,"touch %s.done\n",name);
-      jobname = [jobname, sprintf("%s.sub",name)];
+      jobname = {jobname{:} sprintf("%s.sub",name)};
     else
       fprintf(fid,"g09 %s.gjf\n",name);
       if (!isempty(xdm))
