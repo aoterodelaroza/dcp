@@ -1,5 +1,5 @@
-function s = run_inputs_plonk(ilist,cont=0)
-  %% function run_inputs_plonk(ilist,cont=0)
+function s = run_inputs_plonk(ilist,cont=0,xdm=[],xdmfun="")
+  %% function run_inputs_plonk(ilist,cont=0,xdm=[],xdmfun="")
   %% 
   %% Run all the inputs in the job list (ilist). The jobs should be  
   %% in the current working directory, with extension gjf. This
@@ -13,6 +13,9 @@ function s = run_inputs_plonk(ilist,cont=0)
   %% If cont is true, continue with the calculations even
   %% if one of the Gaussian input fails. Then return the 
   %% success/failure state in ifail
+  %%
+  %% If xdm is non-empty, run postg on the resulting wfx with
+  %% the indicated parameters and the functional in xdmfun.
   %%
   %% This version of run_inputs creates submission scripts for all
   %% inputs in the list and submits them to a private queue. After
@@ -40,7 +43,11 @@ function s = run_inputs_plonk(ilist,cont=0)
       error("Could not create submission script: %s.sub",name);
     endif
     fprintf(fid,"cd %s\n",pwd());
+    fprintf(fid,"export OMP_NUM_THREADS=6\n");
     fprintf(fid,"g09 %s.gjf\n",name);
+    if (!isempty(xdm))
+      fprintf(fid,"~/git/postg/postg %.10f %.10f %s.wfx %s > %s.pgout\n",xdm(1),xdm(2),name,xdmfun,name);
+    endif
     fprintf(fid,"touch %s.done\n",name);
     fclose(fid);
     jobname = {jobname{:} sprintf("%s.sub",name)};
@@ -84,6 +91,9 @@ function s = run_inputs_plonk(ilist,cont=0)
   if (verbose)
     printf("All Gaussian outputs are ready after %d seconds\n",nslept0);
   endif
+
+  ## Give time to sync the NFS
+  sleep(sleeptime);
 
   ## Clean up the done and the err files
   for i = 1:length(ilist)

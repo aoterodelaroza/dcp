@@ -1,5 +1,5 @@
-function sout = run_inputs_serial(ilist,cont=0)
-  %% function run_inputs_serial(ilist,cont=0)
+function sout = run_inputs_serial(ilist,cont=0,xdm=[],xdmfun="")
+  %% function run_inputs_serial(ilist,cont=0,xdm=[],xdmfun="")
   %% 
   %% Run all the inputs in the job list (ilist). The jobs should be  
   %% in the current working directory, with extension gjf. This
@@ -13,6 +13,9 @@ function sout = run_inputs_serial(ilist,cont=0)
   %% If cont is true, continue with the calculations even
   %% if one of the Gaussian input fails. Then return the 
   %% success/failure state in ifail
+  %%
+  %% If xdm is non-empty, run postg on the resulting wfx with
+  %% the indicated parameters and the functional in xdmfun.
   %%
   %% This version of run_inputs runs all input files sequentially
   %% on the same node in which the octave script is running.
@@ -30,6 +33,9 @@ function sout = run_inputs_serial(ilist,cont=0)
       endif
     endif
     [s out] = system(sprintf("g09 %s.gjf 2>&1",ilist{i}));
+    if (!isempty(xdm))
+      [s2 out] = system(sprintf("postg %.10f %.10f %s.wfx %s > %s.pgout\n",xdm(1),xdm(2),ilist{i},xdmfun,ilist{i}));
+    endif
     ## Check that Gaussian didn't crap out
     if (s != 0)
       # printf("There was an error from Gaussian running one of the inputs.\n");

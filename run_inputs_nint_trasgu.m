@@ -1,5 +1,5 @@
-function s = run_inputs_nint_trasgu(ilist,cont=0)
-  %% function run_inputs_nint_trasgu(ilist,cont=0)
+function s = run_inputs_nint_trasgu(ilist,cont=0,xdm=[],xdmfun="")
+  %% function run_inputs_nint_trasgu(ilist,cont=0,xdm=[],xdmfun="")
   %% 
   %% Run all the inputs in the job list (ilist). The jobs should be  
   %% in the current working directory, with extension gjf. This
@@ -14,13 +14,16 @@ function s = run_inputs_nint_trasgu(ilist,cont=0)
   %% if one of the Gaussian input fails. Then return the 
   %% success/failure state in ifail
   %%
+  %% If xdm is non-empty, run postg on the resulting wfx with
+  %% the indicated parameters and the functional in xdmfun.
+  %%
   %% This version of run_inputs creates submission scripts for all
   %% inputs in the list and submits them to grex. After that,
   %% the routine enters a waiting loop and checks periodically for
   %% the calc results. When all jobs are done, control is given back
   %% to the caller.
   
-  global verbose iload
+  global verbose iload 
   
   ## Parameters for the run
   sleeptime = 5; ## time in seconds between job completion checks
@@ -44,10 +47,14 @@ function s = run_inputs_nint_trasgu(ilist,cont=0)
     fprintf(fid,"\n");
     fprintf(fid,"export SCRATCH=/state/partition1/scratch_local/${PBS_JOBID%%%%.*}\n");
     fprintf(fid,"export GAUSS_SCRDIR=/state/partition1/scratch_local/${PBS_JOBID%%%%.*}\n");
+    fprintf(fid,"export OMP_NUM_THREADS=8\n");
     fprintf(fid,"mkdir $SCRATCH\n");
     fprintf(fid,"\n");
     fprintf(fid,"cd %s\n",pwd());
     fprintf(fid,"g03 %s.gjf\n",name);
+    if (!isempty(xdm))
+      fprintf(fid,"~/src/postg/postg %.10f %.10f %s.wfx %s > %s.pgout\n",xdm(1),xdm(2),name,xdmfun,name);
+    endif
     fprintf(fid,"rm -f $SCRATCH\n");
     fprintf(fid,"touch %s.done\n",name);
     fclose(fid);
@@ -93,6 +100,7 @@ function s = run_inputs_nint_trasgu(ilist,cont=0)
     printf("All Gaussian outputs are ready after %d seconds\n",nslept0);
   endif
 
+  ## Give time to sync the NFS
   sleep(sleeptime);
 
   ## Clean up the done and the err files

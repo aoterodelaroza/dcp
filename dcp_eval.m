@@ -28,8 +28,7 @@ mem=2;
 
 ## List of database files to use in DCP optimization
 [s out] = system("ls db/s66_*.db");
-listdb = strsplit(out,"\n");
-listdb = listdb(1:end-1);
+listdb = strfields(out);
 
 ## List of DCP files to evaluate (you can use a cell array of files
 ## here, like {"C.dcp","H.dcp"}, or a single string "bleh.dcp")

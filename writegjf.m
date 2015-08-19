@@ -1,4 +1,4 @@
-function writegjf(file,dcp,basis,at,x,q,mult,ent,chk="",derivs=0)
+function writegjf(file,dcp,basis,at,x,q,mult,ent,chk="",wfx="",derivs=0)
   %% function writegjf(file,dcp,at,x,q,mult,ent,chk="");
   %%
   %% Write a Gaussian input file (gjf) in filename file. Use the DCP
@@ -28,13 +28,18 @@ function writegjf(file,dcp,basis,at,x,q,mult,ent,chk="",derivs=0)
   else
     chkstr = "";
   endif
+  if (length(wfx) > 0)
+    wfxstr = "output=wfx";
+  else
+    wfxstr = "";
+  endif
   fprintf(fid,"%%nosave\n");
   fprintf(fid,"%%mem=%dGB\n",ent.mem);
   fprintf(fid,"%%nproc=%d\n",ent.ncpu);
   if (iscell(basis))
-    fprintf(fid,"#p %s gen pseudo=read %s %s\n",ent.method,ent.extragau,chkstr);
+    fprintf(fid,"#p %s gen pseudo=read %s %s %s\n",ent.method,ent.extragau,chkstr,wfxstr);
   else
-    fprintf(fid,"#p %s %s pseudo=read %s %s\n",ent.method,basis,ent.extragau,chkstr);
+    fprintf(fid,"#p %s %s pseudo=read %s %s %s\n",ent.method,basis,ent.extragau,chkstr,wfxstr);
   endif
   fprintf(fid,"\n");
   fprintf(fid,"title\n");
@@ -50,11 +55,16 @@ function writegjf(file,dcp,basis,at,x,q,mult,ent,chk="",derivs=0)
   endif
   writedcp(dcp,fid,at);
   fprintf(fid,"\n");
+  if (length(wfx) > 0)
+    fprintf(fid,"%s\n",wfx);
+    fprintf(fid,"\n");
+  endif
 
   if (derivs)
     ## The same calculation without any DCP
     fprintf(fid,"--Link1--\n");
     fprintf(fid,"%%chk=%s\n",chk);
+    fprintf(fid,"%%nosave\n");
     fprintf(fid,"%%mem=%dGB\n",ent.mem);
     fprintf(fid,"%%nproc=%d\n",ent.ncpu);
     if (iscell(basis))
@@ -91,6 +101,7 @@ function writegjf(file,dcp,basis,at,x,q,mult,ent,chk="",derivs=0)
       dcptmp = unpackdcp(xtmp,dcp);
       fprintf(fid,"--Link1--\n");
       fprintf(fid,"%%chk=%s\n",chk);
+      fprintf(fid,"%%nosave\n");
       fprintf(fid,"%%mem=%dGB\n",ent.mem);
       fprintf(fid,"%%nproc=%d\n",ent.ncpu);
       if (iscell(basis))
