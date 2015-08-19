@@ -16,11 +16,17 @@ function stash_inputs_outputs(ilist)
 
   ## Tar all the inputs and outputs and move to the stash
   str = "";
-  for i = 1:length(ilist)
-    str = sprintf("%s %s.gjf %s.log %s.err",str,ilist{i},ilist{i},ilist{i});
-  endfor
+  if (exist(sprintf("%s.gjf",ilist{1}),"file"))
+    str = sprintf("%s %s_*.gjf",str,prefix);
+  endif
+  if (exist(sprintf("%s.log",ilist{1}),"file"))
+    str = sprintf("%s %s_*.log",str,prefix);
+  endif
+  if (exist(sprintf("%s.wfx",ilist{1}),"file"))
+    str = sprintf("%s %s_*.wfx",str,prefix);
+  endif
   [s out] = system(sprintf("tar cjvf %s_%4.4d.tar.bz2 %s",prefix,nstep,str));
-  if (s != 0)
+  if (!exist(sprintf("%s_%4.4d.tar.bz2",prefix,nstep),"file"))
     error(sprintf("Could not tar inputs/outputs for iteration %d",nstep));
   endif
   [s out] = system(sprintf("mv %s_%4.4d.tar.bz2 %s",prefix,nstep,prefix));

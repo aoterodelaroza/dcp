@@ -93,6 +93,8 @@ function s = run_inputs_nint_trasgu(ilist,cont=0)
     printf("All Gaussian outputs are ready after %d seconds\n",nslept0);
   endif
 
+  sleep(sleeptime);
+
   ## Clean up the done and the err files
   for i = 1:length(ilist)
     [s out] = system(sprintf("rm -f %s.done %s.err %s.sub",ilist{i},ilist{i},ilist{i}));

@@ -19,8 +19,8 @@ method="blyp";
 basis="basis.ini";
 
 ## Extra bits for gaussian (do not include pseudo=read here)
-extragau="EmpiricalDispersion=GD3BJ SCF=(Conver=9, MaxCycle=40) Symm=Loose int=(grid=ultrafine)";
-# extragau="SCF=(Conver=5, MaxCycle=40) Symm=Loose int=(grid=ultrafine)";
+# extragau="EmpiricalDispersion=GD3BJ SCF=(Conver=9, MaxCycle=40) Symm=Loose int=(grid=ultrafine)";
+extragau="SCF=(Conver=9, MaxCycle=40) Symm=Loose int=(grid=ultrafine)";
 
 ## Number of CPUs and memory (in GB) for Gaussian runs
 ncpu=6;
@@ -51,7 +51,6 @@ dcpini="dcp.ini";
 prefix="bleh";
 
 ## Name of the Gaussian input runner routine
-## run_inputs = @run_inputs_serial; ## Run all Gaussian inputs sequentially on the same node
 ## run_inputs = @run_inputs_serial; ## Run all Gaussian inputs sequentially on the same node
 ## run_inputs = @run_inputs_grex; ## Submit inputs to the queue, wait for all to finish. Grex version.
 run_inputs = @run_inputs_plonk; ## Submit inputs to a private queue, plonk version.
