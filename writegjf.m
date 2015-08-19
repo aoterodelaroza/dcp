@@ -28,6 +28,7 @@ function writegjf(file,dcp,basis,at,x,q,mult,ent,chk="",derivs=0)
   else
     chkstr = "";
   endif
+  fprintf(fid,"%%nosave\n");
   fprintf(fid,"%%mem=%dGB\n",ent.mem);
   fprintf(fid,"%%nproc=%d\n",ent.ncpu);
   if (iscell(basis))
