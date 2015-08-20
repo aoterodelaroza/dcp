@@ -25,6 +25,9 @@ function stash_inputs_outputs(ilist)
   if (exist(sprintf("%s.wfx",ilist{1}),"file"))
     str = sprintf("%s %s_*.wfx",str,prefix);
   endif
+  if (exist(sprintf("%s.pgout",ilist{1}),"file"))
+    str = sprintf("%s %s_*.pgout",str,prefix);
+  endif
   [s out] = system(sprintf("tar cjvf %s_%4.4d.tar.bz2 %s",prefix,nstep,str));
   if (!exist(sprintf("%s_%4.4d.tar.bz2",prefix,nstep),"file"))
     error(sprintf("Could not tar inputs/outputs for iteration %d",nstep));
