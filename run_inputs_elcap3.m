@@ -75,8 +75,8 @@ function s = run_inputs_elcap3(ilist,cont=0,xdm=[],xdmfun="")
       fprintf(fid,"#$ -S /bin/bash\n");
       fprintf(fid,"#$ -q ethernet.q\n");
       fprintf(fid,"#$ -P ejohnson29_project\n");
-      fprintf(fid,"#$ -o /dev/null");
-      fprintf(fid,"#$ -e /dev/null");
+      fprintf(fid,"#$ -o /dev/null\n");
+      fprintf(fid,"#$ -e /dev/null\n");
       fprintf(fid,"#$ -pe ompi_4slot 4\n");
       fprintf(fid,"#$ -N %s\n",name);
       fprintf(fid,"#$ -cwd\n");
