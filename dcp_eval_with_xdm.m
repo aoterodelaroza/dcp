@@ -1,6 +1,7 @@
 #! /usr/bin/octave -q
 
 format long
+pkg load optim;
 
 ## Globals for DCP
 global dcp basis db prefix nstep verbose run_inputs ycur...
@@ -80,7 +81,6 @@ for i = 1:length(xdmfuns)
   endif
 endfor
 source("routines_for_xdm.m");
-addpath("leasqr/");
 
 ## Read the basis set
 basis = parsebasis(basis);
