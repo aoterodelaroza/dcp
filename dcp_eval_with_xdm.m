@@ -194,8 +194,9 @@ endfor
 printf("\n");
 printf("### Evaluation ###\n");
 
-## Put back the prefix
+## Put back the prefix, clear iload
 prefix = prefix0;
+iload = [];
 
 ## Read the evaluation database
 db = parsedb(listdb);
@@ -235,7 +236,7 @@ for idcp = 1:length(dcpini)
 
   dy = ycalc = yref = zeros(length(db),1);
   for i = 1:length(db)
-    [dy(i) ycalc(i) yref(i)] = process_output_one(db{i},0,!isempty(xdmsave));
+    [dy(i) ycalc(i) yref(i)] = process_output_one(db{i},!isempty(xdmsave),0);
   endfor
   if (any(ycalc == Inf))
     mae = Inf;
