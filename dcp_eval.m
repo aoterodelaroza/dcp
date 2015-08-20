@@ -94,7 +94,7 @@ for idcp = 1:length(dcpini)
 
   dy = ycalc = yref = zeros(length(db),1);
   for i = 1:length(db)
-    [dy(i) ycalc(i) yref(i)] = process_output_one(db{i},0);
+    [dy(i) ycalc(i) yref(i)] = process_output_one(db{i},0,0);
   endfor
   if (any(ycalc == Inf))
     mae = Inf;

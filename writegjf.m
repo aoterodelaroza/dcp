@@ -33,7 +33,6 @@ function writegjf(file,dcp,basis,at,x,q,mult,ent,chk="",wfx="",derivs=0)
   else
     wfxstr = "";
   endif
-  fprintf(fid,"%%nosave\n");
   fprintf(fid,"%%mem=%dGB\n",ent.mem);
   fprintf(fid,"%%nproc=%d\n",ent.ncpu);
   if (iscell(basis))
@@ -64,7 +63,6 @@ function writegjf(file,dcp,basis,at,x,q,mult,ent,chk="",wfx="",derivs=0)
     ## The same calculation without any DCP
     fprintf(fid,"--Link1--\n");
     fprintf(fid,"%%chk=%s\n",chk);
-    fprintf(fid,"%%nosave\n");
     fprintf(fid,"%%mem=%dGB\n",ent.mem);
     fprintf(fid,"%%nproc=%d\n",ent.ncpu);
     if (iscell(basis))
@@ -101,7 +99,6 @@ function writegjf(file,dcp,basis,at,x,q,mult,ent,chk="",wfx="",derivs=0)
       dcptmp = unpackdcp(xtmp,dcp);
       fprintf(fid,"--Link1--\n");
       fprintf(fid,"%%chk=%s\n",chk);
-      fprintf(fid,"%%nosave\n");
       fprintf(fid,"%%mem=%dGB\n",ent.mem);
       fprintf(fid,"%%nproc=%d\n",ent.ncpu);
       if (iscell(basis))

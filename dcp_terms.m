@@ -105,7 +105,7 @@ for idcp = 1:length(dcpini)
   yamean = [];
   yade = zeros(length(db),1);
   for i = 1:length(db)
-    [dy ycalc yref ay] = process_output_one(db{i},-1);
+    [dy ycalc yref ay] = process_output_one(db{i},0,-1);
     yade(i) = process_output_one_echange(db{i});
     if (isempty(ymean))
          ymean = zeros(size(ay(:)));

@@ -86,7 +86,7 @@ function [y dy d2y] = fbasicd2(x)
   endfor
   for i = 1:length(db)
     wei(i) = db{i}.wei;
-    [erry(i) ycalc(i) yref(i) ay] = process_output_one(db{i},1);
+    [erry(i) ycalc(i) yref(i) ay] = process_output_one(db{i},0,1);
     y += wei(i) * erry(i)^2;
     for j = 1:length(ay)
       dy(2*j) += 2 * wei(i) * erry(i) * ay(j);

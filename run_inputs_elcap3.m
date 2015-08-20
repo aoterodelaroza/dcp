@@ -75,9 +75,10 @@ function s = run_inputs_elcap3(ilist,cont=0,xdm=[],xdmfun="")
       fprintf(fid,"#$ -S /bin/bash\n");
       fprintf(fid,"#$ -q ethernet.q\n");
       fprintf(fid,"#$ -P ejohnson29_project\n");
-      fprintf(fid,"#$ -o %s/%s.err \n",pwd(),name);
+      fprintf(fid,"#$ -o /dev/null");
+      fprintf(fid,"#$ -e /dev/null");
       fprintf(fid,"#$ -pe ompi_4slot 4\n");
-      fprintf(fid,"#$ -N g09_%s\n",name);
+      fprintf(fid,"#$ -N %s\n",name);
       fprintf(fid,"#$ -cwd\n");
       fprintf(fid,"#$ -V\n");
       fprintf(fid,"\n");
@@ -101,7 +102,7 @@ function s = run_inputs_elcap3(ilist,cont=0,xdm=[],xdmfun="")
       fprintf(fid,"export PATH=${PATH}:~/cvs/bashlib/awk\n");
       fprintf(fid,"\n");
       fprintf(fid,"# g09\n");
-      fprintf(fid,"export g09root="/opt/apps"\n");
+      fprintf(fid,"export g09root='/home/alberto/src'\n");
       fprintf(fid,"export GAUSS_SCRDIR=$TMP\n");
       fprintf(fid,". $g09root/g09/bsd/g09.profile\n");
       fprintf(fid,"\n");
@@ -111,14 +112,14 @@ function s = run_inputs_elcap3(ilist,cont=0,xdm=[],xdmfun="")
       fprintf(fid,"export OMP_NUM_THREADS=4\n");
       fprintf(fid,"\n");
       fprintf(fid,"cd %s\n",pwd());
-      fprintf(fid,"g09 %s.gjf\n",name);
+      fprintf(fid,"~/src/g09/g09 %s.gjf\n",name);
       if (!isempty(xdm))
         fprintf(fid,"postg %.10f %.10f %s.wfx %s > %s.pgout\n",xdm(1),xdm(2),name,xdmfun,name);
       endif
       fprintf(fid,"touch %s.done\n",name);
       jobname = {jobname{:} sprintf("%s.sub",name)};
     else
-      fprintf(fid,"g09 %s.gjf\n",name);
+      fprintf(fid,"~/src/g09/g09 %s.gjf\n",name);
       if (!isempty(xdm))
         fprintf(fid,"postg %.10f %.10f %s.wfx %s > %s.pgout\n",xdm(1),xdm(2),name,xdmfun,name);
       endif
@@ -139,11 +140,6 @@ function s = run_inputs_elcap3(ilist,cont=0,xdm=[],xdmfun="")
     if (s != 0)
       error("Could not submit script: %s",jobname{i});
     endif
-    aux = strsplit(strtrim(out),".");
-    if (verbose)
-      printf("Job %s submitted for %s\n",aux{1},jobname{i});
-    endif
-    jobstr = sprintf("%s %s",jobstr,aux{1});
   endfor
 
   ## Wait until all the calcs and jobs are done
@@ -172,7 +168,7 @@ function s = run_inputs_elcap3(ilist,cont=0,xdm=[],xdmfun="")
 
   ## Clean up the done and the err files
   for i = 1:length(ilist)
-    [s out] = system(sprintf("rm -f %s.done %s.err %s.sub",ilist{i},ilist{i},ilist{i}));
+    [s out] = system(sprintf("rm -f %s.done %s.e* %s.sub %s.e*",ilist{i},ilist{i},ilist{i},ilist{i}));
   endfor
 
   ## Calculate the load for subsequent runs
