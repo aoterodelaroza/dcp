@@ -242,7 +242,6 @@ while (irnd <= nrnd)
   ## Apply a Metropolis-like algorithm
   if (cost < cost0) 
     iaccept = 1;
-    cost0 = cost;
     printf("# Step accepted (lower cost)\n");
     printf("# New intial cost for acceptance threshold: %.4f\n",cost0);
   else
@@ -258,6 +257,7 @@ while (irnd <= nrnd)
   ## Accept the step and launch the minimization 
   if (iaccept)
     irnd++;
+    cost0 = cost;
     [xmin, ymin] = d2_min(funeval,funevald2,xnew,ftol);
     x = xmin;
   endif
