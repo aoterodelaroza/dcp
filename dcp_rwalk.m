@@ -19,6 +19,7 @@ method="blyp";
 ## If a file is found, it is parsed and the basis-set information read,
 ## then information for the relevant atoms passed to the inputs. 
 ## Several basis set files can be used (e.g. {"basis1","basis2"}).
+## basis="basis.ini";
 basis="basis.ini";
 
 ## Extra bits for gaussian (do not include pseudo=read here)
@@ -109,22 +110,28 @@ run_inputs = @run_inputs_nint_trasgu; ## Submit inputs to a private queue on the
 ## run_inputs = @run_inputs_elcap3; ## Submit inputs to elcap3.
 
 ## Tolerance criteria for the minimization (function difference between successive steps)
-ftol = 1d-4; ## function change tolerance
+ftol = 1d-1; ## function change tolerance for random walk batches
+
+## Number of random batches
+nrnd = Inf;
+
+## Norm of the random step
+rndstep = 1d-3;
 
 ## Maximum norm: when the norm of the coefficients (square root of the
 ## sum of the squares), the cost function is Inf. This limits the
-## minimizer search to a ball of radius maxnorm around zero.
+## minimizer search to a ball of radius maxnorm around zero. (optional)
 ## maxnorm = 1d-3;
 
 ## Norm constraint: the norm of the coefficients is constrained to
-## this value.
+## this value. (optional)
 fixnorm = 1d-2;
 
 #### No touching past this point. ####
 
 ## Header
-printf("### DCP optimization started on %s ###\n",strtrim(ctime(time())));
-printf("### PID: %d ###\n",getpid());
+printf("### Random walk started on %s ###\n",strtrim(ctime(time())));
+printf("# PID: %d \n",getpid());
 
 ## Read the basis set
 basis = parsebasis(basis);
@@ -171,33 +178,88 @@ astep = 0;
 costmin = Inf;
 iload = [];
 stime0 = time();
-xini = packdcp(dcp);
-
+x = packdcp(dcp);
 if (exist("fixnorm","var") && fixnorm > 0)
-  xini(end) = sqrt(fixnorm^2 - sum(xini(2:2:end).^2));
+  x(end) = sqrt(fixnorm^2 - sum(x(2:2:end).^2));
 endif
+n = length(x) / 2;
 
-## Minimize
-[xmin, ymin] = d2_min(funeval,funevald2,xini,ftol);
-dcp = unpackdcp(xmin,dcp);
+## Evaluate the zero DCP 
+printf("# Evaluating the zero DCP cost\n");
+x0 = x;
+x0(2:2:end) = 0;
+cost0 = feval(funeval,x0);
 
-## Write the final DCP
-writedcp(dcp,dcpfin)
+## Save the initial random seed
+v = rand("state");
+save "dcp_rwalk.seed" v;
 
-## Write the results at the minimum
-printf("### Statistics for the parametrization set at the optimal DCP###\n");
-printf("| Id | Name | yref | ycalc | dy |\n")
-dy = yref = zeros(length(db),1);
-for i = 1:length(db)
-  yref(i) = db{i}.ref;
-  dy(i) = ycur(i) - yref(i);
-  printf("| %d | %s | %.4f | %.4f | %.4f |\n",...
-         i,db{i}.name,yref(i),ycur(i),dy(i));
-endfor
-printf("# MAE = %.4f\n",mean(abs(yref-ycur)));
-printf("# MAPE = %.4f\n",mean(abs((yref-ycur)./yref))*100);
-printf("# RMS = %.4f\n",sqrt(mean((yref-ycur).^2)));
-printf("# Cost function minimum: %.10f\n",ymin)
-printf("# Final DCP written to: %s\n",dcpfin)
-printf("### DCP optimization finished on %s ###\n",strtrim(ctime(time())));
+irnd = 1;
+while (irnd <= nrnd)
+  ## Header
+  printf("# Random batch number %d\n",irnd);
+
+  ## Generate new random DCP using the dcpfin
+  ## Number of coefficients to change
+  nchng = floor(rand() * n + 1); 
+  nchng = min(max(nchng,1),n);
+  printf("# Number of coefficients changed: %d/%d [",nchng,n);
+
+  ## Pick the nchng terms to change
+  iperm = randperm(n);
+  iperm = sort(iperm(1:nchng));
+  for i = 1:nchng
+    printf("%d ",iperm(i));
+  endfor
+  printf("]\n");
+
+  ## Generate the coefficients using a normal distribution
+  ## with mean zero and variance one
+  step = randn(1,nchng);
+
+  ## Normalize to the random step value
+  stepnorm = rand() * rndstep;
+  step = step / norm(step) * stepnorm;
+  printf("# Step length: %.4e\n",stepnorm);
+
+  ## Define the new step
+  xnew = x;
+  xnew(2*iperm) = xnew(2*iperm) + step;
+
+  ## Normalize 
+  if (exist("fixnorm","var") && fixnorm > 0)
+    nn = norm(xnew(2:2:end));
+    xnew(2:2:end) = xnew(2:2:end) / nn * fixnorm;
+  endif
+  if (exist("maxnorm","var") && maxnorm > 0)
+    xnew(2:2:end) = min(xnew(2:2:end),maxnorm);
+  endif
+  printf("# New coefficient norm: %.4e\n",norm(xnew(2:2:end)));
+
+  ## Check that the first DCP evaluation works
+  cost = feval(funeval,xnew);
+
+  ## Apply a Metropolis-like algorithm
+  if (cost < cost0) 
+    iaccept = 1;
+    cost0 = cost;
+    printf("# Step accepted (lower cost)\n");
+    printf("# New intial cost for acceptance threshold: %.4f\n",cost0);
+  else
+    if (rand() < cost0/cost)
+      printf("# Step accepted at probability %.4f\n",cost0/cost);
+      iaccept = 1;
+    else
+      printf("# Step rejected\n");
+      iaccept = 0;
+    endif
+  endif
+
+  ## Accept the step and launch the minimization 
+  if (iaccept)
+    irnd++;
+    [xmin, ymin] = d2_min(funeval,funevald2,xnew,ftol);
+    x = xmin;
+  endif
+endwhile
 

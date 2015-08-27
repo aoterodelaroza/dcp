@@ -53,6 +53,7 @@ run_inputs = @run_inputs_elcap3; ## Submit inputs to elcap3.
 
 ## Header
 printf("### DCP evaluation started on %s ###\n",strtrim(ctime(time())));
+printf("### PID: %d ###\n",getpid());
 
 ## Read the basis set
 basis = parsebasis(basis);

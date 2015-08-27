@@ -68,6 +68,7 @@ xdmdb = strfields(out);
 
 ## Header
 printf("### DCP evaluation (with XDM) started on %s ###\n",strtrim(ctime(time())));
+printf("### PID: %d ###\n",getpid());
 
 ## Prepare for XDM 
 funname = struct("blyp","blyp","b3lyp","b3lyp","bhahlyp","bhandhlyp",...
