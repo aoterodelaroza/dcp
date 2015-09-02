@@ -29,6 +29,7 @@ mem=2;
 ## List of database files to use in DCP optimization
 [s out] = system("ls db/s66_*.db");
 listdb = strfields(out);
+weightdb = [];
 
 ## List of DCP files to evaluate (you can use a cell array of files
 ## here, like {"C.dcp","H.dcp"}, or a single string "bleh.dcp")
@@ -104,17 +105,23 @@ for idcp = 1:length(dcpini)
     mae = Inf;
     mape = Inf;
     rms = Inf;
+    cost = Inf;
   else
     dyr = dy(find(dy != Inf));
     yrefr = yref(find(yref != Inf));
     mae = mean(abs(dyr));
-   mape = mean(abs(dyr./yrefr))*100;
-   rms = sqrt(mean(dyr.^2));
+    mape = mean(abs(dyr./yrefr))*100;
+    rms = sqrt(mean(dyr.^2));
+    if (exist("weightdb","var") && !isempty(weightdb))
+      cost = sum(weightdb' .* dyr.^2);
+    else
+      cost = sum(dyr.^2);
+    endif
   endif
 
   ## Write the results at the minimum
-  printf("# DCP %d (%s) | MAE = %.4f | MAPE = %.4f | RMS = %.4f |\n",idcp,dcpini{idcp},...
-         mae,mape,rms);
+  printf("# DCP %d (%s) | Cost = %.10f | MAE = %.4f | MAPE = %.4f | RMS = %.4f | Time = %.1f |\n",...
+         cost,idcp,dcpini{idcp},mae,mape,rms,sum(iload));
   
   printf("| Id|           Name       |       yref   |      ycalc   |       dy     |\n");
   for i = 1:length(db)
