@@ -99,7 +99,6 @@ prefix="bleh";
 
 ## Name of the function to be minimized 
 funeval   = "fbasic";
-funevald1 = "fbasicd1";
 funevald2 = "fbasicd2";
 
 ## Name of the Gaussian input runner routine

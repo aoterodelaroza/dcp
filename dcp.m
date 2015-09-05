@@ -2,7 +2,7 @@
 
 format long
 global dcp basis db prefix nstep verbose run_inputs ycur dcpfin...
-       costmin iload stime0 astep dcpeval maxnorm fixnorm
+       costmin iload stime0 astep dcpeval maxnorm fixnorm muk
 
 #### Modify this to change the input behavior ####
 
@@ -31,47 +31,8 @@ mem=2;
 
 ## List of database files to use in DCP optimization
 listdb={...
-"atz_blyp/s225_2pyridoxine2aminopyridin09.db","atz_blyp/s225_2pyridoxine2aminopyridin10.db","atz_blyp/s225_2pyridoxine2aminopyridin12.db",...
-"atz_blyp/s225_2pyridoxine2aminopyridin15.db","atz_blyp/s225_2pyridoxine2aminopyridin20.db","atz_blyp/s225_adeninethyminestack09.db",...
-"atz_blyp/s225_adeninethyminestack10.db","atz_blyp/s225_adeninethyminestack12.db","atz_blyp/s225_adeninethyminestack15.db",...
-"atz_blyp/s225_adeninethyminestack20.db","atz_blyp/s225_adeninethymineWC09.db","atz_blyp/s225_adeninethymineWC10.db",...
-"atz_blyp/s225_adeninethymineWC12.db","atz_blyp/s225_adeninethymineWC15.db","atz_blyp/s225_adeninethymineWC20.db",...
-"atz_blyp/s225_ammoniadimer09.db","atz_blyp/s225_ammoniadimer10.db","atz_blyp/s225_ammoniadimer12.db",...
-"atz_blyp/s225_ammoniadimer15.db","atz_blyp/s225_ammoniadimer20.db","atz_blyp/s225_benzeneammonia09.db",...
-"atz_blyp/s225_benzeneammonia10.db","atz_blyp/s225_benzeneammonia12.db","atz_blyp/s225_benzeneammonia15.db",...
-"atz_blyp/s225_benzeneammonia20.db","atz_blyp/s225_benzenedimerstack09.db","atz_blyp/s225_benzenedimerstack10.db",...
-"atz_blyp/s225_benzenedimerstack12.db","atz_blyp/s225_benzenedimerstack15.db","atz_blyp/s225_benzenedimerstack20.db",...
-"atz_blyp/s225_benzenedimerTshape09.db","atz_blyp/s225_benzenedimerTshape10.db","atz_blyp/s225_benzenedimerTshape12.db",...
-"atz_blyp/s225_benzenedimerTshape15.db","atz_blyp/s225_benzenedimerTshape20.db","atz_blyp/s225_benzeneHCN09.db",...
-"atz_blyp/s225_benzeneHCN10.db","atz_blyp/s225_benzeneHCN12.db","atz_blyp/s225_benzeneHCN15.db",...
-"atz_blyp/s225_benzeneHCN20.db","atz_blyp/s225_benzenemethane09.db","atz_blyp/s225_benzenemethane10.db",...
-"atz_blyp/s225_benzenemethane12.db","atz_blyp/s225_benzenemethane15.db","atz_blyp/s225_benzenemethane20.db",...
-"atz_blyp/s225_benzenewater09.db","atz_blyp/s225_benzenewater10.db","atz_blyp/s225_benzenewater12.db",...
-"atz_blyp/s225_benzenewater15.db","atz_blyp/s225_benzenewater20.db","atz_blyp/s225_ethenedimer09.db",...
-"atz_blyp/s225_ethenedimer10.db","atz_blyp/s225_ethenedimer12.db","atz_blyp/s225_ethenedimer15.db",...
-"atz_blyp/s225_ethenedimer20.db","atz_blyp/s225_etheneethyne09.db","atz_blyp/s225_etheneethyne10.db",...
-"atz_blyp/s225_etheneethyne12.db","atz_blyp/s225_etheneethyne15.db","atz_blyp/s225_etheneethyne20.db",...
-"atz_blyp/s225_formamidedimer09.db","atz_blyp/s225_formamidedimer10.db","atz_blyp/s225_formamidedimer12.db",...
-"atz_blyp/s225_formamidedimer15.db","atz_blyp/s225_formamidedimer20.db","atz_blyp/s225_formicaciddimer09.db",...
-"atz_blyp/s225_formicaciddimer10.db","atz_blyp/s225_formicaciddimer12.db","atz_blyp/s225_formicaciddimer15.db",...
-"atz_blyp/s225_formicaciddimer20.db","atz_blyp/s225_indolebenzenestack09.db","atz_blyp/s225_indolebenzenestack10.db",...
-"atz_blyp/s225_indolebenzenestack12.db","atz_blyp/s225_indolebenzenestack15.db","atz_blyp/s225_indolebenzenestack20.db",...
-"atz_blyp/s225_indolebenzeneTshape09.db","atz_blyp/s225_indolebenzeneTshape10.db","atz_blyp/s225_indolebenzeneTshape12.db",...
-"atz_blyp/s225_indolebenzeneTshape15.db","atz_blyp/s225_indolebenzeneTshape20.db","atz_blyp/s225_methanedimer09.db",...
-"atz_blyp/s225_methanedimer10.db","atz_blyp/s225_methanedimer12.db","atz_blyp/s225_methanedimer15.db",...
-"atz_blyp/s225_methanedimer20.db","atz_blyp/s225_phenoldimer09.db","atz_blyp/s225_phenoldimer10.db",...
-"atz_blyp/s225_phenoldimer12.db","atz_blyp/s225_phenoldimer15.db","atz_blyp/s225_phenoldimer20.db",...
-"atz_blyp/s225_pyrazinedimer09.db","atz_blyp/s225_pyrazinedimer10.db","atz_blyp/s225_pyrazinedimer12.db",...
-"atz_blyp/s225_pyrazinedimer15.db","atz_blyp/s225_pyrazinedimer20.db","atz_blyp/s225_uracildimerHB09.db",...
-"atz_blyp/s225_uracildimerHB10.db","atz_blyp/s225_uracildimerHB12.db","atz_blyp/s225_uracildimerHB15.db",...
-"atz_blyp/s225_uracildimerHB20.db","atz_blyp/s225_uracildimerstack09.db","atz_blyp/s225_uracildimerstack10.db",...
-"atz_blyp/s225_uracildimerstack12.db","atz_blyp/s225_uracildimerstack15.db","atz_blyp/s225_uracildimerstack20.db",...
-"atz_blyp/s225_waterdimer09.db","atz_blyp/s225_waterdimer10.db","atz_blyp/s225_waterdimer12.db",...
-"atz_blyp/s225_waterdimer15.db","atz_blyp/s225_waterdimer20.db",...
 };
-weightdb=[1 5 1 1 1 1 5 1 1 1 1 5 1 1 1 1 5 1 1 1 1 5 1 1 1 1 5 1 1 1 1 5 1 1 1 1 5 1 1 1 1 5 1 1 1 ...
-          1 5 1 1 1 1 5 1 1 1 1 5 1 1 1 1 5 1 1 1 1 5 1 1 1 1 5 1 1 1 1 5 1 1 1 1 5 1 1 1 1 5 1 1 1 ...
-          1 5 1 1 1 1 5 1 1 1 1 5 1 1 1 1 5 1 1 1];
+weightdb=[];
 
 ## Initial DCP file (you can use a cell array of files here, like
 ## {"C.dcp","H.dcp"}, or a single string "bleh.dcp")
@@ -98,18 +59,17 @@ prefix="bleh";
 
 ## Name of the function to be minimized 
 funeval   = "fbasic";
-funevald1 = "fbasicd1";
 funevald2 = "fbasicd2";
 
 ## Name of the Gaussian input runner routine
-## run_inputs = @run_inputs_serial; ## Run all Gaussian inputs sequentially on the same node
+run_inputs = @run_inputs_serial; ## Run all Gaussian inputs sequentially on the same node
 ## run_inputs = @run_inputs_grex; ## Submit inputs to the queue, wait for all to finish. Grex version.
 ## run_inputs = @run_inputs_plonk; ## Submit inputs to a private queue, plonk version.
-run_inputs = @run_inputs_nint_trasgu; ## Submit inputs to a private queue on the NINT cluster.
+## run_inputs = @run_inputs_nint_trasgu; ## Submit inputs to a private queue on the NINT cluster.
 ## run_inputs = @run_inputs_elcap3; ## Submit inputs to elcap3.
 
 ## Tolerance criteria for the minimization (function difference between successive steps)
-ftol = 1d-4; ## function change tolerance
+ftol = 1d-2; ## function change tolerance
 
 ## Maximum norm: when the norm of the coefficients (square root of the
 ## sum of the squares), the cost function is Inf. This limits the
@@ -117,8 +77,10 @@ ftol = 1d-4; ## function change tolerance
 ## maxnorm = 1d-3;
 
 ## Norm constraint: the norm of the coefficients is constrained to
-## this value.
-fixnorm = 1d-2;
+## this value. Stop the minimzation if the relative deviation from
+## fixnorm is less than normtol.
+## fixnorm = 1d-3;
+## normtol = 1d-2;
 
 #### No touching past this point. ####
 
@@ -171,17 +133,50 @@ astep = 0;
 costmin = Inf;
 iload = [];
 stime0 = time();
-xini = packdcp(dcp);
+x = packdcp(dcp);
 
+## Set initial penalty coefficient
+muk = 0;
 if (exist("fixnorm","var") && fixnorm > 0)
-  xini(end) = sqrt(fixnorm^2 - sum(xini(2:2:end).^2));
+  v = feval(funeval,x);
+  ssq = sum(x(2:2:end).^2);
+  px = ssq/fixnorm^2 - 1;
+  printf("### Initial cost: %.10f\n",v);
+  printf("### Initial norm: %.10f\n",sqrt(ssq));
+  printf("### Target norm: %.10f\n",fixnorm);
+  muk = 0.01 * v / px^2;
 endif
 
-## Minimize
-[xmin, ymin] = d2_min(funeval,funevald2,xini,ftol);
-dcp = unpackdcp(xmin,dcp);
+## Run the minimization
+nopt = 0;
+while true
+  nopt = nopt + 1;
+  if (exist("fixnorm","var") && fixnorm > 0)
+    printf("### Minimization number %d\n",nopt);
+    printf("### Penalty mu: %.4e\n",muk);
+  endif
+  ## Minimize
+  [xmin, ymin] = d2_min(funeval,funevald2,x,ftol);
+
+  if (exist("fixnorm","var") && fixnorm > 0)
+    x = xmin;
+    muk = muk * 10;
+    cn = sqrt(sum(x(2:2:end).^2));
+    printf("### Minimization done\n");
+    printf("### Coefficient norm: %.10f\n",cn);
+    printf("### Target norm: %.10f\n",fixnorm);
+    if (abs(cn - fixnorm)/fixnorm <= normtol)
+      break
+    else
+      printf("### Penalty mu: %.4e\n",muk);
+    endif
+  else
+    break
+  endif
+endwhile
 
 ## Write the final DCP
+dcp = unpackdcp(xmin,dcp);
 writedcp(dcp,dcpfin)
 
 ## Write the results at the minimum
@@ -194,10 +189,11 @@ for i = 1:length(db)
   printf("| %d | %s | %.4f | %.4f | %.4f |\n",...
          i,db{i}.name,yref(i),ycur(i),dy(i));
 endfor
+printf("# Norm of the coeffs = %.4e\n",sqrt(sum(xmin(2:2:end).^2)));
 printf("# MAE = %.4f\n",mean(abs(yref-ycur)));
 printf("# MAPE = %.4f\n",mean(abs((yref-ycur)./yref))*100);
 printf("# RMS = %.4f\n",sqrt(mean((yref-ycur).^2)));
-printf("# Cost function minimum: %.10f\n",ymin)
+printf("# Penalty function minimum: %.10f\n",ymin)
 printf("# Final DCP written to: %s\n",dcpfin)
 printf("### DCP optimization finished on %s ###\n",strtrim(ctime(time())));
 

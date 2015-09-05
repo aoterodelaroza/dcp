@@ -10,7 +10,7 @@ function [y dy d2y] = fbasicd2(x)
   %% function for the DCP given by x is calculated, and returned as y.
   
   global dcp db prefix nstep verbose run_inputs ycur dcpfin ...
-         costmin stime0 astep dcpeval maxnorm
+         costmin stime0 astep dcpeval maxnorm muk fixnorm
   
   ## Yet another function evaluation.
   nstep++;
@@ -28,8 +28,8 @@ function [y dy d2y] = fbasicd2(x)
   if (exist("maxnorm","var") && norm(x(2:2:end)) > maxnorm)
     norm(x(2:2:end))
     y = Inf;
-    printf("#x2# | %2d | %5d | %15.7f | %7.4f | %7.4f | %7.4f | %7.4e | %d |\n",astep,nstep,y,...
-           Inf,Inf,Inf,norm(x(2:2:end)),time()-stime0);
+    printf("#x2# | %2d | %5d | %15.7f | %15.7f | %7.4f | %7.4f | %7.4f | %7.4e | %d |\n",astep,nstep,y,...
+           Inf,Inf,Inf,Inf,norm(x(2:2:end)),time()-stime0);
     stime0 = time();
     return
   endif
@@ -69,8 +69,8 @@ function [y dy d2y] = fbasicd2(x)
   if (srun != 0)
     y = Inf;
     stash_inputs_outputs(ilist);
-    printf("#x2# | %2d | %5d | %15.7f | %7.4f | %7.4f | %7.4f | %7.4e | %d |\n",astep,nstep,y,...
-           Inf,Inf,Inf,norm(x(2:2:end)),time()-stime0);
+    printf("#x2# | %2d | %5d | %15.7f | %15.7f | %7.4f | %7.4f | %7.4f | %7.4e | %d |\n",astep,nstep,y,...
+           Inf,Inf,Inf,Inf,norm(x(2:2:end)),time()-stime0);
     stime0 = time();
     return
   endif
@@ -101,8 +101,13 @@ function [y dy d2y] = fbasicd2(x)
   stash_inputs_outputs(ilist);
 
   ## Print summary to output
-  printf("#x2# | %2d | %5d | %15.7f | %7.4f | %7.4f | %7.4f | %7.4e | %d |\n",astep,nstep,...
-         y,sqrt(y/sum(wei)),sqrt(mean((yref-ycalc).^2)),mean(abs(yref-ycalc)),...
+  if (exist("fixnorm","var") && fixnorm > 0)
+    py = y + muk * (sum(x(2:2:end).^2) / fixnorm^2 - 1)^2;
+  else
+    py = y;
+  endif
+  printf("#x2# | %2d | %5d | %15.7f | %15.7f | %7.4f | %7.4f | %7.4f | %7.4e | %d |\n",astep,nstep,...
+         y,py,sqrt(y/sum(wei)),sqrt(mean((yref-ycalc).^2)),mean(abs(yref-ycalc)),...
          norm(x(2:2:end)),time()-stime0);
   stime0 = time();
   if (verbose)
@@ -117,11 +122,11 @@ function [y dy d2y] = fbasicd2(x)
   writedcp(dcp,sprintf("%s/%s_%4.4d.dcp",prefix,prefix,nstep));
 
   ## Write the DCP if this is the best we have
-  if (y < costmin)
+  if (py < costmin)
     if (length(dcpfin) > 0)
       writedcp(dcp,dcpfin);
     endif
-    costmin = y;
+    costmin = py;
     if (length(dcpeval) > 0)
       fid = fopen(dcpeval,"w");
       fprintf(fid,"| Id | Name | weig | yref | ycalc | dy |\n")
@@ -133,7 +138,8 @@ function [y dy d2y] = fbasicd2(x)
       fprintf(fid,"# MAPE = %.4f\n",mean(abs((yref-ycalc)./yref))*100);
       fprintf(fid,"# RMS = %.4f\n",sqrt(mean((yref-ycalc).^2)));
       fprintf(fid,"# wRMS = %.4f\n",sqrt(sum(wei .* (yref-ycalc).^2)/sum(wei)));
-      fprintf(fid,"# Cost function minimum: %.10f\n",costmin);
+      fprintf(fid,"# Cost function : %.10f\n",y);
+      fprintf(fid,"# Penalty function : %.10f\n",costmin);
       fclose(fid);
     endif
   endif
