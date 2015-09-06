@@ -2,7 +2,7 @@
 
 format long
 global dcp basis db prefix nstep verbose run_inputs ycur dcpfin...
-       costmin iload stime0 astep dcpeval maxnorm fixnorm muk
+       costmin iload stime0 astep dcpeval maxnorm fixnorm muk dcp0
 
 #### Modify this to change the input behavior ####
 
@@ -43,6 +43,10 @@ dcpini="dcp.ini";
 ## with lowest cost function.
 dcpfin="dcp.fin";
 
+## This DCP will be included in all the calculations but it will not 
+## be optimized. 
+dcpfix="dcp.fix";
+
 ## Final evaluation file. Contains the evaluation of the best DCP
 ## found on hte parametrization set. While the script is running,
 ## dcpeval contains the DCP for the evaluation with the lowest cost
@@ -79,7 +83,7 @@ ftol = 1d-2; ## function change tolerance
 ## Norm constraint: the norm of the coefficients is constrained to
 ## this value. Stop the minimzation if the relative deviation from
 ## fixnorm is less than normtol.
-## fixnorm = 1d-3;
+## fixnorm = 7.0711e-04;
 ## normtol = 1d-2;
 
 #### No touching past this point. ####
@@ -96,6 +100,21 @@ dcp = parsedcp(dcpini);
 if (verbose) 
   printf("### Initial DCP ###\n");
   writedcp(dcp);
+endif
+
+## Read the fixed DCP
+if (exist("dcpfix","var") && !isempty(dcpfix))
+  dcp0 = parsedcp(dcpfix);
+  ## Check that the atoms in dcp and dcp0 do not clash
+  for i = 1:length(dcp)
+    for j = 1:length(dcp0)
+      if (strcmp(tolower(dcp{i}.atom),tolower(dcp0{j}.atom)))
+        error("Clashing atom in dcpini and dcpfix")
+      endif
+    endfor
+  endfor
+else
+  dcp0 = {};
 endif
 
 ## Read the parametrization database 
@@ -144,12 +163,18 @@ if (exist("fixnorm","var") && fixnorm > 0)
   printf("### Initial cost: %.10f\n",v);
   printf("### Initial norm: %.10f\n",sqrt(ssq));
   printf("### Target norm: %.10f\n",fixnorm);
-  muk = 0.01 * v / px^2;
+  if (abs(px) > 1d-3)
+    muk0 = 0.01 * v / px^2;
+  else
+    muk0 = v;
+  endif
 endif
 
 ## Run the minimization
 nopt = 0;
+muk = 0;
 while true
+  costmin = Inf;
   nopt = nopt + 1;
   if (exist("fixnorm","var") && fixnorm > 0)
     printf("### Minimization number %d\n",nopt);
@@ -160,6 +185,9 @@ while true
 
   if (exist("fixnorm","var") && fixnorm > 0)
     x = xmin;
+    if (nopt == 1)
+      muk = muk0 / 10;
+    endif
     muk = muk * 10;
     cn = sqrt(sum(x(2:2:end).^2));
     printf("### Minimization done\n");

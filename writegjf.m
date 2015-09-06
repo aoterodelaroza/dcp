@@ -1,5 +1,5 @@
-function writegjf(file,dcp,basis,at,x,q,mult,ent,chk="",wfx="",derivs=0)
-  %% function writegjf(file,dcp,at,x,q,mult,ent,chk="");
+function writegjf(file,dcp,dcp0,basis,at,x,q,mult,ent,chk="",wfx="",derivs=0)
+  %% function writegjf(file,dcp,dcp0,at,x,q,mult,ent,chk="");
   %%
   %% Write a Gaussian input file (gjf) in filename file. Use the DCP
   %% information contained in the dcp argument, the geometry in at
@@ -9,7 +9,9 @@ function writegjf(file,dcp,basis,at,x,q,mult,ent,chk="",wfx="",derivs=0)
   %% (optional) checkpoint file. If derivs is not zero and positive,
   %% generate the gjfs for the derivatives calculation up to derivs
   %% order. If derivs is negative, prepare the inputs for
-  %% theevaluation of the DCP terms.
+  %% theevaluation of the DCP terms. The dcp0 argument contains 
+  %% DCP specifications for some atoms; derivatives are not taken wrt
+  %% the coefficients in dcp0.
   
   atlist = {};
   for i = 1:length(at)
@@ -53,6 +55,7 @@ function writegjf(file,dcp,basis,at,x,q,mult,ent,chk="",wfx="",derivs=0)
     fprintf(fid,"\n");
   endif
   writedcp(dcp,fid,at);
+  writedcp(dcp0,fid,at);
   fprintf(fid,"\n");
   if (length(wfx) > 0)
     fprintf(fid,"%s\n",wfx);
@@ -117,6 +120,7 @@ function writegjf(file,dcp,basis,at,x,q,mult,ent,chk="",wfx="",derivs=0)
         fprintf(fid,"\n");
       endif
       writedcp(dcptmp,fid,at);
+      writedcp(dcp0,fid,at);
       fprintf(fid,"\n");
     endfor
   endif
