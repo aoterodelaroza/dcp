@@ -1,0 +1,4 @@
+DCP is a set of routines for the development of dispersion-correcting
+potentials, aiming at improving how density-functional theory methods
+deal with non-covalent interactions. This code is extremely
+experimental. 
