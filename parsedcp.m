@@ -38,8 +38,12 @@ function dcp = parsedcp(alist)
       error(sprintf("Error opening file: %s",files{i}));
     endif
     while (!feof(fid))
+      line = fgetl(fid);
+      if (feof(fid))
+        break
+      endif
       ## Skip blank lines and four-star lines
-      line = strtrim(fgetl(fid));
+      line = strtrim(line)
       if (!ischar(line) || length(line) == 0)
         continue
       end
