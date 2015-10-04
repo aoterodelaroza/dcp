@@ -126,14 +126,16 @@ for idcp = 1:length(dcpini)
     rms = sqrt(mean(dyr.^2));
     if (exist("weightdb","var") && !isempty(weightdb))
       cost = sum(weightdb' .* dyr.^2);
+      wrms = sqrt(mean(weightdb' .* dyr.^2));
     else
       cost = sum(dyr.^2);
+      wrms = sqrt(mean(dyr.^2));
     endif
   endif
 
   ## Write the results at the minimum
   printf("# DCP %d (%s) | Cost = %.10f | wRMS = %.4f | MAE = %.4f | MAPE = %.4f | RMS = %.4f | Time = %.1f |\n",...
-         idcp,dcpini{idcp},cost,sqrt(cost),mae,mape,rms,sum(iload));
+         idcp,dcpini{idcp},cost,wrms,mae,mape,rms,sum(iload));
   
   printf("| Id|           Name       |       yref   |      ycalc   |       dy     |\n");
   for i = 1:length(db)
