@@ -39,13 +39,13 @@ ncpu=6;
 mem=2;
 
 ## List of database files to use in DCP optimization
-[s out] = system("ls db/s66_*.db");
-listdb = strfields(out);
-weightdb = [];
+listdb={...
+};
+weightdb=[];
 
 ## List of DCP files to evaluate (you can use a cell array of files
 ## here, like {"C.dcp","H.dcp"}, or a single string "bleh.dcp")
-dcpini={"bleh_0101.dcp","bleh_0127.dcp"};
+dcpini={"empty.dcp"};
 
 ## Prefix for the calculations. If prefix is "bleh", then all the
 ## inputs and outputs will be stored in subdirectory bleh/ of the
@@ -53,14 +53,14 @@ dcpini={"bleh_0101.dcp","bleh_0127.dcp"};
 ## where xx is the DCP optimization evaluation number. The archive
 ## contains files bleh_xx_name, where name is the identifier for the
 ## database entry. 
-prefix="test";
+prefix="bleh";
 
 ## Name of the Gaussian input runner routine
 ## run_inputs = @run_inputs_serial; ## Run all Gaussian inputs sequentially on the same node
 ## run_inputs = @run_inputs_grex; ## Submit inputs to the queue, wait for all to finish. Grex version.
-## run_inputs = @run_inputs_plonk; ## Submit inputs to a private queue, plonk version.
+run_inputs = @run_inputs_plonk; ## Submit inputs to a private queue, plonk version.
 ## run_inputs = @run_inputs_nint_trasgu; ## Submit inputs to a private queue on the NINT cluster.
-run_inputs = @run_inputs_elcap3; ## Submit inputs to elcap3.
+## run_inputs = @run_inputs_elcap3; ## Submit inputs to elcap3.
 
 #### No touching past this point. ####
 
@@ -132,8 +132,8 @@ for idcp = 1:length(dcpini)
   endif
 
   ## Write the results at the minimum
-  printf("# DCP %d (%s) | Cost = %.10f | MAE = %.4f | MAPE = %.4f | RMS = %.4f | Time = %.1f |\n",...
-         cost,idcp,dcpini{idcp},mae,mape,rms,sum(iload));
+  printf("# DCP %d (%s) | Cost = %.10f | wRMS = %.4f | MAE = %.4f | MAPE = %.4f | RMS = %.4f | Time = %.1f |\n",...
+         idcp,dcpini{idcp},cost,sqrt(cost),mae,mape,rms,sum(iload));
   
   printf("| Id|           Name       |       yref   |      ycalc   |       dy     |\n");
   for i = 1:length(db)
