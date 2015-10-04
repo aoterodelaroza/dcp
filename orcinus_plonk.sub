@@ -3,7 +3,7 @@
 #PBS -j eo
 #PBS -e ./plonk.log
 #PBS -N plonk
-#PBS -l walltime=72:00:00,mem=4GB,nodes=1:ppn=6
+#PBS -l walltime=72:00:00,mem=4GB,nodes=1:ppn=4
 #PBS -m n
 #PBS -V
 
@@ -15,7 +15,7 @@ TLIMIT=3600
 
 TIME0=$(date +%s)
 
-module load gaussian/g09.d01
+module load gaussian
 
 while true; do
     ## grab the lock if you can

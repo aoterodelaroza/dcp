@@ -15,7 +15,7 @@ TLIMIT=3600
 
 TIME0=$(date +%s)
 
-module load gaussian/g09.d01
+module load uofa/gaussian-nint/g09-d1
 
 while true; do
     ## grab the lock if you can
