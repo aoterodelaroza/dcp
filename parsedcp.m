@@ -43,7 +43,7 @@ function dcp = parsedcp(alist)
         break
       endif
       ## Skip blank lines and four-star lines
-      line = strtrim(line)
+      line = strtrim(line);
       if (!ischar(line) || length(line) == 0)
         continue
       end
