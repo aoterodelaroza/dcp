@@ -61,6 +61,7 @@ function s = run_inputs_plonk(ilist,cont=0,xdm=[],xdmfun="")
       fprintf(fid,"~/git/postg/postg %.10f %.10f %s.wfx %s > %s.pgout\n",xdm(1),xdm(2),name,xdmfun,name);
     endif
     fprintf(fid,"touch %s.done\n",name);
+    fprintf(fid,"sync\n");
     fclose(fid);
     jobname = {jobname{:} sprintf("%s.sub",name)};
   endfor
@@ -94,9 +95,13 @@ function s = run_inputs_plonk(ilist,cont=0,xdm=[],xdmfun="")
      endif
      ## See if calcs are done
      for i = find(!done)
-       if (exist(sprintf("%s.done",ilist{i}),"file"))
-         done(i) = 1;
-         nslept = 0;
+       if (exist(sprintf("%s.done",ilist{i}),"file") && exist(sprintf("%s.log",ilist{i}),"file"))
+	 [s1 out] = system(sprintf("tail -n 3 %s.log | grep -q 'Error termination'",ilist{i}));
+         [s2 out] = system(sprintf("tail -n 1 %s.log | grep -q 'Normal termination'",ilist{i}));
+         if (s1 == 0 || s2 == 0) 
+           done(i) = 1;
+           nslept = 0;
+         endif
        endif
      endfor
   until(all(done))
