@@ -55,13 +55,11 @@ function s = run_inputs_plonk(ilist,cont=0,xdm=[],xdmfun="")
       error("Could not create submission script: %s.sub",name);
     endif
     fprintf(fid,"cd %s\n",pwd());
-    fprintf(fid,"export OMP_NUM_THREADS=6\n");
     fprintf(fid,"g09 %s.gjf\n",name);
     if (!isempty(xdm))
       fprintf(fid,"~/git/postg/postg %.10f %.10f %s.wfx %s > %s.pgout\n",xdm(1),xdm(2),name,xdmfun,name);
     endif
     fprintf(fid,"touch %s.done\n",name);
-    fprintf(fid,"sync\n");
     fclose(fid);
     jobname = {jobname{:} sprintf("%s.sub",name)};
   endfor
