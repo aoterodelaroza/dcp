@@ -4,10 +4,26 @@
 #PBS -d /home/delarozao/
 #PBS -e /home/delarozao/plonk.log
 #PBS -N plonk
-#PBS -l nodes=1:ppn=6
+#PBS -l nodes=1:ppn=8
 #PBS -q serial
 #PBS -m n
 #PBS -V
+
+# global paths -> ignore the system configuration
+export PATH=./:/home/delarozao/bin:/home/delarozao/tmpbin/:/bin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+export LD_LIBRARY_PATH=./:/usr/lib:/usr/lib64:/lib:/lib64:/usr/local/lib:/usr/local/lib64
+
+# torque
+export PATH=${PATH}:/opt/torque/bin
+
+# g03
+export g03root="/home/delarozao/src"
+. $g03root/g03/bsd/g03.profile
+
+# prepare the scratch
+export SCRATCH=/state/partition1/scratch_local/${PBS_JOBID%%.*}
+export GAUSS_SCRDIR=/state/partition1/scratch_local/${PBS_JOBID%%.*}
+mkdir $SCRATCH
 
 LIST="/home/delarozao/plonk.jobs"
 LOCKDIR="/home/delarozao/plonk.lock"
