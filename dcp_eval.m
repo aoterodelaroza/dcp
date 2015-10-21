@@ -126,7 +126,7 @@ for idcp = 1:length(dcpini)
     rms = sqrt(mean(dyr.^2));
     if (exist("weightdb","var") && !isempty(weightdb))
       cost = sum(weightdb' .* dyr.^2);
-      wrms = sqrt(mean(weightdb' .* dyr.^2));
+      wrms = sqrt(sum(weightdb' .* dyr.^2) / sum(weightdb));
     else
       cost = sum(dyr.^2);
       wrms = sqrt(mean(dyr.^2));
