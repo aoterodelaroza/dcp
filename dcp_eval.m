@@ -14,7 +14,7 @@
 
 format long
 global dcp basis db prefix nstep verbose run_inputs ycur...
-       dcpfin costmin iload stime0 astep 
+       dcpfin costmin iload stime0 astep savetarbz2
 
 #### Modify this to change the input behavior ####
 
@@ -61,6 +61,10 @@ prefix="bleh";
 run_inputs = @run_inputs_plonk; ## Submit inputs to a private queue, plonk version.
 ## run_inputs = @run_inputs_nint_trasgu; ## Submit inputs to a private queue on the NINT cluster.
 ## run_inputs = @run_inputs_elcap3; ## Submit inputs to elcap3.
+
+## Save a compressed tar.bz2 with the inputs/outputs/wfxs?
+## savetarbz2="";
+savetarbz2=1;
 
 #### No touching past this point. ####
 
