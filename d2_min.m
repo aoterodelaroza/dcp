@@ -124,6 +124,7 @@ function [xbest,vbest] = d2_min (f,d2f,x0,tol)
       ## Proposed step
       dx = wt*(wn*dnewton - (1-wn)*d);
       xnew = x + dx;
+      xnew(1:2:end-1) = x(1:2:end-1);
 
       if (norm(dx) < 1e-9)
         break
@@ -164,6 +165,7 @@ function [xbest,vbest] = d2_min (f,d2f,x0,tol)
     ## Evaluate at the new point
     wn = ocoeff ;
     xnew = x + wn*dbest;
+    xnew(1:2:end-1) = x(1:2:end-1);
     vnew = feval(f,xnew);
 
     ## Transform vnew
