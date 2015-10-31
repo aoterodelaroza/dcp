@@ -27,7 +27,7 @@ function stash_inputs_outputs(ilist)
   endif
 
   ## Tar all the inputs and outputs and move to the stash
-  if (exist("savetarbz2","variable") && savetarbz2)
+  if (exist("savetarbz2","var") && savetarbz2)
     str = "";
     if (exist(sprintf("%s.gjf",ilist{1}),"file"))
       str = sprintf("%s %s_*.gjf",str,prefix);
