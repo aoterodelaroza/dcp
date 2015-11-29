@@ -60,7 +60,7 @@ function s = run_inputs_nint_trasgu(ilist,cont=0,xdm=[],xdmfun="")
       endif
       str = sprintf("%s %s.gjf",str,ilist{k});
     endfor
-    system(sprintf("tar cjf %s_%4.4d.tar.bz2 %s",prefix,i,str));
+    system(sprintf("echo %s | xargs tar cjf %s_%4.4d.tar.bz2",str,prefix,i));
   endfor
 
   ## Create submission scripts for all inputs on the list
@@ -94,7 +94,8 @@ function s = run_inputs_nint_trasgu(ilist,cont=0,xdm=[],xdmfun="")
 
   ## Move all the files to the run directory
   [s out] = system(sprintf("mkdir -p /home/delarozao/run/%s",dirname));
-  [s out] = system(sprintf("mv %s_*.tar.bz2 %s_*.sub /home/delarozao/run/%s",prefix,prefix,dirname));
+  [s out] = system(sprintf("find . -name '%s_*.tar.bz2' | xargs mv -t /home/delarozao/run/%s",prefix,dirname));
+  [s out] = system(sprintf("find . -name '%s_*.sub' | xargs mv -t /home/delarozao/run/%s",prefix,dirname));
 
   ## Grab the lock
   while (exist(lockdir,"dir") || system(sprintf("mkdir %s",lockdir)))
@@ -138,7 +139,7 @@ function s = run_inputs_nint_trasgu(ilist,cont=0,xdm=[],xdmfun="")
 
   ## Clean up the done and the err files
   [s out] = system(sprintf("rm -f /home/delarozao/run/%s/*.done /home/delarozao/run/%s/*sub",dirname,dirname));
-  [s out] = system(sprintf("mv /home/delarozao/run/%s/*.tar.bz2 .",dirname));
+  [s out] = system(sprintf("find /home/delarozao/run/%s/ -name '*.tar.bz2' | xargs mv -t .",dirname));
   for i = 1:npack
     system(sprintf("tar xjf %s_%4.4d.tar.bz2",prefix,i));
   endfor

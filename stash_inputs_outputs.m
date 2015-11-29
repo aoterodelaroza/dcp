@@ -51,11 +51,11 @@ function stash_inputs_outputs(ilist)
     endif
     [s out] = system(sprintf("rm -f %s %s_*.chk",str,prefix));
   else
-    [s out] = system(sprintf("rm -f %s_*.gjf",prefix));
-    [s out] = system(sprintf("rm -f %s_*.log",prefix));
-    [s out] = system(sprintf("rm -f %s_*.wfx",prefix));
-    [s out] = system(sprintf("rm -f %s_*.pgout",prefix));
-    [s out] = system(sprintf("rm -f %s_*.chk",prefix));
+    [s out] = system(sprintf("find . -name '%s_*.gjf' -delete",prefix));
+    [s out] = system(sprintf("find . -name '%s_*.log' -delete",prefix));
+    [s out] = system(sprintf("find . -name '%s_*.wfx' -delete",prefix));
+    [s out] = system(sprintf("find . -name '%s_*.pgout' -delete",prefix));
+    [s out] = system(sprintf("find . -name '%s_*.chk' -delete",prefix));
   endif
 
 endfunction
