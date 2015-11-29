@@ -11,7 +11,7 @@
 % more details.
 
 function s = run_inputs_nint_trasgu(ilist,cont=0,xdm=[],xdmfun="")
-  %% function run_inputs_nint_trasgu(ilist,cont=0,xdm=[],xdmfun="")
+  %% function run_inputs_plonk(ilist,cont=0,xdm=[],xdmfun="")
   %% 
   %% Run all the inputs in the job list (ilist). The jobs should be  
   %% in the current working directory, with extension gjf. This
@@ -30,48 +30,71 @@ function s = run_inputs_nint_trasgu(ilist,cont=0,xdm=[],xdmfun="")
   %% the indicated parameters and the functional in xdmfun.
   %%
   %% This version of run_inputs creates submission scripts for all
-  %% inputs in the list and submits them to grex. After that,
-  %% the routine enters a waiting loop and checks periodically for
-  %% the calc results. When all jobs are done, control is given back
-  %% to the caller.
+  %% inputs in the list and submits them to a private queue. After
+  %% that, the routine enters a waiting loop and checks periodically
+  %% for the calc results. When all jobs are done, control is given
+  %% back to the caller.
   
-  global verbose iload 
+  global verbose iload prefix
   
   ## Parameters for the run
-  sleeptime = 5; ## time in seconds between job completion checks
+  sleeptime = 10; ## time in seconds between job completion checks
   maxtime = Inf; ## maximum sleep time in seconds. Crash if the script sleeps
                  ## for longer than this number without a new Gaussian output
                  ## being written.
-  jobfile = "/home/delarozao/cron/trasgu.jobs"; 
-  lockdir = "/home/delarozao/cron/trasgu.lock";
+  jobfile = "~/plonk.jobs"; 
+  lockdir = "~/plonk.lock";
+  [s out] = system("hostname");
+  dirname = sprintf("%s_%d",prefix,getpid());
+  npack = 200;
+
+  ngjf = ceil(length(ilist) / npack);
+  npack = ceil(length(ilist) / ngjf);
+  k = 0;
+  for i = 1:npack
+    str = "";
+    for j = 1:ngjf
+      k++;
+      if (k > length(ilist))
+        break
+      endif
+      str = sprintf("%s %s.gjf",str,ilist{k});
+    endfor
+    system(sprintf("tar cjf %s_%4.4d.tar.bz2 %s",prefix,i,str));
+  endfor
 
   ## Create submission scripts for all inputs on the list
   fid = -1;
   jobname = {};
-  for i = 1:length(ilist)
-    name = ilist{i};
+  for i = 1:npack
+    name = sprintf("%s_%4.4d",prefix,i);
     fid = fopen(sprintf("%s.sub",name),"w");
     if (fid < 0) 
       error("Could not create submission script: %s.sub",name);
     endif
-    fprintf(fid,"export g03root='/home/delarozao/src'\n");
-    fprintf(fid,". $g03root/g03/bsd/g03.profile\n");
+    fprintf(fid,"mkdir -p /home/delarozao/run/%s\n",dirname);
+    fprintf(fid,"cd /home/delarozao/run/%s\n",dirname);
+    fprintf(fid,"export SCRATCH=/state/partition1/scratch_local/$PBS_JOBID\n");
+    fprintf(fid,"mkdir -p $SCRATCH\n");
     fprintf(fid,"\n");
-    fprintf(fid,"export SCRATCH=/state/partition1/scratch_local/${PBS_JOBID%%%%.*}\n");
-    fprintf(fid,"export GAUSS_SCRDIR=/state/partition1/scratch_local/${PBS_JOBID%%%%.*}\n");
-    fprintf(fid,"export OMP_NUM_THREADS=8\n");
-    fprintf(fid,"mkdir $SCRATCH\n");
-    fprintf(fid,"\n");
-    fprintf(fid,"cd %s\n",pwd());
-    fprintf(fid,"g03 %s.gjf\n",name);
-    if (!isempty(xdm))
-      fprintf(fid,"~/src/postg/postg %.10f %.10f %s.wfx %s > %s.pgout\n",xdm(1),xdm(2),name,xdmfun,name);
-    endif
-    fprintf(fid,"rm -f $SCRATCH\n");
+    fprintf(fid,"cp -f %s.tar.bz2 $SCRATCH\n",name);
+    fprintf(fid,"cd $SCRATCH\n");
+    fprintf(fid,"tar xjf %s.tar.bz2\n",name);
+    fprintf(fid,"for j in *.gjf ; do\n");
+    fprintf(fid,"  g03 $j\n");
+    fprintf(fid,"done\n");
+    fprintf(fid,"tar cjf %s.tar.bz2 *.log \n",name);
+    fprintf(fid,"mv %s.tar.bz2 /home/delarozao/run/%s\n",name,dirname);
+    fprintf(fid,"cd /home/delarozao/run/%s\n",dirname);
+    fprintf(fid,"rm -rf $SCRATCH\n");
     fprintf(fid,"touch %s.done\n",name);
     fclose(fid);
-    jobname = {jobname{:} sprintf("%s.sub",name)};
+    jobname = {jobname{:} sprintf("/home/delarozao/run/%s/%s.sub",dirname,name)};
   endfor
+
+  ## Move all the files to the run directory
+  [s out] = system(sprintf("mkdir -p /home/delarozao/run/%s",dirname));
+  [s out] = system(sprintf("mv %s_*.tar.bz2 %s_*.sub /home/delarozao/run/%s",prefix,prefix,dirname));
 
   ## Grab the lock
   while (exist(lockdir,"dir") || system(sprintf("mkdir %s",lockdir)))
@@ -81,7 +104,7 @@ function s = run_inputs_nint_trasgu(ilist,cont=0,xdm=[],xdmfun="")
   ## Submit all the scripts to the queue
   fid = fopen(jobfile,"a");
   for i = 1:length(jobname)
-    fprintf(fid,sprintf("%s/%s\n",pwd(),jobname{i}));
+    fprintf(fid,sprintf("%s\n",jobname{i}));
   endfor
   fclose(fid);
 
@@ -89,7 +112,7 @@ function s = run_inputs_nint_trasgu(ilist,cont=0,xdm=[],xdmfun="")
   system(sprintf("rm -rf %s",lockdir));
 
   ## Wait until all the calcs and jobs are done
-  done = zeros(1,length(ilist));
+  done = zeros(1,npack);
   nslept = 0;
   nslept0 = 0;
   do 
@@ -102,7 +125,8 @@ function s = run_inputs_nint_trasgu(ilist,cont=0,xdm=[],xdmfun="")
      endif
      ## See if calcs are done
      for i = find(!done)
-       if (exist(sprintf("%s.done",ilist{i}),"file"))
+       if (exist(sprintf("/home/delarozao/run/%s/%s_%4.4d.done",dirname,prefix,i),"file") && ...
+           exist(sprintf("/home/delarozao/run/%s/%s_%4.4d.tar.bz2",dirname,prefix,i),"file"))
          done(i) = 1;
          nslept = 0;
        endif
@@ -112,25 +136,25 @@ function s = run_inputs_nint_trasgu(ilist,cont=0,xdm=[],xdmfun="")
     printf("All Gaussian outputs are ready after %d seconds\n",nslept0);
   endif
 
-  ## Give time to sync the NFS
-  sleep(sleeptime);
-
   ## Clean up the done and the err files
-  for i = 1:length(ilist)
-    [s out] = system(sprintf("rm -f %s.done %s.err %s.sub",ilist{i},ilist{i},ilist{i}));
+  [s out] = system(sprintf("rm -f /home/delarozao/run/%s/*.done /home/delarozao/run/%s/*sub",dirname,dirname));
+  [s out] = system(sprintf("mv /home/delarozao/run/%s/*.tar.bz2 .",dirname));
+  for i = 1:npack
+    system(sprintf("tar xjf %s_%4.4d.tar.bz2",prefix,i));
   endfor
-
-  ## Calculate the load for subsequent runs
-  iload = read_jobload(ilist,iload);
-  if (verbose)
-    printf("# Job load\n")
-    printf("| Id | Name | Load (s) |\n")
-    for i = 1:length(ilist)
-      printf("| %d | %s | %.1f |\n",...
-             i,ilist{i},iload(i));
-    endfor
-    printf("#\n");
-  endif
+  
+  ## ## Calculate the load for subsequent runs
+  ## disp("calculating the iload")
+  ## iload = read_jobload(ilist,iload);
+  ## if (verbose)
+  ##   printf("# Job load\n")
+  ##   printf("| Id | Name | Load (s) |\n")
+  ##   for i = 1:length(ilist)
+  ##     printf("| %d | %s | %.1f |\n",...
+  ##            i,ilist{i},iload(i));
+  ##   endfor
+  ##   printf("#\n");
+  ## endif
 
   ## Check that we have a normal termination. If not, pass the error 
   ## back to the caller.
