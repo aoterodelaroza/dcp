@@ -44,9 +44,14 @@ function writebasis(basis,file="",atlist={})
     return
   endif
 
+  ## tolower the atlist
+  for i = 1:length(atlist)
+    atlist{i} = tolower(atlist{i});
+  endfor
+
   ## Write the basis
   for i = 1:length(basis)
-    if (isempty(atlist) || any(ismember(tolower(atlist),tolower(basis{i}.atom))))
+    if (isempty(atlist) || any(ismember(atlist,tolower(basis{i}.atom))))
       fprintf(fid,"%s 0\n",basis{i}.atom);
       if (basis{i}.nblock == 0)
         fprintf(fid,"%s\n",basis{i}.bstring);
