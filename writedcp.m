@@ -38,9 +38,14 @@ function writedcp(dcp,file="",atlist={})
     fid = file;
   endif
 
+  ## tolower the atlist
+  for i = 1:length(atlist)
+    atlist{i} = tolower(atlist{i});
+  endfor
+
   ## Write the DCP
   for i = 1:length(dcp)
-    if (isempty(atlist) || any(ismember(tolower(atlist),tolower(dcp{i}.atom))))
+    if (isempty(atlist) || any(ismember(atlist,tolower(dcp{i}.atom))))
       fprintf(fid,"%s 0\n",dcp{i}.atom);
       fprintf(fid,"%s %d %d\n",dcp{i}.name,dcp{i}.nblock-1,dcp{i}.nelec);
       for j = 1:dcp{i}.nblock
