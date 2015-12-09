@@ -41,7 +41,7 @@ mem=2;
 ## List of database files to use in DCP optimization
 ## [s out] = system("ls db/*.db");
 ## listdb = strfields(out);
-listdb = {"db/kb49_h2o_h2o.db","db/kb49_nh3_nh3.db"};
+listdb = {"atz_blyp/bde_p-p.db"};
 weightdb=[];
 
 ## List of DCP files to evaluate (you can use a cell array of files
@@ -70,8 +70,8 @@ savetarbz2=1;
 ## To use XDM, put the damping function coefficients here.
 ## [a1 a2], with a2 in angstrom. xdmfun is the functional keyword
 ## passed to postg.
-xdmcoef = [0.7647 0.8457];
-xdmfun = "blyp";
+## xdmcoef = [0.7647 0.8457];
+## xdmfun = "blyp";
 
 #### No touching past this point. ####
 
@@ -129,7 +129,7 @@ for idcp = 1:length(dcpini)
 
   dy = ycalc = yref = ycalcnd = zeros(length(db),1);
   for i = 1:length(db)
-    [dy(i) ycalc(i) yref(i) ans ycalcnd(i)] = process_output_one(db{i},!isempty(xdmcoef),0);
+    [dy(i) ycalc(i) yref(i) ans ycalcnd(i)] = process_output_one(db{i},exist("xdmcoef","var") && !isempty(xdmcoef),0);
   endfor
   if (any(ycalc == Inf))
     mae = Inf;
