@@ -35,7 +35,7 @@ basis="basis.ini";
 extragau="SCF=(Conver=6, MaxCycle=40) Symm=none int=(grid=ultrafine)";
 
 ## Number of CPUs and memory (in GB) for Gaussian runs
-ncpu=6;
+ncpu=8;
 mem=2;
 
 ## List of database files to use in DCP optimization
@@ -56,15 +56,21 @@ dcpini={"empty.dcp"};
 prefix="bleh";
 
 ## Name of the Gaussian input runner routine
-## run_inputs = @run_inputs_serial; ## Run all Gaussian inputs sequentially on the same node
+run_inputs = @run_inputs_serial; ## Run all Gaussian inputs sequentially on the same node
 ## run_inputs = @run_inputs_grex; ## Submit inputs to the queue, wait for all to finish. Grex version.
-run_inputs = @run_inputs_plonk; ## Submit inputs to a private queue, plonk version.
+## run_inputs = @run_inputs_plonk; ## Submit inputs to a private queue, plonk version.
 ## run_inputs = @run_inputs_nint_trasgu; ## Submit inputs to a private queue on the NINT cluster.
 ## run_inputs = @run_inputs_elcap3; ## Submit inputs to elcap3.
 
 ## Save a compressed tar.bz2 with the inputs/outputs/wfxs?
 ## savetarbz2="";
 savetarbz2=1;
+
+## To use XDM, put the damping function coefficients here.
+## [a1 a2], with a2 in angstrom. xdmfun is the functional keyword
+## passed to postg.
+xdmcoef = [0.4186 2.6791];
+xdmfun = "blyp";
 
 #### No touching past this point. ####
 
@@ -107,7 +113,14 @@ for idcp = 1:length(dcpini)
 endfor
 
 ## Run all inputs
-srun = run_inputs(ilist,1);
+if (!exist("xdmcoef","var") || isempty(xdmcoef))
+  srun = run_inputs(ilist,1);
+else
+  if (!exist("xdmfun","var") || isempty(xdmfun))
+    xdmfun = method;
+  endif
+  srun = run_inputs(ilist,1,xdmcoef,xdmfun);
+endif
 
 ## Collect the results and compare to the reference data
 for idcp = 1:length(dcpini)
@@ -115,13 +128,14 @@ for idcp = 1:length(dcpini)
 
   dy = ycalc = yref = zeros(length(db),1);
   for i = 1:length(db)
-    [dy(i) ycalc(i) yref(i)] = process_output_one(db{i},0,0);
+    [dy(i) ycalc(i) yref(i)] = process_output_one(db{i},!isempty(xdmcoef),0);
   endfor
   if (any(ycalc == Inf))
     mae = Inf;
     mape = Inf;
     rms = Inf;
     cost = Inf;
+    wrms = Inf;
   else
     dyr = dy(find(dy != Inf));
     yrefr = yref(find(yref != Inf));
