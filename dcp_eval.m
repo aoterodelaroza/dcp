@@ -28,7 +28,7 @@ method="blyp";
 ## If a file is found, it is parsed and the basis-set information read,
 ## then information for the relevant atoms passed to the inputs. 
 ## Several basis set files can be used (e.g. {"basis1","basis2"}).
-basis="basis.ini";
+basis="aug-cc-pvtz";
 
 ## Extra bits for gaussian (do not include pseudo=read here)
 # extragau="EmpiricalDispersion=GD3BJ SCF=(Conver=6, MaxCycle=40) Symm=none int=(grid=ultrafine)";
@@ -39,8 +39,9 @@ ncpu=8;
 mem=2;
 
 ## List of database files to use in DCP optimization
-listdb={...
-};
+## [s out] = system("ls db/*.db");
+## listdb = strfields(out);
+listdb = {"db/kb49_h2o_h2o.db","db/kb49_nh3_nh3.db"};
 weightdb=[];
 
 ## List of DCP files to evaluate (you can use a cell array of files
@@ -69,7 +70,7 @@ savetarbz2=1;
 ## To use XDM, put the damping function coefficients here.
 ## [a1 a2], with a2 in angstrom. xdmfun is the functional keyword
 ## passed to postg.
-xdmcoef = [0.4186 2.6791];
+xdmcoef = [0.7647 0.8457];
 xdmfun = "blyp";
 
 #### No touching past this point. ####
@@ -126,9 +127,9 @@ endif
 for idcp = 1:length(dcpini)
   nstep = idcp;
 
-  dy = ycalc = yref = zeros(length(db),1);
+  dy = ycalc = yref = ycalcnd = zeros(length(db),1);
   for i = 1:length(db)
-    [dy(i) ycalc(i) yref(i)] = process_output_one(db{i},!isempty(xdmcoef),0);
+    [dy(i) ycalc(i) yref(i) ans ycalcnd(i)] = process_output_one(db{i},!isempty(xdmcoef),0);
   endfor
   if (any(ycalc == Inf))
     mae = Inf;
@@ -155,11 +156,19 @@ for idcp = 1:length(dcpini)
   printf("# DCP %d (%s) | Cost = %.10f | wRMS = %.4f | MAE = %.4f | MAPE = %.4f | RMS = %.4f | Time = %.1f |\n",...
          idcp,dcpini{idcp},cost,wrms,mae,mape,rms,sum(iload));
   
-  printf("| Id|           Name       |       yref   |      ycalc   |       dy     |\n");
-  for i = 1:length(db)
-    printf("| %d | %20s | %12.4f | %12.4f | %12.4f |\n",...
-           i,db{i}.name,yref(i),ycalc(i),dy(i));
-  endfor
+  if (!exist("xdmcoef","var") || isempty(xdmcoef))
+    printf("| Id|           Name       |       yref   |      ycalc   |       dy     |\n");
+    for i = 1:length(db)
+      printf("| %d | %20s | %12.4f | %12.4f | %12.4f |\n",...
+             i,db{i}.name,yref(i),ycalc(i),dy(i));
+    endfor
+  else
+    printf("| Id|           Name       |       yref   |      ycalc   |  ycalc(scf)  |       dy     |\n");
+    for i = 1:length(db)
+      printf("| %d | %20s | %12.4f | %12.4f | %12.4f | %12.4f |\n",...
+             i,db{i}.name,yref(i),ycalc(i),ycalcnd(i),dy(i));
+    endfor
+  endif
   printf("\n");
 endfor
 
