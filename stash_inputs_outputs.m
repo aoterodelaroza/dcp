@@ -28,34 +28,16 @@ function stash_inputs_outputs(ilist)
 
   ## Tar all the inputs and outputs and move to the stash
   if (exist("savetarbz2","var") && savetarbz2)
-    str = "";
-    if (exist(sprintf("%s.gjf",ilist{1}),"file"))
-      str = sprintf("%s %s_*.gjf",str,prefix);
-    endif
-    if (exist(sprintf("%s.log",ilist{1}),"file"))
-      str = sprintf("%s %s_*.log",str,prefix);
-    endif
-    if (exist(sprintf("%s.wfx",ilist{1}),"file"))
-      str = sprintf("%s %s_*.wfx",str,prefix);
-    endif
-    if (exist(sprintf("%s.pgout",ilist{1}),"file"))
-      str = sprintf("%s %s_*.pgout",str,prefix);
-    endif
-    [s out] = system(sprintf("tar cjvf %s_%4.4d.tar.bz2 %s",prefix,nstep,str));
-    if (!exist(sprintf("%s_%4.4d.tar.bz2",prefix,nstep),"file"))
-      error(sprintf("Could not tar inputs/outputs for iteration %d",nstep));
-    endif
-    [s out] = system(sprintf("mv %s_%4.4d.tar.bz2 %s",prefix,nstep,prefix));
-    if (s != 0)
-      error(sprintf("Could not move compressed inputs/outputs for iteration %d",nstep));
-    endif
-    [s out] = system(sprintf("rm -f %s %s_*.chk",str,prefix));
-  else
-    [s out] = system(sprintf("find . -name '%s_*.gjf' -delete",prefix));
-    [s out] = system(sprintf("find . -name '%s_*.log' -delete",prefix));
-    [s out] = system(sprintf("find . -name '%s_*.wfx' -delete",prefix));
-    [s out] = system(sprintf("find . -name '%s_*.pgout' -delete",prefix));
     [s out] = system(sprintf("find . -name '%s_*.chk' -delete",prefix));
+    [s out] = system(sprintf("find . -name '%s_*.*' > filelist.tmp",prefix));
+    [s out] = system(sprintf("tar cjvf %s_%4.4d.tar.bz2 -T filelist.tmp",prefix,nstep));
+    [s out] = system(sprintf("rm -f filelist.tmp"));
+    [s out] = system(sprintf("mv %s_%4.4d.tar.bz2 %s",prefix,nstep,prefix));
   endif
+  [s out] = system(sprintf("find . -name '%s_*.gjf' -delete",prefix));
+  [s out] = system(sprintf("find . -name '%s_*.log' -delete",prefix));
+  [s out] = system(sprintf("find . -name '%s_*.wfx' -delete",prefix));
+  [s out] = system(sprintf("find . -name '%s_*.pgout' -delete",prefix));
+  [s out] = system(sprintf("find . -name '%s_*.chk' -delete",prefix));
 
 endfunction

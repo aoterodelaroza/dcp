@@ -75,6 +75,10 @@ function s = run_inputs_nint_trasgu(ilist,cont=0,xdm=[],xdmfun="")
     fprintf(fid,"mkdir -p /home/delarozao/run/%s\n",dirname);
     fprintf(fid,"cd /home/delarozao/run/%s\n",dirname);
     fprintf(fid,"export SCRATCH=/state/partition1/scratch_local/$PBS_JOBID\n");
+    fprintf(fid,"export OMP_NUM_THREADS=8\n");
+    fprintf(fid,". /home/delarozao/intel/composer_xe_2011_sp1.6.233/bin/compilervars.sh intel64\n");
+    fprintf(fid,". /home/delarozao/intel/composer_xe_2011_sp1.6.233/mkl/bin/mklvars.sh intel64\n");
+    fprintf(fid,"export POSTG_HOME=/home/delarozao/src/postg\n");
     fprintf(fid,"mkdir -p $SCRATCH\n");
     fprintf(fid,"\n");
     fprintf(fid,"cp -f %s.tar.bz2 $SCRATCH\n",name);
@@ -82,8 +86,15 @@ function s = run_inputs_nint_trasgu(ilist,cont=0,xdm=[],xdmfun="")
     fprintf(fid,"tar xjf %s.tar.bz2\n",name);
     fprintf(fid,"for j in *.gjf ; do\n");
     fprintf(fid,"  g03 $j\n");
+    if (!isempty(xdm))
+      fprintf(fid,"  /home/delarozao/src/postg/postg %.10f %.10f ${j%%gjf}wfx %s > ${j%%gjf}pgout\n",xdm(1),xdm(2),xdmfun);
+    endif
     fprintf(fid,"done\n");
-    fprintf(fid,"tar cjf %s.tar.bz2 *.log \n",name);
+    if (!isempty(xdm))
+      fprintf(fid,"tar cjf %s.tar.bz2 *.log *.pgout\n",name);
+    else
+      fprintf(fid,"tar cjf %s.tar.bz2 *.log\n",name);
+    endif
     fprintf(fid,"mv %s.tar.bz2 /home/delarozao/run/%s\n",name,dirname);
     fprintf(fid,"cd /home/delarozao/run/%s\n",dirname);
     fprintf(fid,"rm -rf $SCRATCH\n");
@@ -142,6 +153,7 @@ function s = run_inputs_nint_trasgu(ilist,cont=0,xdm=[],xdmfun="")
   [s out] = system(sprintf("find /home/delarozao/run/%s/ -name '*.tar.bz2' | xargs mv -t .",dirname));
   for i = 1:npack
     system(sprintf("tar xjf %s_%4.4d.tar.bz2",prefix,i));
+    system(sprintf("rm -f %s_%4.4d.tar.bz2",prefix,i));
   endfor
   
   ## ## Calculate the load for subsequent runs
