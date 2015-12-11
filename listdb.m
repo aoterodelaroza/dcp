@@ -13,21 +13,21 @@
 
 
 format long
-## global dcp basis db prefix nstep verbose run_inputs ycur dcpfin...
-##        costmin iload stime0 astep dcpeval maxnorm fixnorm muk dcp0...
-##        savetarbz2
 
 #### Modify this to change the input behavior ####
 
 ## List of database files to use in DCP optimization
-listdb={...
-         "atz_blyp/s_tsoh_h2s_090.db","atz_blyp/s_tsoh_h2s_095.db","atz_blyp/s_tsoh_h2s_100.db","atz_blyp/s_tsoh_h2s_105.db",...
-         "atz_blyp/s_tsoh_h2s_110.db","atz_blyp/s_tsoh_h2s_125.db","atz_blyp/s_tsoh_h2s_150.db","atz_blyp/s_tsoh_h2s_200.db",...
+listdb = {...
 };
 
 ## print reference energies to the output
-printref=1;
+## printref=1;
 ## printref="";
+
+## print reference energies to the output
+## printxyz={"mol","mon1","mon2"};
+## printxyz={"mol"};
+## printxyz={};
 
 #### No touching past this point. ####
 
@@ -35,10 +35,45 @@ printref=1;
 db = parsedb(listdb);
 db = filldb(db,[],"blyp","",1,4);
 
+## print the reference energies
 if (exist("printref","var") && !isempty(printref))
   printf("### Reference energies ###\n");
-  printf("| Filename | Type | Reference |\n");
+  printf("| N | Filename | Type | Reference |\n");
   for i = 1:length(db)
-    printf("| %s | %s | %.5f |\n",db{i}.file,db{i}.type,db{i}.ref);
+    printf("| %d | %s | %s | %.5f |\n",i,db{i}.file,db{i}.type,db{i}.ref);
   endfor
 endif
+
+## write the xyz files
+if (exist("printxyz","var") && !isempty(printxyz))
+  for i = 1:length(db)
+    if (ismember("mol",printxyz) && isfield(db{i},"mol") && isfield(db{i}.mol,"nat") && db{i}.mol.nat > 0)
+      fid = fopen(sprintf("%s_mol.xyz",db{i}.name),"w");
+      nat = db{i}.mol.nat;
+      fprintf(fid,"%d\n\n",nat);
+      for j = 1:nat
+        fprintf(fid,"%s %.10f %.10f %.10f\n",db{i}.mol.at{j},db{i}.mol.x(j,:));
+      endfor
+      fclose(fid);
+    endif
+    if (ismember("mon1",printxyz) && isfield(db{i},"mon1") && isfield(db{i}.mon1,"nat") && db{i}.mon1.nat > 0)
+      fid = fopen(sprintf("%s_mon1.xyz",db{i}.name),"w");
+      nat = db{i}.mon1.nat;
+      fprintf(fid,"%d\n\n",nat);
+      for j = 1:nat
+        fprintf(fid,"%s %.10f %.10f %.10f\n",db{i}.mon1.at{j},db{i}.mon1.x(j,:));
+      endfor
+      fclose(fid);
+    endif
+    if (ismember("mon2",printxyz) && isfield(db{i},"mon2") && isfield(db{i}.mon2,"nat") && db{i}.mon2.nat > 0)
+      fid = fopen(sprintf("%s_mon2.xyz",db{i}.name),"w");
+      nat = db{i}.mon2.nat;
+      fprintf(fid,"%d\n\n",nat);
+      for j = 1:nat
+        fprintf(fid,"%s %.10f %.10f %.10f\n",db{i}.mon2.at{j},db{i}.mon2.x(j,:));
+      endfor
+      fclose(fid);
+    endif
+  endfor
+endif
+
