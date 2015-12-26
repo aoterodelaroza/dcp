@@ -78,6 +78,8 @@ savetarbz2=1;
 ## Header
 printf("### DCP evaluation started on %s ###\n",strtrim(ctime(time())));
 printf("### PID: %d ###\n",getpid());
+[s out] = system("hostname");
+printf("### hostname: %s ###\n",strrep(out,"\n",""));
 
 ## Read the basis set
 basis = parsebasis(basis);
