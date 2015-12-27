@@ -95,8 +95,8 @@ if (!iscell(dcpini))
 endif
 
 ## Read and evaluate the DCPs one by one, prepare all input files
-ilist = {};
 for idcp = 1:length(dcpini)
+  ilist = {};
   dcp = parsedcp(dcpini{idcp});
   nstep = idcp;
 
@@ -113,22 +113,18 @@ for idcp = 1:length(dcpini)
     anew = setup_input_one(db{i},dcp);
     ilist = {ilist{:}, anew{:}};
   endfor
-endfor
 
-## Run all inputs
-if (!exist("xdmcoef","var") || isempty(xdmcoef))
-  srun = run_inputs(ilist,1);
-else
-  if (!exist("xdmfun","var") || isempty(xdmfun))
-    xdmfun = method;
+  ## Run all inputs
+  if (!exist("xdmcoef","var") || isempty(xdmcoef))
+    srun = run_inputs(ilist,1);
+  else
+    if (!exist("xdmfun","var") || isempty(xdmfun))
+      xdmfun = method;
+    endif
+    srun = run_inputs(ilist,1,xdmcoef,xdmfun);
   endif
-  srun = run_inputs(ilist,1,xdmcoef,xdmfun);
-endif
 
-## Collect the results and compare to the reference data
-for idcp = 1:length(dcpini)
-  nstep = idcp;
-
+  ## Collect the results and compare to the reference data
   dy = ycalc = yref = ycalcnd = zeros(length(db),1);
   for i = 1:length(db)
     [dy(i) ycalc(i) yref(i) ans ycalcnd(i)] = process_output_one(db{i},exist("xdmcoef","var") && !isempty(xdmcoef),0);
@@ -172,8 +168,9 @@ for idcp = 1:length(dcpini)
     endfor
   endif
   printf("\n");
+
+  ## Clean up
+  stash_inputs_outputs(ilist);
 endfor
 
-## Clean up
-stash_inputs_outputs(ilist);
 printf("### DCP evaluation finished on %s ###\n",strtrim(ctime(time())));
