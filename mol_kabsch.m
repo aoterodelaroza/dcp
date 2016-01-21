@@ -20,8 +20,8 @@ function rmsd = mol_kabsch(x0, x1, allow_inversion=0)
 % positions. x0 and x1 have 3 rows and nat columns.
 %
 % Input variables:
-% mol0: molecule to be rotated.
-% mol1: target molecule
+% x0: molecule to be rotated. (3 rows x nat columns0
+% x1: target molecule
 % allow_inversion: if 1, permit the application of an inversion operation
 % to match the two molecules. Warning: if mol0 is chiral, it is
 % converted to its enantiomer.
@@ -34,6 +34,17 @@ function rmsd = mol_kabsch(x0, x1, allow_inversion=0)
     error("inconsistent number of atoms in mol0 and mol1")
   endif
 
+  ## Center both molecules
+  xcm = sum(x0,2) / n0;
+  for i = 1:n0
+    x0(:,i) = x0(:,i) - xcm;
+  endfor
+  xcm = sum(x1,2) / n0;
+  for i = 1:n0
+    x1(:,i) = x1(:,i) - xcm;
+  endfor
+
+  ## Calculate the rotation
   a = x0 * x1';
   [v,s,w] = svd(a);
   d = sign(det(w * v'));
