@@ -145,6 +145,22 @@ function [dy ycalc yref dery ycalcnd] = process_output_one(ent,xdm=0,derivs=0)
       dery = zeros(1,n);
       dery = be_c';
     endif
+  elseif (strcmp(ent.type,"intramol_geometry"))
+    ## Read the output geometry
+    file = sprintf("%s_%4.4d_%s_mol.log",prefix,nstep,ent.name);
+    if (!exist(file,"file"))
+      dy = ycalc = yref = ycalcnd = Inf;
+      return
+    endif
+    mol = mol_readlog(file);
+
+    ## Compare to the reference molecule
+    rmsd = mol_kabsch(mol.atxyz,ent.mol.x') * 1000;
+    ycalc = rmsd;
+    ycalcnd = rmsd;
+    yref = 0;
+    dy = ycalc;
+    dery = 0;
   else
     ## I don't know what that type is
     error(sprintf("Unknown type (%s) in entry %s",db{i}.type,db{i}.file))

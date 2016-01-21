@@ -1,0 +1,5 @@
+type intramol_geometry
+mol 0 1
+C          0.00000        0.00000       -1.12064
+S          0.00000        0.00000        0.42024
+end

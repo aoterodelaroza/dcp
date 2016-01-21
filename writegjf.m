@@ -25,6 +25,7 @@ function writegjf(file,dcp,dcp0,basis,at,x,q,mult,ent,chk="",wfx="",derivs=0)
   %% DCP specifications for some atoms; derivatives are not taken wrt
   %% the coefficients in dcp0.
   
+  ## Build the atom list
   atlist = {};
   for i = 1:length(at)
     if (!any(ismember(at{i},atlist)))
@@ -32,43 +33,72 @@ function writegjf(file,dcp,dcp0,basis,at,x,q,mult,ent,chk="",wfx="",derivs=0)
     endif
   endfor
 
+  ## Open the input file for writing
   fid = fopen(file,"w");
   if (fid <= 0) 
     error(sprintf("Could not open Gaussian input file for writing: %s",file));
   endif
+
+  ## Checkpoint file bit
   if (length(chk) > 0 || derivs) 
     fprintf(fid,"%%chk=%s\n",chk);
     chkstr = "guess=(read,tcheck)";
   else
     chkstr = "";
   endif
+
+  ## Wfx file bit
   if (length(wfx) > 0)
     wfxstr = "output=wfx";
   else
     wfxstr = "";
   endif
+  
+  ## Pseudo=read bit
+  if (!isempty(dcp) || !isempty(dcp))
+    pseudostr = "pseudo=read";
+  else
+    pseudostr = "";
+  endif
+
+  ## Basis bit
+  if (iscell(basis))
+    basisstr = "gen";
+  else
+    basisstr = basis;
+  endif
+
+  ## Write the mem and proc
   fprintf(fid,"%%mem=%dGB\n",ent.mem);
   fprintf(fid,"%%nproc=%d\n",ent.ncpu);
-  if (iscell(basis))
-    fprintf(fid,"#p %s gen pseudo=read %s %s %s\n",ent.method,ent.extragau,chkstr,wfxstr);
-  else
-    fprintf(fid,"#p %s %s pseudo=read %s %s %s\n",ent.method,basis,ent.extragau,chkstr,wfxstr);
-  endif
+
+  ## The route line
+  fprintf(fid,"#p %s %s %s %s %s %s\n",ent.method,basisstr,pseudostr,ent.extragau,chkstr,wfxstr);
+
+  ## Title and multiplicity
   fprintf(fid,"\n");
   fprintf(fid,"title\n");
   fprintf(fid,"\n");
   fprintf(fid,"%d %d\n",q,mult);
+
+  ## Molecular geometry
   for i = 1:length(at)
     fprintf(fid,"%s %.10f %.10f %.10f\n",at{i},x(i,:));
   endfor
   fprintf(fid,"\n");
+  
+  ## Basis set (if gen)
   if (iscell(basis))
     writebasis(basis,fid,at);
     fprintf(fid,"\n");
   endif
+
+  ## DCP block
   writedcp(dcp,fid,at);
   writedcp(dcp0,fid,at);
   fprintf(fid,"\n");
+
+  ## Wfx block
   if (length(wfx) > 0)
     fprintf(fid,"%s\n",wfx);
     fprintf(fid,"\n");
@@ -80,11 +110,7 @@ function writegjf(file,dcp,dcp0,basis,at,x,q,mult,ent,chk="",wfx="",derivs=0)
     fprintf(fid,"%%chk=%s\n",chk);
     fprintf(fid,"%%mem=%dGB\n",ent.mem);
     fprintf(fid,"%%nproc=%d\n",ent.ncpu);
-    if (iscell(basis))
-      fprintf(fid,"#p %s gen %s\n",ent.method,ent.extragau);
-    else
-      fprintf(fid,"#p %s %s %s\n",ent.method,basis,ent.extragau);
-    endif
+    fprintf(fid,"#p %s %s %s\n",ent.method,basisstr,ent.extragau);
     fprintf(fid,"   scf=(maxcycle=1) guess=(read) geom=(check) iop(5/13=1,99/5=2,3/53=10)\n");
     fprintf(fid,"\n");
     fprintf(fid,"title\n");
@@ -116,11 +142,7 @@ function writegjf(file,dcp,dcp0,basis,at,x,q,mult,ent,chk="",wfx="",derivs=0)
       fprintf(fid,"%%chk=%s\n",chk);
       fprintf(fid,"%%mem=%dGB\n",ent.mem);
       fprintf(fid,"%%nproc=%d\n",ent.ncpu);
-      if (iscell(basis))
-        fprintf(fid,"#p %s gen %s\n",ent.method,ent.extragau);
-      else
-        fprintf(fid,"#p %s %s %s\n",ent.method,basis,ent.extragau);
-      endif
+      fprintf(fid,"#p %s %s %s\n",ent.method,basisstr,ent.extragau);
       fprintf(fid,"   pseudo=read scf=(maxcycle=1) guess=(read) geom=(check) iop(5/13=1,99/5=2,3/53=10)\n");
       fprintf(fid,"\n");
       fprintf(fid,"title\n");

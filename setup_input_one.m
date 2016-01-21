@@ -49,6 +49,12 @@ function ilist = setup_input_one(ent,dcp,derivs=0)
       writegjf(file,dcp,dcp0,basis,ent.mon2.at,ent.mon2.x,ent.mon2.q,ent.mon2.mult,ent,chk,wfx,derivs);
       ilist = {ilist{:}, sprintf("%s_%4.4d_%s_mon2",prefix,nstep,ent.name)};
     endif
+  elseif (strcmp(ent.type,"intramol_geometry"))
+    ## Make it an geometry relaxation by appending "opt" to extragau
+    file = sprintf("%s_%4.4d_%s_mol.gjf",prefix,nstep,ent.name);
+    ent.extragau = sprintf("%s opt=(nomicro)",ent.extragau);
+    writegjf(file,dcp,dcp0,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult,ent,:,:,0);
+    ilist = {ilist{:}, sprintf("%s_%4.4d_%s_mol",prefix,nstep,ent.name)};
   else
     ## I don't know what that type is
     error(sprintf("Unknown type (%s) in entry %s",db{i}.type,db{i}.file))

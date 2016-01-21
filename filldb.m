@@ -57,6 +57,36 @@ function db = filldb(db,weis=[],method=[],extragau,ncpu,mem);
       endif
     endif
 
+    ## Fill missing fields in the database with default values
+    if (!isfield(db{i},"wei"))
+      db{i}.wei = weis(i);
+    endif
+    if (!isfield(db{i},"method"))
+      if (isempty(method))
+        error(sprintf("No method specified and no default available in entry %s",db{i}.file))
+      endif
+      db{i}.method = method;
+    endif
+    if (!isfield(db{i},"extragau"))
+      if (isempty(extragau))
+        db{i}.extragau = "";
+      else
+        db{i}.extragau = extragau;
+      endif
+    endif
+    if (!isfield(db{i},"ncpu"))
+      if (isempty(ncpu))
+        error(sprintf("No ncpu specified and no default available in entry %s",db{i}.file))
+      endif
+      db{i}.ncpu = ncpu;
+    endif
+    if (!isfield(db{i},"mem"))
+      if (isempty(mem))
+        error(sprintf("No mem specified and no default available in entry %s",db{i}.file))
+      endif
+      db{i}.mem = mem;
+    endif
+  
     ## Specific checks and fills for frozen monomer binding energy calculations
     if (strcmp(db{i}.type,"be_frozen_monomer"))
       ## Sanity checks for the frozen-monomer BE calculations
@@ -115,40 +145,28 @@ function db = filldb(db,weis=[],method=[],extragau,ncpu,mem);
           error(sprintf("Monomer 2 in entry %s is not sane",db{i}.file))
         endif
       endif
-      ## Fill missing fields in the database with default values
-      if (!isfield(db{i},"wei"))
-        db{i}.wei = weis(i);
+    elseif (strcmp(db{i}.type,"intramol_geometry"))
+      ## Sanity checks for the intramolecular geometry calculations
+      if (!isfield(db{i},"mol"))
+        error(sprintf("Entry %s has no molecular structure",db{i}.file))
       endif
-      if (!isfield(db{i},"method"))
-        if (isempty(method))
-          error(sprintf("No method specified and no default available in entry %s",db{i}.file))
-        endif
-        db{i}.method = method;
+      if (!isfield(db{i}.mol,"q"))
+        db{i}.mol.q = 0;
       endif
-      if (!isfield(db{i},"extragau"))
-        if (isempty(extragau))
-          db{i}.extragau = "";
-        else
-          db{i}.extragau = extragau;
-        endif
+      if (!isfield(db{i}.mol,"mult"))
+        db{i}.mol.mult = 1;
       endif
-      if (!isfield(db{i},"ncpu"))
-        if (isempty(ncpu))
-          error(sprintf("No ncpu specified and no default available in entry %s",db{i}.file))
-        endif
-        db{i}.ncpu = ncpu;
+      if (!isfield(db{i}.mol,"nat") || db{i}.mol.nat <= 0)
+        error(sprintf("Molecule entry %s has no atoms",db{i}.file))
       endif
-      if (!isfield(db{i},"mem"))
-        if (isempty(mem))
-          error(sprintf("No mem specified and no default available in entry %s",db{i}.file))
-        endif
-        db{i}.mem = mem;
+      if (!isfield(db{i}.mol,"at") || !isfield(db{i}.mol,"x"))
+        error(sprintf("Molecule entry %s is not sane",db{i}.file))
       endif
     else
       ## I don't know what that type is
       error(sprintf("Unknown type (%s) in entry %s",db{i}.type,db{i}.file))
     endif
   endfor
-  
+
 endfunction
 
