@@ -50,9 +50,14 @@ function ilist = setup_input_one(ent,dcp,derivs=0)
       ilist = {ilist{:}, sprintf("%s_%4.4d_%s_mon2",prefix,nstep,ent.name)};
     endif
   elseif (strcmp(ent.type,"intramol_geometry"))
-    ## Make it an geometry relaxation by appending "opt" to extragau
+    ## A geometry relaxation; append "opt" to extragau
     file = sprintf("%s_%4.4d_%s_mol.gjf",prefix,nstep,ent.name);
     ent.extragau = sprintf("%s opt=(nomicro)",ent.extragau);
+    writegjf(file,dcp,dcp0,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult,ent,:,:,0);
+    ilist = {ilist{:}, sprintf("%s_%4.4d_%s_mol",prefix,nstep,ent.name)};
+  elseif (strcmp(ent.type,"total_energy"))
+    ## A total energy calculation
+    file = sprintf("%s_%4.4d_%s_mol.gjf",prefix,nstep,ent.name);
     writegjf(file,dcp,dcp0,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult,ent,:,:,0);
     ilist = {ilist{:}, sprintf("%s_%4.4d_%s_mol",prefix,nstep,ent.name)};
   else
