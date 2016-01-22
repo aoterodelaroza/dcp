@@ -40,9 +40,11 @@ function [mol] = mol_readlog(filename)
   endif
 
   ## read the orientation block
-  mol = molecule_();
+  mol = struct();
   fseek(fid,ipos);
-  fskipl(fid,4);
+  for i = 1:4
+    line = fgetl(fid);
+  endfor
   while (1)
     line = fgetl(fid);
     if (strfind(line,"-----"))
@@ -50,8 +52,6 @@ function [mol] = mol_readlog(filename)
     endif
     [n atnum zero x y z] = sscanf(line,"%d %d %d %f %f %f","C");
     mol.atnumber(n) = atnum;
-    [mol.atname{n}, atom] = mol_dbsymbol(atnum);
-    mol.atmass{n} = atom.mass;
     mol.atxyz(:,n) = [x y z]';
   endwhile
   mol.nat = n;

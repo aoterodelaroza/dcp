@@ -127,7 +127,7 @@ for idcp = 1:length(dcpini)
   ## Collect the results and compare to the reference data
   dy = ycalc = yref = ycalcnd = zeros(length(db),1);
   for i = 1:length(db)
-    [dy(i) ycalc(i) yref(i) ans ycalcnd(i)] = process_output_one(db{i},exist("xdmcoef","var") && !isempty(xdmcoef),0);
+    [dy(i) ycalc(i) yref(i) xdum ycalcnd(i)] = process_output_one(db{i},exist("xdmcoef","var") && !isempty(xdmcoef),0);
   endfor
   if (any(ycalc == Inf))
     mae = Inf;
