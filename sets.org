@@ -1,0 +1,29 @@
+* db/ -- high-level reference energies.
+bde: bond dissociation energies from Edmanuel's code.
+hsg: the HSG set.
+kb49: the KB49 set.
+pes: the potential energy surfaces from Edmanuel's code.
+s12l: the s12l set, with QMC data where available.
+s22: the s22 set, latest reference energies.
+s225: the s22x5 set.
+s66: the s66 set.
+s668: the s66x8 set.
+
+* atz_blyp -- BLYP/aug-cc-pVTZ energies.
+bde: bond dissociation eneergies from Edmanuel's code.
+bdex: bond dissociation energies, designed as training set for the pc1 DCP.
+cl: non-covalent binding energies of Cl compounds; designed for DCP training.
+f: non-covalent binding energies of F compounds; designed for DCP training.
+p: non-covalent binding energies of P compounds; designed for DCP training.
+s: non-covalent binding energies of S compounds; designed for DCP training.
+s225: the s22x5 set.
+s668: the s66x8 set.
+energy: total energies of atoms and molecules.
+
+* atz_hf -- HF/aug-cc-pVTZ energies.
+s225: the s22x5 set.
+s668: the s66x8 set.
+
+* geom_blyp -- geometry optimizations at the blyp/aug-cc-pVTZ level.
+g3: a subset of the G3 set with only {C,H,N,O,F,P,S,Cl}.
+
