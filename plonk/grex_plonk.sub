@@ -3,7 +3,7 @@
 #PBS -j eo
 #PBS -e ./plonk.log
 #PBS -N plonk
-#PBS -l walltime=168:00:00,mem=4GB,nodes=1:ppn=4
+#PBS -l walltime=168:00:00,mem=4GB,nodes=1:ppn=6
 #PBS -m n
 #PBS -V
 
@@ -12,11 +12,10 @@ LOCKDIR="plonk.lock"
 LOG="plonk.log"
 SLEEPTIME=1
 TLIMIT=3600
-PBS_WALLTIME=604800
 
 TIME0=$(date +%s)
 
-module load gaussian
+module load gaussian/g09.d01
 
 while true; do
     ## grab the lock if you can
@@ -35,8 +34,8 @@ while true; do
 
 	## run the job
 	if [ $count -gt 0 ] && [ ! -z $njob ]; then
-	    echo "plonk $$ [$(date +%Y%m%d-%H:%M)] : $njob" >> $LOG
-	    ( . $njob ) 2>&1 >> $LOG
+            echo "plonk [pid:$$ host:$(hostname) date:$(date +%Y%m%d-%H:%M)] : $njob" >> $LOG
+  	    ( . $njob ) 2>&1 >> $LOG
 	fi
     fi
     
@@ -44,7 +43,6 @@ while true; do
     sleep $SLEEPTIME
 
     ## check the time
-    echo "wola"
     TLEFT=$(($PBS_WALLTIME - $(date +%s) + $TIME0))
     if [ $TLEFT -le $TLIMIT ]; then
 	break

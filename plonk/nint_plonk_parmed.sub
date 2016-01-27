@@ -5,7 +5,7 @@
 #PBS -e /home/delarozao/plonk.log
 #PBS -N plonk
 #PBS -l nodes=1:ppn=8
-#PBS -q serial
+#PBS -q parmed
 #PBS -m n
 #PBS -V
 
@@ -21,8 +21,8 @@ export g03root="/home/delarozao/src"
 . $g03root/g03/bsd/g03.profile
 
 # prepare the scratch
-export SCRATCH=/state/partition1/scratch_local/${PBS_JOBID}
-export GAUSS_SCRDIR=/state/partition1/scratch_local/${PBS_JOBID}
+export SCRATCH=/state/partition1/scratch_local/${PBS_JOBID%%.*}
+export GAUSS_SCRDIR=/state/partition1/scratch_local/${PBS_JOBID%%.*}
 mkdir $SCRATCH
 
 LIST="/home/delarozao/plonk.jobs"
@@ -47,7 +47,7 @@ while true; do
 
 	## run the job
 	if [ $count -gt 0 ] && [ ! -z $njob ]; then
-	    echo "plonk $$ [$(date +%Y%m%d-%H:%M)] : $njob" >> $LOG
+	    echo "plonk [pid:$$ host:$(hostname) date:$(date +%Y%m%d-%H:%M)] : $njob" >> $LOG
 	    ( . $njob ) 2>&1 >> $LOG
 	fi
     fi
