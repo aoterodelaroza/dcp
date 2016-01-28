@@ -55,7 +55,7 @@ function writegjf(file,dcp,dcp0,basis,at,x,q,mult,ent,chk="",wfx="",derivs=0)
   endif
   
   ## Pseudo=read bit
-  if (!isempty(dcp) || !isempty(dcp))
+  if (!isempty(dcp) || !isempty(dcp0))
     pseudostr = "pseudo=read";
   else
     pseudostr = "";
@@ -94,9 +94,11 @@ function writegjf(file,dcp,dcp0,basis,at,x,q,mult,ent,chk="",wfx="",derivs=0)
   endif
 
   ## DCP block
-  writedcp(dcp,fid,at);
-  writedcp(dcp0,fid,at);
-  fprintf(fid,"\n");
+  if (!isempty(dcp) || !isempty(dcp0))
+    writedcp(dcp,fid,at);
+    writedcp(dcp0,fid,at);
+    fprintf(fid,"\n");
+  endif
 
   ## Wfx block
   if (length(wfx) > 0)
