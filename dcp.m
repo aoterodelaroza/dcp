@@ -231,7 +231,7 @@ dy = yref = zeros(length(db),1);
 for i = 1:length(db)
   yref(i) = db{i}.ref;
   dy(i) = ycur(i) - yref(i);
-  printf("| %d | %s | %.4f | %.4f | %.4f |\n",...
+  printf("| %d | %s | %.8f | %.8f | %.8f |\n",...
          i,db{i}.name,yref(i),ycur(i),dy(i));
 endfor
 printf("# Norm of the coeffs = %.4e\n",sqrt(sum(xmin(2:2:end).^2)));
