@@ -161,6 +161,28 @@ function [dy ycalc yref dery ycalcnd] = process_output_one(ent,xdm=0,derivs=0)
     yref = 0;
     dy = ycalc;
     dery = 0;
+  elseif (strcmp(ent.type,"intermol_geometry"))
+    ## Read the output geometry
+    file = sprintf("%s_%4.4d_%s_mol.log",prefix,nstep,ent.name);
+    if (!exist(file,"file"))
+      dy = ycalc = yref = ycalcnd = Inf;
+      return
+    endif
+    mol = mol_readlog(file);
+
+    ## Calculate the center of mass of each fragment
+    n1 = ent.mon1.nat;
+    n2 = ent.mon2.nat;
+    xcm1 = sum(mol.atxyz(:,1:n1),2) / n1;
+    xcm2 = sum(mol.atxyz(:,n1+1:n1+n2),2) / n2;
+    dist = norm(xcm1 - xcm2);
+
+    ## Compare to the reference molecule
+    ycalc = dist;
+    ycalcnd = dist;
+    yref = ent.ref;
+    dy = ycalc - yref;
+    dery = 0;
   elseif (strcmp(ent.type,"total_energy"))
     ## Read the output energy
     file = sprintf("%s_%4.4d_%s_mol.log",prefix,nstep,ent.name);

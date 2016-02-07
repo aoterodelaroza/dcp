@@ -88,8 +88,8 @@ function db = filldb(db,weis=[],method=[],extragau,ncpu,mem);
     endif
   
     ## Specific checks and fills for frozen monomer binding energy calculations
-    if (strcmp(db{i}.type,"be_frozen_monomer"))
-      ## Sanity checks for the frozen-monomer BE calculations
+    ## and intermolecular geometries.
+    if (strcmp(db{i}.type,"be_frozen_monomer") || strcmp(db{i}.type,"intermol_geometry") )
       ## Fill charge and multiplicity with default values
       if (!isfield(db{i},"ref"))
         error(sprintf("Entry %s has no reference energy",db{i}.file))
