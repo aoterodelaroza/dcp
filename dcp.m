@@ -83,6 +83,7 @@ run_inputs = @run_inputs_serial; ## Run all Gaussian inputs sequentially on the 
 ## run_inputs = @run_inputs_grex; ## Submit inputs to the queue, wait for all to finish. Grex version.
 ## run_inputs = @run_inputs_plonk; ## Submit inputs to a private queue, plonk version.
 ## run_inputs = @run_inputs_nint_trasgu; ## Submit inputs to a private queue on the NINT cluster.
+## run_inputs = @run_inputs_nint_gino; ## Submit inputs to a private queue on the NINT cluster (gino).
 ## run_inputs = @run_inputs_elcap3; ## Submit inputs to elcap3.
 
 ## Tolerance criteria for the minimization (function difference between successive steps)
