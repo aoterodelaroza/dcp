@@ -10,8 +10,8 @@
 % FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
 % more details.
 
-function s = run_inputs_nint_trasgu(ilist,cont=0,xdm=[],xdmfun="")
-  %% function run_inputs_plonk(ilist,cont=0,xdm=[],xdmfun="")
+function s = run_inputs_nint_gino(ilist,cont=0,xdm=[],xdmfun="")
+  %% function run_inputs_nint_gino(ilist,cont=0,xdm=[],xdmfun="")
   %% 
   %% Run all the inputs in the job list (ilist). The jobs should be  
   %% in the current working directory, with extension gjf. This
@@ -42,8 +42,8 @@ function s = run_inputs_nint_trasgu(ilist,cont=0,xdm=[],xdmfun="")
   maxtime = Inf; ## maximum sleep time in seconds. Crash if the script sleeps
                  ## for longer than this number without a new Gaussian output
                  ## being written.
-  jobfile = "~/plonk.jobs"; 
-  lockdir = "~/plonk.lock";
+  jobfile = "~/alberto/plonk.jobs";
+  lockdir = "~/alberto/plonk.lock";
   [s out] = system("hostname");
   dirname = sprintf("%s_%d",prefix,getpid());
   npack = 200;
