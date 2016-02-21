@@ -203,6 +203,26 @@ function [dy ycalc yref dery ycalcnd] = process_output_one(ent,xdm=0,derivs=0)
     yref = ent.ref;
     dy = e-ent.ref;
     dery = 0;
+  elseif (strcmp(ent.type,"dipole"))
+    ## Read the output energy
+    file = sprintf("%s_%4.4d_%s_mol.log",prefix,nstep,ent.name);
+    if (!exist(file,"file"))
+      dy = ycalc = yref = ycalcnd = Inf;
+      return
+    endif
+    [s out] = system(sprintf("grep -A 1 'Dipole moment' %s | tail -n 1 | awk '{print $NF}'",file));
+    e = str2num(out);
+    if (s != 0 || isempty(e)) 
+      dy = ycalc = yref = ycalcnd = Inf;
+      return
+    endif
+
+    ## Compare to the reference molecule
+    ycalc = e;
+    ycalcnd = e;
+    yref = ent.ref;
+    dy = e-ent.ref;
+    dery = 0;
   else
     ## I don't know what that type is
     error(sprintf("Unknown type (%s) in entry %s",db{i}.type,db{i}.file))
