@@ -158,7 +158,7 @@ for idcp = 1:length(dcpini)
   if (!exist("xdmcoef","var") || isempty(xdmcoef))
     printf("| Id|           Name       |       yref   |      ycalc   |       dy     |\n");
     for i = 1:length(db)
-      printf("| %d | %20s | %14.8ff | %14.8f | %14.8f |\n",...
+      printf("| %d | %20s | %14.8f | %14.8f | %14.8f |\n",...
              i,db{i}.name,yref(i),ycalc(i),dy(i));
     endfor
   else
