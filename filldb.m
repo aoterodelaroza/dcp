@@ -145,8 +145,8 @@ function db = filldb(db,weis=[],method=[],extragau,ncpu,mem);
           error(sprintf("Monomer 2 in entry %s is not sane",db{i}.file))
         endif
       endif
-    elseif (strcmp(db{i}.type,"intramol_geometry") || strcmp(db{i}.type,"total_energy"))
-      ## Sanity checks for the intramolecular geometry calculations
+    elseif (strcmp(db{i}.type,"intramol_geometry") || strcmp(db{i}.type,"total_energy") || strcmp(db{i}.type,"dipole"))
+      ## Sanity checks for the intramolecular geometry/total energy/dipole calculations
       if (!isfield(db{i},"mol"))
         error(sprintf("Entry %s has no molecular structure",db{i}.file))
       endif

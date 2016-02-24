@@ -55,7 +55,7 @@ function ilist = setup_input_one(ent,dcp,derivs=0)
     ent.extragau = sprintf("%s opt=(nomicro)",ent.extragau);
     writegjf(file,dcp,dcp0,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult,ent,:,:,0);
     ilist = {ilist{:}, sprintf("%s_%4.4d_%s_mol",prefix,nstep,ent.name)};
-  elseif (strcmp(ent.type,"total_energy"))
+  elseif (strcmp(ent.type,"total_energy") || strcmp(ent.type,"dipole"))
     ## A total energy calculation
     file = sprintf("%s_%4.4d_%s_mol.gjf",prefix,nstep,ent.name);
     writegjf(file,dcp,dcp0,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult,ent,:,:,0);
