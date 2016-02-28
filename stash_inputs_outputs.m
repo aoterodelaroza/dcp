@@ -28,16 +28,16 @@ function stash_inputs_outputs(ilist)
 
   ## Tar all the inputs and outputs and move to the stash
   if (exist("savetarbz2","var") && savetarbz2)
-    [s out] = system(sprintf("find . -name '%s_*.chk' -delete",prefix));
-    [s out] = system(sprintf("find . -name '%s_*.*' > filelist.tmp",prefix));
+    [s out] = system(sprintf("find . -maxdepth 1 -name '%s_*.chk' -delete",prefix));
+    [s out] = system(sprintf("find . -maxdepth 1 -name '%s_*.gjf' -or -name '%s_*.log' -or -name '%s_*.wfx' > filelist.tmp",prefix,prefix,prefix));
     [s out] = system(sprintf("tar cjvf %s_%4.4d.tar.bz2 -T filelist.tmp",prefix,nstep));
     [s out] = system(sprintf("rm -f filelist.tmp"));
     [s out] = system(sprintf("mv %s_%4.4d.tar.bz2 %s",prefix,nstep,prefix));
   endif
-  [s out] = system(sprintf("find . -name '%s_*.gjf' -delete",prefix));
-  [s out] = system(sprintf("find . -name '%s_*.log' -delete",prefix));
-  [s out] = system(sprintf("find . -name '%s_*.wfx' -delete",prefix));
-  [s out] = system(sprintf("find . -name '%s_*.pgout' -delete",prefix));
-  [s out] = system(sprintf("find . -name '%s_*.chk' -delete",prefix));
+  [s out] = system(sprintf("find . -maxdepth 1 -name '%s_*.gjf' -delete",prefix));
+  [s out] = system(sprintf("find . -maxdepth 1 -name '%s_*.log' -delete",prefix));
+  [s out] = system(sprintf("find . -maxdepth 1 -name '%s_*.wfx' -delete",prefix));
+  [s out] = system(sprintf("find . -maxdepth 1 -name '%s_*.pgout' -delete",prefix));
+  [s out] = system(sprintf("find . -maxdepth 1 -name '%s_*.chk' -delete",prefix));
 
 endfunction
