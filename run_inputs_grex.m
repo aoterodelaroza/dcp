@@ -39,8 +39,8 @@ function s = run_inputs_grex(ilist,cont=0,xdm=[],xdmfun="")
   
   ## Parameters for the run
   hours = 2; ## walltime hours
-  ncpu = 6; ## number of cores
-  mem = 4; ## memory in GB
+  ncpu0 = 6; ## number of cores (local)
+  mem0 = 4; ## memory in GB (local)
   sleeptime = 5; ## time in seconds between job completion checks
   usenodes = 6; ## pack all available jobs so that only usenodes number of nodes 
                 ## are used. If usenodes = -1, submit one job per Gaussian input.
@@ -88,7 +88,7 @@ function s = run_inputs_grex(ilist,cont=0,xdm=[],xdmfun="")
       fprintf(fid,"#PBS -j eo\n");
       fprintf(fid,"#PBS -e %s/%s.err \n",pwd(),name);
       fprintf(fid,"#PBS -N dcp_%s\n",name);
-      fprintf(fid,"#PBS -l walltime=%d:00:00,mem=%dGB,nodes=1:ppn=%d\n",hours,mem,ncpu);
+      fprintf(fid,"#PBS -l walltime=%d:00:00,mem=%dGB,nodes=1:ppn=%d\n",hours,mem0,ncpu0);
       fprintf(fid,"#PBS -m n\n");
       fprintf(fid,"\n");
       fprintf(fid,"module load gaussian/g09.d01\n");

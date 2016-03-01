@@ -25,6 +25,8 @@ function writegjf(file,dcp,dcp0,basis,at,x,q,mult,ent,chk="",wfx="",derivs=0)
   %% DCP specifications for some atoms; derivatives are not taken wrt
   %% the coefficients in dcp0.
   
+  global ncpu mem
+
   ## Build the atom list
   atlist = {};
   for i = 1:length(at)
@@ -69,8 +71,8 @@ function writegjf(file,dcp,dcp0,basis,at,x,q,mult,ent,chk="",wfx="",derivs=0)
   endif
 
   ## Write the mem and proc
-  fprintf(fid,"%%mem=%dGB\n",ent.mem);
-  fprintf(fid,"%%nproc=%d\n",ent.ncpu);
+  fprintf(fid,"%%mem=%dGB\n",mem);
+  fprintf(fid,"%%nproc=%d\n",ncpu);
 
   ## The route line
   fprintf(fid,"#p %s %s %s %s %s %s\n",ent.method,basisstr,pseudostr,ent.extragau,chkstr,wfxstr);
@@ -110,8 +112,8 @@ function writegjf(file,dcp,dcp0,basis,at,x,q,mult,ent,chk="",wfx="",derivs=0)
     ## The same calculation without any DCP
     fprintf(fid,"--Link1--\n");
     fprintf(fid,"%%chk=%s\n",chk);
-    fprintf(fid,"%%mem=%dGB\n",ent.mem);
-    fprintf(fid,"%%nproc=%d\n",ent.ncpu);
+    fprintf(fid,"%%mem=%dGB\n",mem);
+    fprintf(fid,"%%nproc=%d\n",ncpu);
     fprintf(fid,"#p %s %s %s\n",ent.method,basisstr,ent.extragau);
     fprintf(fid,"   scf=(maxcycle=1) guess=(read) geom=(check) iop(5/13=1,99/5=2,3/53=10)\n");
     fprintf(fid,"\n");
@@ -142,8 +144,8 @@ function writegjf(file,dcp,dcp0,basis,at,x,q,mult,ent,chk="",wfx="",derivs=0)
       dcptmp = unpackdcp(xtmp,dcp);
       fprintf(fid,"--Link1--\n");
       fprintf(fid,"%%chk=%s\n",chk);
-      fprintf(fid,"%%mem=%dGB\n",ent.mem);
-      fprintf(fid,"%%nproc=%d\n",ent.ncpu);
+      fprintf(fid,"%%mem=%dGB\n",mem);
+      fprintf(fid,"%%nproc=%d\n",ncpu);
       fprintf(fid,"#p %s %s %s\n",ent.method,basisstr,ent.extragau);
       fprintf(fid,"   pseudo=read scf=(maxcycle=1) guess=(read) geom=(check) iop(5/13=1,99/5=2,3/53=10)\n");
       fprintf(fid,"\n");

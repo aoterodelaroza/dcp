@@ -52,10 +52,13 @@ function db = parsedb(files)
       ## Parse the keyword
       anew = strfields(line);
       keyw = lower(anew{1});
+      rest = strrep(line,anew{1},"");
       if (strcmp(keyw,"type"))
         db{ndb}.type = lower(anew{2});
       elseif (strcmp(keyw,"name"))
-        db{ndb}.name = anew{2};
+        db{ndb}.name = rest;
+      elseif (strcmp(keyw,"extragau"))
+        db{ndb}.extragau = rest;
       elseif (strcmp(keyw,"ref"))
         db{ndb}.ref = str2num(anew{2});
       elseif (strcmp(keyw,"mol"))

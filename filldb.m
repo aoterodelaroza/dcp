@@ -10,8 +10,8 @@
 % FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
 % more details.
 
-function db = filldb(db,weis=[],method=[],extragau,ncpu,mem);
-  %% function db = filldb(db,weis,method,extragau,ncpu,mem);
+function db = filldb(db,weis=[],method=[],extragau);
+  %% function db = filldb(db,weis,method,extragau);
   %% 
   %% Fill the missing information in the database with default values.
   %% If a non-optional parameter is missing from the database,
@@ -20,8 +20,6 @@ function db = filldb(db,weis=[],method=[],extragau,ncpu,mem);
   %% weis: an array containing the weight of every reference calculation.
   %% method: functional string for Gaussian.
   %% extragau: extra bits to use in Gaussian's route section.
-  %% ncpu: number of CPUs for the calcs.
-  %% mem: amount of memory (in GB) for the calcs.
   %%
   %% and only apply if the same fields were not found in the database.
 
@@ -73,18 +71,10 @@ function db = filldb(db,weis=[],method=[],extragau,ncpu,mem);
       else
         db{i}.extragau = extragau;
       endif
-    endif
-    if (!isfield(db{i},"ncpu"))
-      if (isempty(ncpu))
-        error(sprintf("No ncpu specified and no default available in entry %s",db{i}.file))
+    else
+      if (!isempty(extragau))
+        db{i}.extragau = sprintf("%s %s",db{i}.extragau,extragau);
       endif
-      db{i}.ncpu = ncpu;
-    endif
-    if (!isfield(db{i},"mem"))
-      if (isempty(mem))
-        error(sprintf("No mem specified and no default available in entry %s",db{i}.file))
-      endif
-      db{i}.mem = mem;
     endif
   
     ## Specific checks and fills for frozen monomer binding energy calculations

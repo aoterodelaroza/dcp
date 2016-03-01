@@ -14,7 +14,7 @@
 
 format long
 global dcp basis db prefix nstep verbose run_inputs ycur...
-       dcpfin costmin iload stime0 astep savetarbz2
+       dcpfin costmin iload stime0 astep savetarbz2 ncpu mem
 
 #### Modify this to change the input behavior ####
 
@@ -87,7 +87,7 @@ basis = parsebasis(basis);
 
 ## Read the parametrization database 
 db = parsedb(listdb);
-db = filldb(db,[],method,extragau,ncpu,mem);
+db = filldb(db,[],method,extragau);
 
 ## Initialization
 verbose = 0;

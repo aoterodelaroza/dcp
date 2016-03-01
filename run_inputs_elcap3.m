@@ -39,8 +39,6 @@ function s = run_inputs_elcap3(ilist,cont=0,xdm=[],xdmfun="")
   
   ## Parameters for the run
   hours = 2; ## walltime hours
-  ncpu = 4; ## number of cores
-  mem = 4; ## memory in GB
   sleeptime = 5; ## time in seconds between job completion checks
   usenodes = 6; ## pack all available jobs so that only usenodes number of nodes 
                 ## are used. If usenodes = -1, submit one job per Gaussian input.

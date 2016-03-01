@@ -15,7 +15,7 @@
 format long
 global dcp basis db prefix nstep verbose run_inputs ycur dcpfin...
        costmin iload stime0 astep dcpeval maxnorm fixnorm muk dcp0...
-       savetarbz2
+       savetarbz2 ncpu mem
 
 #### Modify this to change the input behavior ####
 
@@ -137,7 +137,7 @@ endif
 
 ## Read the parametrization database 
 db = parsedb(listdb);
-db = filldb(db,weightdb,method,extragau,ncpu,mem);
+db = filldb(db,weightdb,method,extragau);
 if (verbose) 
   printf("### Database for the parametrization ###\n");
   writedb(db);

@@ -56,14 +56,6 @@ function writedb(db,file="")
     if (isfield(db{i},"extragau"))
       fprintf(fid,"extragau %s\n",db{i}.extragau);
     endif
-    ## ncpu
-    if (isfield(db{i},"ncpu"))
-      fprintf(fid,"ncpu %d\n",db{i}.ncpu);
-    endif
-    ## mem
-    if (isfield(db{i},"mem"))
-      fprintf(fid,"mem %d\n",db{i}.mem);
-    endif
     ## mol
     if (isfield(db{i},"mol"))
       fprintf(fid,"mol %d %d\n",db{i}.mol.q,db{i}.mol.mult);
