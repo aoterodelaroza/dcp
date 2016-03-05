@@ -150,7 +150,7 @@ function s = run_inputs_nint_trasgu(ilist,cont=0,xdm=[],xdmfun="")
 
   ## Clean up the done and the err files
   [s out] = system(sprintf("rm -f /home/delarozao/run/%s/*.done /home/delarozao/run/%s/*sub",dirname,dirname));
-  [s out] = system(sprintf("find -maxdepth 1 /home/delarozao/run/%s/ -name '*.tar.bz2' | xargs mv -t .",dirname));
+  [s out] = system(sprintf("find /home/delarozao/run/%s/ -maxdepth 1 -name '*.tar.bz2' | xargs mv -t .",dirname));
   for i = 1:npack
     system(sprintf("tar xjf %s_%4.4d.tar.bz2",prefix,i));
     system(sprintf("rm -f %s_%4.4d.tar.bz2",prefix,i));
