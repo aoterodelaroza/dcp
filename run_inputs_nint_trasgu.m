@@ -48,6 +48,11 @@ function s = run_inputs_nint_trasgu(ilist,cont=0,xdm=[],xdmfun="")
   dirname = sprintf("%s_%d",prefix,getpid());
   npack = 200;
 
+  ## randomize ilist
+  iperm = randperm(length(ilist));
+  ilist = ilist(iperm);
+
+  ## pack
   ngjf = ceil(length(ilist) / npack);
   npack = ceil(length(ilist) / ngjf);
   k = 0;
