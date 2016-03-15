@@ -75,7 +75,7 @@ function writegjf(file,dcp,dcp0,basis,at,x,q,mult,ent,chk="",wfx="",derivs=0)
   fprintf(fid,"%%nproc=%d\n",ncpu);
 
   ## The route line
-  fprintf(fid,"#p %s %s %s %s %s %s\n",ent.method,basisstr,pseudostr,ent.extragau,chkstr,wfxstr);
+  fprintf(fid,"# %s %s %s %s %s %s\n",ent.method,basisstr,pseudostr,ent.extragau,chkstr,wfxstr);
 
   ## Title and multiplicity
   fprintf(fid,"\n");
@@ -114,7 +114,7 @@ function writegjf(file,dcp,dcp0,basis,at,x,q,mult,ent,chk="",wfx="",derivs=0)
     fprintf(fid,"%%chk=%s\n",chk);
     fprintf(fid,"%%mem=%dGB\n",mem);
     fprintf(fid,"%%nproc=%d\n",ncpu);
-    fprintf(fid,"#p %s %s %s\n",ent.method,basisstr,ent.extragau);
+    fprintf(fid,"# %s %s %s\n",ent.method,basisstr,ent.extragau);
     fprintf(fid,"   scf=(maxcycle=1) guess=(read) geom=(check) iop(5/13=1,99/5=2,3/53=10)\n");
     fprintf(fid,"\n");
     fprintf(fid,"title\n");
@@ -146,8 +146,8 @@ function writegjf(file,dcp,dcp0,basis,at,x,q,mult,ent,chk="",wfx="",derivs=0)
       fprintf(fid,"%%chk=%s\n",chk);
       fprintf(fid,"%%mem=%dGB\n",mem);
       fprintf(fid,"%%nproc=%d\n",ncpu);
-      fprintf(fid,"#p %s %s %s\n",ent.method,basisstr,ent.extragau);
-      fprintf(fid,"   pseudo=read scf=(maxcycle=1) guess=(read) geom=(check) iop(5/13=1,99/5=2,3/53=10)\n");
+      fprintf(fid,"# %s %s %s\n",ent.method,basisstr,ent.extragau);
+      fprintf(fid,"  pseudo=read scf=(maxcycle=1) guess=(read) geom=(check) iop(5/13=1,99/5=2,3/53=10)\n");
       fprintf(fid,"\n");
       fprintf(fid,"title\n");
       fprintf(fid,"\n");
