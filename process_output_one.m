@@ -132,18 +132,50 @@ function [dy ycalc yref dery ycalcnd] = process_output_one(ent,xdm=0,derivs=0)
       dy = ycalc - yref;
 
       ## Prepare for derivatives 
-      n = length(e2)-2;
-      if (abs(n-round(n)) > 1d-10)
-        error("Length of the output array is not consistent. (2n+2, 2n+4)");
-      endif
-      e2_c = e2(3:n+2) - e2(2);
-      e1a_c = e1a(3:n+2) - e1a(2);
-      e1b_c = e1b(3:n+2) - e1b(2);
+      e2_c = e2(3:n) - e2(2);
+      e1a_c = e1a(3:n) - e1a(2);
+      e1b_c = e1b(3:n) - e1b(2);
       be_c = (e2_c - e1a_c - e1b_c) * h2k;
 
       ## First derivatives
       dery = zeros(1,n);
       dery = be_c';
+    endif
+  elseif (strcmp(ent.type,"total_energy"))
+    ## Read the output energy
+    file = sprintf("%s_%4.4d_%s_mol.log",prefix,nstep,ent.name);
+    if (!exist(file,"file"))
+      dy = ycalc = yref = ycalcnd = Inf;
+      return
+    endif
+    [s out] = system(sprintf("grep Done %s | awk '{print $5}'",file));
+    e = str2num(out);
+    if (s != 0 || isempty(e)) 
+      dy = ycalc = yref = ycalcnd = Inf;
+      return
+    endif
+
+    ## Compare to the reference molecule
+    if (derivs == 0) 
+      ycalc = e;
+      ycalcnd = e;
+      yref = ent.ref;
+      dy = e-ent.ref;
+      dery = 0;
+    else
+      n = length(e);
+      ## The scalar value
+      ycalc = e(1);
+      ycalcnd = e(1);
+      yref = ent.ref;
+      dy = ycalc - yref;
+      
+      ## Prepare for derivatives 
+      e_c = e(3:n) - e(2);
+
+      ## First derivatives
+      dery = zeros(1,n);
+      dery = e_c';
     endif
   elseif (strcmp(ent.type,"intramol_geometry"))
     ## Read the output geometry
@@ -182,26 +214,6 @@ function [dy ycalc yref dery ycalcnd] = process_output_one(ent,xdm=0,derivs=0)
     ycalcnd = dist;
     yref = ent.ref;
     dy = ycalc - yref;
-    dery = 0;
-  elseif (strcmp(ent.type,"total_energy"))
-    ## Read the output energy
-    file = sprintf("%s_%4.4d_%s_mol.log",prefix,nstep,ent.name);
-    if (!exist(file,"file"))
-      dy = ycalc = yref = ycalcnd = Inf;
-      return
-    endif
-    [s out] = system(sprintf("grep Done %s | awk '{print $5}'",file));
-    e = str2num(out);
-    if (s != 0 || isempty(e)) 
-      dy = ycalc = yref = ycalcnd = Inf;
-      return
-    endif
-
-    ## Compare to the reference molecule
-    ycalc = e;
-    ycalcnd = e;
-    yref = ent.ref;
-    dy = e-ent.ref;
     dery = 0;
   elseif (strcmp(ent.type,"dipole"))
     ## Read the output energy

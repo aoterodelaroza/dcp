@@ -49,14 +49,21 @@ function ilist = setup_input_one(ent,dcp,derivs=0)
       writegjf(file,dcp,dcp0,basis,ent.mon2.at,ent.mon2.x,ent.mon2.q,ent.mon2.mult,ent,chk,wfx,derivs);
       ilist = {ilist{:}, sprintf("%s_%4.4d_%s_mon2",prefix,nstep,ent.name)};
     endif
+  elseif (strcmp(ent.type,"total_energy"))
+    ## A total energy calculation
+    chk = sprintf("%s_%4.4d_%s_mol.chk",prefix,nstep,ent.name);
+    wfx = sprintf("%s_%4.4d_%s_mol.wfx",prefix,nstep,ent.name);
+    file = sprintf("%s_%4.4d_%s_mol.gjf",prefix,nstep,ent.name);
+    writegjf(file,dcp,dcp0,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult,ent,chk,wfx,derivs);
+    ilist = {ilist{:}, sprintf("%s_%4.4d_%s_mol",prefix,nstep,ent.name)};
   elseif (strcmp(ent.type,"intramol_geometry") || strcmp(ent.type,"intermol_geometry"))
     ## A geometry relaxation; append "opt" to extragau
     file = sprintf("%s_%4.4d_%s_mol.gjf",prefix,nstep,ent.name);
     ent.extragau = sprintf("%s opt=(nomicro)",ent.extragau);
     writegjf(file,dcp,dcp0,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult,ent,:,:,0);
     ilist = {ilist{:}, sprintf("%s_%4.4d_%s_mol",prefix,nstep,ent.name)};
-  elseif (strcmp(ent.type,"total_energy") || strcmp(ent.type,"dipole"))
-    ## A total energy calculation
+  elseif (strcmp(ent.type,"dipole"))
+    ## A dipole calculation
     file = sprintf("%s_%4.4d_%s_mol.gjf",prefix,nstep,ent.name);
     writegjf(file,dcp,dcp0,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult,ent,:,:,0);
     ilist = {ilist{:}, sprintf("%s_%4.4d_%s_mol",prefix,nstep,ent.name)};
