@@ -165,6 +165,12 @@ for i = 1:length(dcp)
   endif
 endfor
 
+## print out of the db, for checking the names, number of dimers, and weight assigments
+## for i = 1:length(db)
+##   printf("| %d | %s | %.1f | %14.8f |\n",i,db{i}.name,db{i}.wei,db{i}.ref);
+## endfor
+## exit
+
 ## Run the minimization, initialize global variables
 nstep = 0;
 astep = 0;
