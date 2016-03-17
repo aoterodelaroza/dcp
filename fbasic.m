@@ -65,9 +65,14 @@ function y = fbasic(x)
   ## If any of the exponents is positive, return Inf
   ## Set up the Gaussian input files
   ilist = {};
+  sidx = [];
+  n = 0;
   for i = 1:length(db)
     anew = setup_input_one(db{i},dcp,0);
     ilist = {ilist{:}, anew{:}};
+    for j = 1:length(anew)
+      sidx(++n) = i;
+    endfor
   endfor
   if (verbose)
     printf("# Running the %d input files: \n",length(ilist));
@@ -75,6 +80,7 @@ function y = fbasic(x)
   
   ## Run all inputs
   srun = run_inputs(ilist);
+  srun = unique(sidx(srun));
 
   ## If any of the Gaussian outputs are wrong, return Inf to the caller
   if (!isempty(srun) && (!exist("errcontinue","var") || !errcontinue))
