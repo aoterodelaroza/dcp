@@ -15,7 +15,7 @@
 format long
 global dcp basis db prefix nstep verbose run_inputs ycur dcpfin...
        costmin iload stime0 astep dcpeval maxnorm fixnorm muk dcp0...
-       savetarbz2 ncpu mem
+       savetarbz2 errcontinue ncpu mem
 
 #### Modify this to change the input behavior ####
 
@@ -100,6 +100,10 @@ ftol = 1d-2; ## function change tolerance
 ## fixnorm is less than normtol.
 ## fixnorm = 7.0711e-04;
 ## normtol = 1d-2;
+
+## Continue with the calculation, even if one of the calculations fails.
+errcontinue = 1;
+## errcontinue = "";
 
 ## Save a compressed tar.bz2 with the inputs/outputs/wfxs?
 ## savetarbz2="";

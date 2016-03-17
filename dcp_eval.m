@@ -117,12 +117,12 @@ for idcp = 1:length(dcpini)
 
   ## Run all inputs
   if (!exist("xdmcoef","var") || isempty(xdmcoef))
-    srun = run_inputs(ilist,1);
+    srun = run_inputs(ilist);
   else
     if (!exist("xdmfun","var") || isempty(xdmfun))
       xdmfun = method;
     endif
-    srun = run_inputs(ilist,1,xdmcoef,xdmfun);
+    srun = run_inputs(ilist,xdmcoef,xdmfun);
   endif
 
   ## Collect the results and compare to the reference data

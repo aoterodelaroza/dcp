@@ -10,8 +10,8 @@
 % FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
 % more details.
 
-function sout = run_inputs_serial(ilist,cont=0,xdm=[],xdmfun="")
-  %% function run_inputs_serial(ilist,cont=0,xdm=[],xdmfun="")
+function sout = run_inputs_serial(ilist,xdm=[],xdmfun="")
+  %% function run_inputs_serial(ilist,xdm=[],xdmfun="")
   %% 
   %% Run all the inputs in the job list (ilist). The jobs should be  
   %% in the current working directory, with extension gjf. This
@@ -22,10 +22,6 @@ function sout = run_inputs_serial(ilist,cont=0,xdm=[],xdmfun="")
   %% all checkpoint files (with the same name) should also be
   %% in the CWD.
   %%
-  %% If cont is true, continue with the calculations even
-  %% if one of the Gaussian input fails. Then return the 
-  %% success/failure state in ifail
-  %%
   %% If xdm is non-empty, run postg on the resulting wfx with
   %% the indicated parameters and the functional in xdmfun.
   %%
@@ -34,7 +30,7 @@ function sout = run_inputs_serial(ilist,cont=0,xdm=[],xdmfun="")
   
   global verbose
 
-  sout = 0;
+  sout = [];
   
   ## Run all the jobs in the current working directory
   for i = 1:length(ilist)
@@ -50,13 +46,8 @@ function sout = run_inputs_serial(ilist,cont=0,xdm=[],xdmfun="")
     endif
     ## Check that Gaussian didn't crap out
     if (s != 0)
-      # printf("There was an error from Gaussian running one of the inputs.\n");
-      # printf("Input file: %s.gjf\n",ilist{i});
-      # printf("Output file: %s.log\n",ilist{i});
-      # printf("The system says: %s\n",out);
-      # error(sprintf("Gaussian error!"))
       if (exist(sprintf("%s.log",ilist{i}),"file"))
-        sout = 1;
+        sout = [sout i];
         continue
       else
         error("Fatal error from Gaussian, could not generate the log file.")
@@ -65,7 +56,7 @@ function sout = run_inputs_serial(ilist,cont=0,xdm=[],xdmfun="")
     ## Check that we have a normal termination
     [s out] = system(sprintf("tail -n 1 %s.log | grep 'Normal termination' | wc -l",ilist{i}));
     if (str2num(out) == 0)
-      sout = 1;
+      sout = [sout i];
     endif
   endfor
   if (verbose)

@@ -10,8 +10,8 @@
 % FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
 % more details.
 
-function s = run_inputs_plonk_packed(ilist,cont=0,xdm=[],xdmfun="")
-  %% function run_inputs_plonk_packed(ilist,cont=0,xdm=[],xdmfun="")
+function sout = run_inputs_plonk_packed(ilist,xdm=[],xdmfun="")
+  %% function run_inputs_plonk_packed(ilist,xdm=[],xdmfun="")
   %% 
   %% Run all the inputs in the job list (ilist). The jobs should be  
   %% in the current working directory, with extension gjf. This
@@ -21,10 +21,6 @@ function s = run_inputs_plonk_packed(ilist,cont=0,xdm=[],xdmfun="")
   %% all the inputs in ilist will also be in the CWD. Optionally,
   %% all checkpoint files (with the same name) should also be
   %% in the CWD.
-  %%
-  %% If cont is true, continue with the calculations even
-  %% if one of the Gaussian input fails. Then return the 
-  %% success/failure state in ifail
   %%
   %% If xdm is non-empty, run postg on the resulting wfx with
   %% the indicated parameters and the functional in xdmfun.
@@ -50,7 +46,7 @@ function s = run_inputs_plonk_packed(ilist,cont=0,xdm=[],xdmfun="")
 
   ## randomize ilist
   iperm = randperm(length(ilist));
-  ilist = ilist(iperm);
+  ilistr = ilist(iperm);
 
   ## pack
   ngjf = ceil(length(ilist) / npack);
@@ -63,7 +59,7 @@ function s = run_inputs_plonk_packed(ilist,cont=0,xdm=[],xdmfun="")
       if (k > length(ilist))
         break
       endif
-      str = sprintf("%s %s.gjf",str,ilist{k});
+      str = sprintf("%s %s.gjf",str,ilistr{k});
     endfor
     system(sprintf("echo %s | xargs tar cjf %s_%4.4d.tar.bz2",str,prefix,i));
   endfor
@@ -164,23 +160,15 @@ function s = run_inputs_plonk_packed(ilist,cont=0,xdm=[],xdmfun="")
 
   ## Check that we have a normal termination. If not, pass the error 
   ## back to the caller.
+  sout = [];
   for i = 1:length(ilist)
     if (!exist(sprintf("%s.log",ilist{i}),"file"))
-      s = 1;
-      if (cont)
-        continue
-      else
-        return
-      endif
+      sout = [sout i];
+      continue
     endif
     [s out] = system(sprintf("tail -n 1 %s.log | grep 'Normal termination' | wc -l",ilist{i}));
     if (str2num(out) == 0)
-      s = 1;
-      if (cont)
-        continue
-      else
-        return
-      endif
+      sout = [sout i];
     endif
   endfor  
 
