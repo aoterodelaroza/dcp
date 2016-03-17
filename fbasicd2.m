@@ -161,7 +161,7 @@ function [y dy d2y] = fbasicd2(x)
   if (!isempty(srun))
     printf("# List of errors for this step\n")
     for i = srun
-      printf("| %d | %s | %.4f | %14.8f |\n",i,db{i}.name,wei(i),yref(i));
+      printf("| %d | %s | %.4f | %14.8f |\n",i,db{i}.name,db{i}.wei,yref(i));
     endfor
   endif
 
