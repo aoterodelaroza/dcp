@@ -3,7 +3,7 @@
 #PBS -j eo
 #PBS -e ./plonk.log
 #PBS -N plonk
-#PBS -l walltime=168:00:00,mem=4GB,nodes=1:ppn=4
+#PBS -l walltime=240:00:00,mem=4GB,nodes=1:ppn=4
 #PBS -m n
 #PBS -V
 
@@ -12,7 +12,7 @@ LOCKDIR="plonk.lock"
 LOG="plonk.log"
 SLEEPTIME=1
 TLIMIT=3600
-PBS_WALLTIME=604800
+PBS_WALLTIME=864000
 
 TIME0=$(date +%s)
 
@@ -44,7 +44,6 @@ while true; do
     sleep $SLEEPTIME
 
     ## check the time
-    echo "wola"
     TLEFT=$(($PBS_WALLTIME - $(date +%s) + $TIME0))
     if [ $TLEFT -le $TLIMIT ]; then
 	break
