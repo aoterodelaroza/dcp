@@ -61,6 +61,37 @@ function db = parsedb(files)
         db{ndb}.extragau = rest;
       elseif (strcmp(keyw,"ref"))
         db{ndb}.ref = str2num(anew{2});
+      elseif (strcmp(keyw,"molc"))
+        if (!isfield(db{ndb},"nmol"))
+          db{ndb}.nmol = 0;
+          db{ndb}.molc = {};
+        endif
+        db{ndb}.nmol++;
+        im = db{ndb}.nmol;
+        if (length(anew) == 4)
+          db{ndb}.molc{im}.coef = str2num(anew{2});
+          db{ndb}.molc{im}.q = str2num(anew{3});
+          db{ndb}.molc{im}.mult = str2num(anew{4});
+        else
+          error("missing charge, multiplicity, or coefficient.")
+        endif
+        n = 0;
+        db{ndb}.molc{im}.at = {};
+        db{ndb}.molc{im}.x = [];
+        do
+          line = strtrim(fgetl(fid));
+          if (length(line) == 0 || line(1:1) == "#")
+            continue
+          end
+          if (strcmp(tolower(line),"end"))
+            break
+          endif
+          n++;
+          [at x y z] = sscanf(line,"%s %f %f %f","C");
+          db{ndb}.molc{im}.at{n} = at;
+          db{ndb}.molc{im}.x(n,:) = [x y z];
+        until (!ischar(line))
+        db{ndb}.molc{im}.nat = n;
       elseif (strcmp(keyw,"mol"))
         db{ndb}.mol = struct();
         if (length(anew) == 3)

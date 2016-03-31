@@ -27,7 +27,7 @@ function [dy ycalc yref dery ycalcnd] = process_output_one(ent,xdm=0,derivs=0)
 
   if (strcmp(ent.type,"be_frozen_monomer"))
     ## Read the energy for the dimer
-    if (xdm) 
+    if (xdm)
       file = sprintf("%s_%4.4d_%s_mol.pgout",prefix,nstep,ent.name);
     else
       file = sprintf("%s_%4.4d_%s_mol.log",prefix,nstep,ent.name);
@@ -36,7 +36,7 @@ function [dy ycalc yref dery ycalcnd] = process_output_one(ent,xdm=0,derivs=0)
       dy = ycalc = yref = ycalcnd = Inf;
       return
     endif
-    if (xdm) 
+    if (xdm)
       [s out] = system(sprintf("grep 'total energy' %s | awk '{print $NF}'",file));
       [s2 out2] = system(sprintf("grep 'scf energy' %s | awk '{print $NF}'",file));
       e2s = str2num(out2);
@@ -52,7 +52,7 @@ function [dy ycalc yref dery ycalcnd] = process_output_one(ent,xdm=0,derivs=0)
 
     ## Then the monomer 1
     if (ent.mon1.nat > 0)
-      if (xdm) 
+      if (xdm)
         file = sprintf("%s_%4.4d_%s_mon1.pgout",prefix,nstep,ent.name);
       else
         file = sprintf("%s_%4.4d_%s_mon1.log",prefix,nstep,ent.name);
@@ -112,8 +112,6 @@ function [dy ycalc yref dery ycalcnd] = process_output_one(ent,xdm=0,derivs=0)
       ## Scalar calculation
       ycalc = (e2 - e1a - e1b) * h2k;
       ycalcnd = (e2s - e1as - e1bs) * h2k;
-      yref = ent.ref;
-      dy = ycalc - yref;
       dery = 0;
     else
       ## Derivatives/term contribution calculation
@@ -128,8 +126,6 @@ function [dy ycalc yref dery ycalcnd] = process_output_one(ent,xdm=0,derivs=0)
       ## The scalar value
       ycalc = (e2(1) - e1a(1) - e1b(1)) * h2k;
       ycalcnd = (e2s(1) - e1as(1) - e1bs(1)) * h2k;
-      yref = ent.ref;
-      dy = ycalc - yref;
 
       ## Prepare for derivatives 
       e2_c = e2(3:n) - e2(2);
@@ -141,6 +137,64 @@ function [dy ycalc yref dery ycalcnd] = process_output_one(ent,xdm=0,derivs=0)
       dery = zeros(1,n);
       dery = be_c';
     endif
+
+    yref = ent.ref;
+    dy = ycalc - yref;
+
+  elseif (strcmp(ent.type,"reaction_frozen"))
+    ycalc = ycalcnd = 0;
+    dery = [];
+    for j = 1:ent.nmol
+      ## Read the energy for the dimer
+      if (xdm)
+        file = sprintf("%s_%4.4d_%s_mol%d.pgout",prefix,nstep,ent.name,j);
+      else
+        file = sprintf("%s_%4.4d_%s_mol%d.log",prefix,nstep,ent.name,j);
+      endif
+      if (!exist(file,"file"))
+        dy = ycalc = yref = ycalcnd = Inf;
+        return
+      endif
+      if (xdm)
+        [s out] = system(sprintf("grep 'total energy' %s | awk '{print $NF}'",file));
+        [s2 out2] = system(sprintf("grep 'scf energy' %s | awk '{print $NF}'",file));
+        e2s = str2num(out2);
+      else
+        [s out] = system(sprintf("grep Done %s | awk '{print $5}'",file));
+        e2s = 0;
+      endif
+      e2 = str2num(out);
+      if (s != 0 || isempty(e2)) 
+        dy = ycalc = yref = ycalcnd = Inf;
+        return
+      endif
+
+      if (derivs == 0)
+        ## Scalar calculation
+        ycalc += ent.molc{j}.coef * e2 * h2k;
+        ycalcnd += ent.molc{j}.coef * e2s * h2k;
+      else
+        ## Derivatives/term contribution calculation
+        n = length(e2);
+        if (isempty(dery))
+          dery = zeros(1,n-2);
+        endif
+
+        ## The scalar value
+        ycalc += ent.molc{j}.coef * e2(1) * h2k;
+        ycalcnd += ent.molc{j}.coef * e2s(1) * h2k;
+
+        ## Prepare for derivatives 
+        e2_c = ent.molc{j}.coef * (e2(3:n) - e2(2)) * h2k;
+
+        ## First derivatives
+        dery += e2_c';
+      endif
+    endfor
+
+    yref = ent.ref;
+    dy = ycalc - yref;
+
   elseif (strcmp(ent.type,"total_energy"))
     ## Read the output energy
     file = sprintf("%s_%4.4d_%s_mol.log",prefix,nstep,ent.name);

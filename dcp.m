@@ -154,18 +154,36 @@ for i = 1:length(dcp)
   atom = dcp{i}.atom;
   ifound = 0;
   for j = 1:length(db)
-    for k = 1:db{j}.mol.nat
-      if (tolower(atom) == tolower(db{j}.mol.at{k}))
-        ifound = 1;
+    if (isfield(db{j},"mol"))
+      for k = 1:db{j}.mol.nat
+        if (tolower(atom) == tolower(db{j}.mol.at{k}))
+          ifound = 1;
+          break
+        endif
+      endfor
+      if (ifound)
         break
       endif
-    endfor
-    if (ifound)
-      break
+    endif
+    if (isfield(db{j},"nmol"))
+      for im = 1:db{j}.nmol
+        for k = 1:db{j}.molc{im}.nat
+          if (tolower(atom) == tolower(db{j}.molc{im}.at{k}))
+            ifound = 1;
+            break
+          endif
+        endfor
+        if (ifound == 1)
+          break
+        endif
+      endfor
+      if (ifound)
+        break
+      endif
     endif
   endfor
   if (!ifound)
-    error(sprintf("Atom %s is present in the inital DCP file (%s) but is not present in any of the DB files.",atom,dcpini))
+    error(sprintf("Atom %s is present in the inital DCP file (%s) but is not present in any of the DB files.",atom,dcpini{i}))
   endif
 endfor
 

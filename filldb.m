@@ -135,6 +135,28 @@ function db = filldb(db,weis=[],method=[],extragau);
           error(sprintf("Monomer 2 in entry %s is not sane",db{i}.file))
         endif
       endif
+    elseif (strcmp(db{i}.type,"reaction_frozen"))
+      ## Fill charge and multiplicity with default values
+      if (!isfield(db{i},"ref"))
+        error(sprintf("Entry %s has no reference energy",db{i}.file))
+      endif
+      if (!isfield(db{i},"molc") || !isfield(db{i},"nmol"))
+        error(sprintf("Entry %s has no molecules",db{i}.file))
+      endif
+      for j = 1:db{i}.nmol
+        if (!isfield(db{i}.molc{j},"q"))
+          db{i}.molc{j}.q = 0;
+        endif
+        if (!isfield(db{i}.molc{j},"mult"))
+          db{i}.molc{j}.mult = 1;
+        endif
+        if (!isfield(db{i}.molc{j},"nat") || db{i}.molc{j}.nat <= 0)
+          error(sprintf("Dimer in entry %s has no atoms",db{i}.file))
+        endif
+        if (!isfield(db{i}.molc{j},"at") || !isfield(db{i}.molc{j},"x"))
+          error(sprintf("Dimer in entry %s is not sane",db{i}.file))
+        endif
+      endfor
     elseif (strcmp(db{i}.type,"intramol_geometry") || strcmp(db{i}.type,"total_energy") || strcmp(db{i}.type,"dipole"))
       ## Sanity checks for the intramolecular geometry/total energy/dipole calculations
       if (!isfield(db{i},"mol"))

@@ -49,6 +49,15 @@ function ilist = setup_input_one(ent,dcp,derivs=0)
       writegjf(file,dcp,dcp0,basis,ent.mon2.at,ent.mon2.x,ent.mon2.q,ent.mon2.mult,ent,chk,wfx,derivs);
       ilist = {ilist{:}, sprintf("%s_%4.4d_%s_mon2",prefix,nstep,ent.name)};
     endif
+  elseif (strcmp(ent.type,"reaction_frozen"))
+    ## First the dimer
+    for j = 1:ent.nmol
+      chk = sprintf("%s_%4.4d_%s_mol%d.chk",prefix,nstep,ent.name,j);
+      wfx = sprintf("%s_%4.4d_%s_mol%d.wfx",prefix,nstep,ent.name,j);
+      file = sprintf("%s_%4.4d_%s_mol%d.gjf",prefix,nstep,ent.name,j);
+      writegjf(file,dcp,dcp0,basis,ent.molc{j}.at,ent.molc{j}.x,ent.molc{j}.q,ent.molc{j}.mult,ent,chk,wfx,derivs);
+      ilist = {ilist{:}, sprintf("%s_%4.4d_%s_mol%d",prefix,nstep,ent.name,j)};
+    endfor
   elseif (strcmp(ent.type,"total_energy"))
     ## A total energy calculation
     chk = sprintf("%s_%4.4d_%s_mol.chk",prefix,nstep,ent.name);
