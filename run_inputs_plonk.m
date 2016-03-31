@@ -55,6 +55,7 @@ function sout = run_inputs_plonk(ilist,xdm=[],xdmfun="")
     if (!isempty(xdm))
       fprintf(fid,"~/git/postg/postg %.10f %.10f %s.wfx %s > %s.pgout\n",xdm(1),xdm(2),name,xdmfun,name);
     endif
+    fprintf(fid,"rm -f %s.chk\n",name);
     fprintf(fid,"touch %s.done\n",name);
     fclose(fid);
     jobname = {jobname{:} sprintf("%s.sub",name)};
