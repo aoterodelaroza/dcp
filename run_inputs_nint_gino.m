@@ -85,9 +85,9 @@ function sout = run_inputs_nint_gino(ilist,xdm=[],xdmfun="")
     fprintf(fid,"  g03 $j\n");
     fprintf(fid,"done\n");
     if (!isempty(xdm))
-      fprintf(fid,"tar cjf %s.tar.bz2 *.log *.pgout\n",name);
+      fprintf(fid,"tar cjf %s.tar.bz2 *.log *.wfx *.pgout\n",name);
     else
-      fprintf(fid,"tar cjf %s.tar.bz2 *.log\n",name);
+      fprintf(fid,"tar cjf %s.tar.bz2 *.log *.wfx\n",name);
     endif
     fprintf(fid,"mv %s.tar.bz2 /home/dilabiog/alberto/run/%s\n",name,dirname);
     fprintf(fid,"cd /home/dilabiog/alberto/run/%s\n",dirname);
