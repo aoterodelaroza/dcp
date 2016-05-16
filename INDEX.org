@@ -33,3 +33,5 @@
 - h2o_trimers : three-body energies of water trimers calculated using
   Shield's approach (MP2, CBS extrapolation).
 
+- bde_shaq : BDEs for Shaq's fits.
+
