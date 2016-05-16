@@ -1,0 +1,35 @@
+- attic : old scripts I don't use anymore.
+
+- atz_blyp : BLYP/aug-cc-pVTZ data, BDE, NCI, and energies.
+
+- atz_hf : BLYP/aug-cc-pVTZ data, BDE, NCI, and energies.
+
+- db : popular NCI and BDE sets using reference data. 
+
+- dipole_blyp : dipoles of small molecules from the G3 calculated
+  using BLYP/aug-cc-pVTZ.
+
+- geom_blyp : intramolecular geometries of small molecules from the G3
+  set calcualted using BLYP/aug-cc-pVTZ.
+
+- geom_blyp-d3 : intermolecular geometries of molecular dimers from
+  the KB49 set using BLYP-D3/aug-cc-pVTZ.
+
+- geom_hf : intramolecular geometries of small molecules from the G3
+  set calculated using HF/aug-cc-pVTZ.
+
+- geom_hf : intramolecular geometries of small molecules from the G3
+  set calculated using LC-wPBE/aug-cc-pVTZ.
+
+- geom_hf : intramolecular geometries of small molecules from the G3
+  set calculated using PBE/aug-cc-pVTZ.
+
+- geom_hf : intramolecular geometries of small molecules from the G3
+  set calculated using PBE0/aug-cc-pVTZ.
+
+- h2o_dimers : water dimer binding energies calculated using Shield's
+  approach (MP2, CBS extrapolation).
+
+- h2o_trimers : three-body energies of water trimers calculated using
+  Shield's approach (MP2, CBS extrapolation).
+
