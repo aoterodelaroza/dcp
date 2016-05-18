@@ -97,6 +97,19 @@ function writedb(db,file="")
         fprintf(fid,"end\n");
       endif
     endif
+    ## molc
+    if (isfield(db{i},"molc"))
+      for j = 1:length(db{i}.molc)
+        fprintf(fid,"molc %.10f %d %d\n",db{i}.molc{j}.coef,db{i}.molc{j}.q,db{i}.molc{j}.mult);
+        if (isfield(db{i}.molc{j},"extragau"))
+          fprintf(fid,"extragau %s\n",db{i}.molc{j}.extragau);
+        endif
+        for k = 1:db{i}.molc{j}.nat
+          fprintf(fid,"%s %.10f %.10f %.10f\n",db{i}.molc{j}.at{k},db{i}.molc{j}.x(k,:));
+        endfor
+        fprintf(fid,"end\n");
+      endfor
+    endif
   endfor
 
   ## Wrap up
