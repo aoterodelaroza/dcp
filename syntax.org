@@ -1,0 +1,68 @@
+| Keyword          | Field        | Type           | Apropos                                                                            |
+| type             | type         | string         | The type of database entry. See below.                                             |
+| --auto filled--  | file         | string         | Name of the source db file.                                                        |
+| name             | name         | string         | Name of the entry.                                                                 |
+| --input block--  | wei          | num            | Weight of this database entry.                                                     |
+| --input block--  | method       | string         | Method in Gaussian route section                                                   |
+| --input block--  | extragau     | string         | Extra info for Gaussian's route section. Applies to all molecules in the db entry. |
+| ref              | ref          | num            | Reference value (energy, distance, etc.). Units depend on "type" (see below).      |
+| mol q mult       | mol          | struct         | A molecule (possibly, a dimer).                                                    |
+|                  | mol.q        | num            | Charge.                                                                            |
+|                  | mol.mult     | num            | Multiplicity.                                                                      |
+|                  | mol.nat      | num            | Number of atoms in the molecule.                                                   |
+|                  | mol.at       | cell           | Atomic symbols.                                                                    |
+|                  | mol.x        | nx3            | Atomic coordinates (angstrom).                                                     |
+| mon1 q mult      | mon1         | struct         | First monomer.                                                                     |
+|                  | mon1.q       | num            | Charge.                                                                            |
+|                  | mon1.mult    | num            | Multiplicity.                                                                      |
+|                  | mon1.nat     | num            | Number of atoms in the molecule.                                                   |
+|                  | mon1.at      | cell           | Atomic symbols.                                                                    |
+|                  | mon1.x       | nx3            | Atomic coordinates (angstrom).                                                     |
+| mon2 q mult      | mon2         | struct         | Second monomer.                                                                    |
+|                  | mon2.q       | num            | Charge.                                                                            |
+|                  | mon2.mult    | num            | Multiplicity.                                                                      |
+|                  | mon2.nat     | num            | Number of atoms in the molecule.                                                   |
+|                  | mon2.at      | cell           | Atomic symbols.                                                                    |
+|                  | mon2.x       | nx3            | Atomic coordinates (angstrom).                                                     |
+| molc coef q mult | molc         | cell of struct | A monomer with associated coefficient (for a reaction).                            |
+|                  | molc{i}.coef | num            | Coefficient for this entry.                                                        |
+|                  | molc{i}.q    | num            | Charge.                                                                            |
+|                  | molc{i}.mult | num            | Multiplicity.                                                                      |
+|                  | molc{i}.nat  | num            | Number of atoms in the molecule.                                                   |
+|                  | molc{i}.at   | cell           | Atomic symbols.                                                                    |
+|                  | molc{i}.x    | nx3            | Atomic coordinates (angstrom).                                                     |
+
+* Types
+** reaction_frozen
+
+A reaction with fixed geometries. The geometries for reactants and
+products and all the associated coefficients are indicated. Requires:
+"type", "ref", and at least one molc entry. The units of ref are
+kcal/mol, and it corresponds to the energy of each component molecule
+multiplied by their respective coefficients.
+
+** intermol_geometry
+
+Intermolecular geometries. A dimer (mol) and its two component
+monomers (mon1 and mon2) are required. The units of ref are angstrom,
+and they correspond to the distance between the centers of mass of the
+two monomers. The reported values are angstrom.
+
+** intramol_geometry
+
+Intramolecular geometries. A molecule (mol) is required, and no ref is
+necessary. The relaxed geometry is compared to the reference in the db
+file by means of the Kabsch algorithm. The RMS deviation is reported
+in thousandths of an angstrom.
+
+** total_energy
+
+Total energy calculation. A molecule (mol) is required. The ref is the
+reference energy for that molecule, in Hartree. The energy in Hartrees
+is reported. 
+
+** dipole
+
+A dipole calculation. A molecule (mol) is required. The ref is the
+dipole in Debye. The dipole in Debye is reported. 
+
