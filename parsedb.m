@@ -80,14 +80,20 @@ function db = parsedb(files)
         db{ndb}.molc{im}.x = [];
         do
           line = strtrim(fgetl(fid));
+          anew = strfields(line);
+          keyw = lower(anew{1});
+          rest = strrep(line,anew{1},"");
+
           if (length(line) == 0 || line(1:1) == "#")
             continue
-          end
-          if (strcmp(tolower(line),"end"))
+          elseif(strcmp(tolower(keyw),"extragau"))
+            db{ndb}.molc{im}.extragau = rest;
+            continue
+          elseif (strcmp(tolower(keyw),"end"))
             break
           endif
-          n++;
           [at x y z] = sscanf(line,"%s %f %f %f","C");
+          n++;
           db{ndb}.molc{im}.at{n} = at;
           db{ndb}.molc{im}.x(n,:) = [x y z];
         until (!ischar(line))
@@ -103,14 +109,20 @@ function db = parsedb(files)
         db{ndb}.mol.x = [];
         do 
           line = strtrim(fgetl(fid));
+          anew = strfields(line);
+          keyw = lower(anew{1});
+          rest = strrep(line,anew{1},"");
+
           if (length(line) == 0 || line(1:1) == "#")
             continue
-          end
-          if (strcmp(tolower(line),"end"))
+          elseif(strcmp(tolower(keyw),"extragau"))
+            db{ndb}.mol.extragau = rest;
+            continue
+          elseif (strcmp(tolower(keyw),"end"))
             break
           endif
-          n++;
           [at x y z] = sscanf(line,"%s %f %f %f","C");
+          n++;
           db{ndb}.mol.at{n} = at;
           db{ndb}.mol.x(n,:) = [x y z];
         until (!ischar(line))
@@ -129,14 +141,20 @@ function db = parsedb(files)
         db{ndb}.mon1.x = [];
         do 
            line = strtrim(fgetl(fid));
+           anew = strfields(line);
+           keyw = lower(anew{1});
+           rest = strrep(line,anew{1},"");
+
            if (length(line) == 0 || line(1:1) == "#")
              continue
-           end
-           if (strcmp(tolower(line),"end"))
+           elseif(strcmp(tolower(keyw),"extragau"))
+             db{ndb}.mon1.extragau = rest;
+             continue
+           elseif (strcmp(tolower(keyw),"end"))
              break
            endif
-           n++;
            [at x y z] = sscanf(line,"%s %f %f %f","C");
+           n++;
            db{ndb}.mon1.at{n} = at;
            db{ndb}.mon1.x(n,:) = [x y z];
         until (!ischar(line))
@@ -155,14 +173,20 @@ function db = parsedb(files)
         db{ndb}.mon2.x = [];
         do 
            line = strtrim(fgetl(fid));
+           anew = strfields(line);
+           keyw = lower(anew{1});
+           rest = strrep(line,anew{1},"");
+
            if (length(line) == 0 || line(1:1) == "#")
              continue
-           end
-           if (strcmp(tolower(line),"end"))
+           elseif(strcmp(tolower(keyw),"extragau"))
+             db{ndb}.mon2.extragau = rest;
+             continue
+           elseif (strcmp(tolower(keyw),"end"))
              break
            endif
-           n++;
            [at x y z] = sscanf(line,"%s %f %f %f","C");
+           n++;
            db{ndb}.mon2.at{n} = at;
            db{ndb}.mon2.x(n,:) = [x y z];
         until (!ischar(line))

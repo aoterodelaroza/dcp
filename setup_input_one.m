@@ -25,12 +25,17 @@ function ilist = setup_input_one(ent,dcp,derivs=0)
 
   ilist = {};
   if (strcmp(ent.type,"reaction_frozen"))
-    ## First the dimer
+    ## Write a gjf for every molecule
     for j = 1:ent.nmol
       chk = sprintf("%s_%4.4d_%s_mol%d.chk",prefix,nstep,ent.name,j);
       wfx = sprintf("%s_%4.4d_%s_mol%d.wfx",prefix,nstep,ent.name,j);
       file = sprintf("%s_%4.4d_%s_mol%d.gjf",prefix,nstep,ent.name,j);
-      writegjf(file,dcp,dcp0,basis,ent.molc{j}.at,ent.molc{j}.x,ent.molc{j}.q,ent.molc{j}.mult,ent,chk,wfx,derivs);
+      if (isfield(ent.molc{j},"extragau"))
+        extragau = ent.molc{j}.extragau;
+      else
+        extragau = "";
+      endif
+      writegjf(file,dcp,dcp0,basis,ent.molc{j}.at,ent.molc{j}.x,ent.molc{j}.q,ent.molc{j}.mult,ent,extragau,chk,wfx,derivs);
       ilist = {ilist{:}, sprintf("%s_%4.4d_%s_mol%d",prefix,nstep,ent.name,j)};
     endfor
   elseif (strcmp(ent.type,"total_energy"))
@@ -38,18 +43,33 @@ function ilist = setup_input_one(ent,dcp,derivs=0)
     chk = sprintf("%s_%4.4d_%s_mol.chk",prefix,nstep,ent.name);
     wfx = sprintf("%s_%4.4d_%s_mol.wfx",prefix,nstep,ent.name);
     file = sprintf("%s_%4.4d_%s_mol.gjf",prefix,nstep,ent.name);
-    writegjf(file,dcp,dcp0,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult,ent,chk,wfx,derivs);
+    if (isfield(ent.mol,"extragau"))
+      extragau = ent.mol.extragau;
+    else
+      extragau = "";
+    endif
+    writegjf(file,dcp,dcp0,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult,ent,extragau,chk,wfx,derivs);
     ilist = {ilist{:}, sprintf("%s_%4.4d_%s_mol",prefix,nstep,ent.name)};
   elseif (strcmp(ent.type,"intramol_geometry") || strcmp(ent.type,"intermol_geometry"))
     ## A geometry relaxation; append "opt" to extragau
     file = sprintf("%s_%4.4d_%s_mol.gjf",prefix,nstep,ent.name);
     ent.extragau = sprintf("%s opt=(nomicro)",ent.extragau);
-    writegjf(file,dcp,dcp0,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult,ent,:,:,0);
+    if (isfield(ent.mol,"extragau"))
+      extragau = ent.mol.extragau;
+    else
+      extragau = "";
+    endif
+    writegjf(file,dcp,dcp0,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult,ent,extragau,:,:,0);
     ilist = {ilist{:}, sprintf("%s_%4.4d_%s_mol",prefix,nstep,ent.name)};
   elseif (strcmp(ent.type,"dipole"))
     ## A dipole calculation
     file = sprintf("%s_%4.4d_%s_mol.gjf",prefix,nstep,ent.name);
-    writegjf(file,dcp,dcp0,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult,ent,:,:,0);
+    if (isfield(ent.mol,"extragau"))
+      extragau = ent.mol.extragau;
+    else
+      extragau = "";
+    endif
+    writegjf(file,dcp,dcp0,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult,ent,extragau,:,:,0);
     ilist = {ilist{:}, sprintf("%s_%4.4d_%s_mol",prefix,nstep,ent.name)};
   else
     ## I don't know what that type is

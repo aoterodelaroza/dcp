@@ -59,6 +59,9 @@ function writedb(db,file="")
     ## mol
     if (isfield(db{i},"mol"))
       fprintf(fid,"mol %d %d\n",db{i}.mol.q,db{i}.mol.mult);
+      if (isfield(db{i}.mol,"extragau"))
+        fprintf(fid,"extragau %s\n",db{i}.mol.extragau);
+      endif
       for j = 1:db{i}.mol.nat
         fprintf(fid,"%s %.10f %.10f %.10f\n",db{i}.mol.at{j},db{i}.mol.x(j,:));
       endfor
@@ -70,6 +73,9 @@ function writedb(db,file="")
         fprintf(fid,"mon1 void\n");
       else
         fprintf(fid,"mon1 %d %d\n",db{i}.mon1.q,db{i}.mon1.mult);
+        if (isfield(db{i}.mon1,"extragau"))
+          fprintf(fid,"extragau %s\n",db{i}.mon1.extragau);
+        endif
         for j = 1:db{i}.mon1.nat
           fprintf(fid,"%s %.10f %.10f %.10f\n",db{i}.mon1.at{j},db{i}.mon1.x(j,:));
         endfor
@@ -81,7 +87,10 @@ function writedb(db,file="")
       if (db{i}.mon2.nat == 0) 
         fprintf(fid,"mon2 void");
       else
-        fprintf(fid,"mon2 %d %d\n",db{i}.mon2.q,db{i}.mon2.mult);
+        fprintf(fid,"mon2 %d %d\n",db{i}.mon2.q,db{i}.mon2.mult); 
+        if (isfield(db{i}.mon2,"extragau"))
+          fprintf(fid,"extragau %s\n",db{i}.mon2.extragau);
+        endif
         for j = 1:db{i}.mon2.nat
           fprintf(fid,"%s %.10f %.10f %.10f\n",db{i}.mon2.at{j},db{i}.mon2.x(j,:));
         endfor
