@@ -1,5 +1,5 @@
 type reaction_frozen
-ref 108.2000
+ref -108.2000
 molc 1.0 0 1
 extragau guess=mix
 C -1.4753020000 0.0001630000 0.0004270000
