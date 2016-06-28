@@ -41,7 +41,7 @@ mem=2;
 ## List of database files to use in DCP optimization
 ## [s out] = system("ls db/*.db");
 ## listdb = strfields(out);
-listdb = {"atz_blyp/bde_p-p.db"};
+listdb = {"atz_blyp/mpole_h2o.db"};
 weightdb=[];
 
 ## List of DCP files to evaluate (you can use a cell array of files
@@ -160,13 +160,13 @@ for idcp = 1:length(dcpini)
     printf("| Id|           Name       |       yref   |      ycalc   |       dy     |\n");
     for i = 1:length(db)
       printf("| %d | %20s | %14.8f | %14.8f | %14.8f |\n",...
-             i,db{i}.name,yref(i),ycalc(i),dy(i));
+             i,db{i}.outname,yref(i),ycalc(i),dy(i));
     endfor
   else
     printf("| Id|           Name       |       yref   |      ycalc   |  ycalc(scf)  |       dy     |\n");
     for i = 1:length(db)
       printf("| %d | %20s | %14.8f | %14.8f | %14.8f | %14.8f |\n",...
-             i,db{i}.name,yref(i),ycalc(i),ycalcnd(i),dy(i));
+             i,db{i}.outname,yref(i),ycalc(i),ycalcnd(i),dy(i));
     endfor
   endif
   printf("\n");

@@ -42,6 +42,7 @@ function db = parsedb(files)
     ## Create a new entry in the database for it
     ndb++;
     db{ndb}.file = files{i};
+    ismp = zeros(1,34);
     ## Parse all the keywords
     while (!feof(fid))
       ## Read the next line
@@ -60,7 +61,114 @@ function db = parsedb(files)
       elseif (strcmp(keyw,"extragau"))
         db{ndb}.extragau = rest;
       elseif (strcmp(keyw,"ref"))
-        db{ndb}.ref = str2num(anew{2});
+        if (length(anew) > 2) 
+          mp = lower(anew{2});
+          if (strcmp(mp,"x"))
+            db{ndb}.ref(1) = str2num(anew{3});
+            ismp(1) = 1;
+          elseif (strcmp(mp,"y"))
+            db{ndb}.ref(2) = str2num(anew{3});
+            ismp(2) = 1;
+          elseif (strcmp(mp,"z"))
+            db{ndb}.ref(3) = str2num(anew{3});
+            ismp(3) = 1;
+          elseif (strcmp(mp,"xx"))
+            db{ndb}.ref(4) = str2num(anew{3});
+            ismp(4) = 1;
+          elseif (strcmp(mp,"yy"))
+            db{ndb}.ref(5) = str2num(anew{3});
+            ismp(5) = 1;
+          elseif (strcmp(mp,"zz"))
+            db{ndb}.ref(6) = str2num(anew{3});
+            ismp(6) = 1;
+          elseif (strcmp(mp,"xy"))
+            db{ndb}.ref(7) = str2num(anew{3});
+            ismp(7) = 1;
+          elseif (strcmp(mp,"xz"))
+            db{ndb}.ref(8) = str2num(anew{3});
+            ismp(8) = 1;
+          elseif (strcmp(mp,"yz"))
+            db{ndb}.ref(9) = str2num(anew{3});
+            ismp(9) = 1;
+          elseif (strcmp(mp,"xxx"))
+            db{ndb}.ref(10) = str2num(anew{3});
+            ismp(10) = 1;
+          elseif (strcmp(mp,"yyy"))
+            db{ndb}.ref(11) = str2num(anew{3});
+            ismp(11) = 1;
+          elseif (strcmp(mp,"zzz"))
+            db{ndb}.ref(12) = str2num(anew{3});
+            ismp(12) = 1;
+          elseif (strcmp(mp,"xyy"))
+            db{ndb}.ref(13) = str2num(anew{3});
+            ismp(13) = 1;
+          elseif (strcmp(mp,"xxy"))
+            db{ndb}.ref(14) = str2num(anew{3});
+            ismp(14) = 1;
+          elseif (strcmp(mp,"xxz"))
+            db{ndb}.ref(15) = str2num(anew{3});
+            ismp(15) = 1;
+          elseif (strcmp(mp,"xzz"))
+            db{ndb}.ref(16) = str2num(anew{3});
+            ismp(16) = 1;
+          elseif (strcmp(mp,"yzz"))
+            db{ndb}.ref(17) = str2num(anew{3});
+            ismp(17) = 1;
+          elseif (strcmp(mp,"yyz"))
+            db{ndb}.ref(18) = str2num(anew{3});
+            ismp(18) = 1;
+          elseif (strcmp(mp,"xyz"))
+            db{ndb}.ref(19) = str2num(anew{3});
+            ismp(19) = 1;
+          elseif (strcmp(mp,"xxxx"))
+            db{ndb}.ref(20) = str2num(anew{3});
+            ismp(20) = 1;
+          elseif (strcmp(mp,"yyyy"))
+            db{ndb}.ref(21) = str2num(anew{3});
+            ismp(21) = 1;
+          elseif (strcmp(mp,"zzzz"))
+            db{ndb}.ref(22) = str2num(anew{3});
+            ismp(22) = 1;
+          elseif (strcmp(mp,"xxxy"))
+            db{ndb}.ref(23) = str2num(anew{3});
+            ismp(23) = 1;
+          elseif (strcmp(mp,"xxxz"))
+            db{ndb}.ref(24) = str2num(anew{3});
+            ismp(24) = 1;
+          elseif (strcmp(mp,"yyyx"))
+            db{ndb}.ref(25) = str2num(anew{3});
+            ismp(25) = 1;
+          elseif (strcmp(mp,"yyyz"))
+            db{ndb}.ref(26) = str2num(anew{3});
+            ismp(26) = 1;
+          elseif (strcmp(mp,"zzzx"))
+            db{ndb}.ref(27) = str2num(anew{3});
+            ismp(27) = 1;
+          elseif (strcmp(mp,"zzzy"))
+            db{ndb}.ref(28) = str2num(anew{3});
+            ismp(28) = 1;
+          elseif (strcmp(mp,"xxyy"))
+            db{ndb}.ref(29) = str2num(anew{3});
+            ismp(29) = 1;
+          elseif (strcmp(mp,"xxzz"))
+            db{ndb}.ref(30) = str2num(anew{3});
+            ismp(30) = 1;
+          elseif (strcmp(mp,"yyzz"))
+            db{ndb}.ref(31) = str2num(anew{3});
+            ismp(31) = 1;
+          elseif (strcmp(mp,"xxyz"))
+            db{ndb}.ref(32) = str2num(anew{3});
+            ismp(32) = 1;
+          elseif (strcmp(mp,"yyxz"))
+            db{ndb}.ref(33) = str2num(anew{3});
+            ismp(33) = 1;
+          elseif (strcmp(mp,"zzxy"))
+            db{ndb}.ref(34) = str2num(anew{3});
+            ismp(34) = 1;
+          endif
+        else
+          db{ndb}.ref = str2num(anew{2});
+        endif
       elseif (strcmp(keyw,"molc"))
         if (!isfield(db{ndb},"nmol"))
           db{ndb}.nmol = 0;
@@ -193,8 +301,25 @@ function db = parsedb(files)
         db{ndb}.mon2.nat = n;
       endif
     endwhile
+
     ## Wrap up
     fclose(fid);
+
+    ## post-process if this is a "multipoles" entry
+    if (strcmp(db{ndb}.type,"multipoles"))
+      eref = db{ndb}.ref;
+      db0 = db{ndb};
+      for j = 1:length(eref)
+        if (ismp(j))
+          db{ndb} = db0;
+          db{ndb}.ref = eref(j);
+          db{ndb}.reftype = j; ## save the component for later
+          ndb++;
+        endif
+      endfor
+      ndb--;
+    endif
+
   endfor
 
 end

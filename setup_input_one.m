@@ -71,6 +71,19 @@ function ilist = setup_input_one(ent,dcp,derivs=0)
     endif
     writegjf(file,dcp,dcp0,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult,ent,extragau,:,:,0);
     ilist = {ilist{:}, sprintf("%s_%4.4d_%s_mol",prefix,nstep,ent.name)};
+  elseif (strcmp(ent.type,"multipoles"))
+    ## A multipole calculation. They usually come in bunches, so if the input
+    ## file already exists, skip it.
+    file = sprintf("%s_%4.4d_%s_mol.gjf",prefix,nstep,ent.name);
+    if (!exist(file,"file"))
+      if (isfield(ent.mol,"extragau"))
+        extragau = ent.mol.extragau;
+      else
+        extragau = "";
+      endif
+      writegjf(file,dcp,dcp0,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult,ent,extragau,:,:,0);
+      ilist = {ilist{:}, sprintf("%s_%4.4d_%s_mol",prefix,nstep,ent.name)};
+    endif
   else
     ## I don't know what that type is
     error(sprintf("Unknown type (%s) in entry %s",db{i}.type,db{i}.file))

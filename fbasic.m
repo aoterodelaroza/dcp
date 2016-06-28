@@ -151,7 +151,7 @@ function y = fbasic(x)
   if (!isempty(srun))
     printf("# List of errors for this step\n")
     for i = srun
-      printf("| %d | %s | %.4f | %14.8f |\n",i,db{i}.name,db{i}.wei,yref(i));
+      printf("| %d | %s | %.4f | %14.8f |\n",i,db{i}.outname,db{i}.wei,yref(i));
     endfor
   endif
 
@@ -160,7 +160,7 @@ function y = fbasic(x)
     printf("| Id | Name | weig | yref | ycalc | dy |\n")
     for i = 1:length(db)
       printf("| %d | %s | %14.8f | %14.8f | %14.8f | %14.8f |\n",...
-             i,db{i}.name,wei(i),yref(i),ycalc(i),dy(i))
+             i,db{i}.outname,wei(i),yref(i),ycalc(i),dy(i))
     endfor
   endif
   
@@ -178,7 +178,7 @@ function y = fbasic(x)
       fprintf(fid,"| Id | Name | weig | yref | ycalc | dy |\n")
       for i = 1:length(db)
         fprintf(fid,"| %d | %s | %.4f | %14.8f | %14.8f | %.4f |\n",...
-                i,db{i}.name,wei(i),yref(i),ycalc(i),dy(i))
+                i,db{i}.outname,wei(i),yref(i),ycalc(i),dy(i))
       endfor
       fprintf(fid,"# MAE = %.4f\n",mean(abs(yref-ycalc)));
       fprintf(fid,"# MAPE = %.4f\n",mean(abs((yref-ycalc)./yref))*100);

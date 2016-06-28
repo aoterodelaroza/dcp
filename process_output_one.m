@@ -154,7 +154,7 @@ function [dy ycalc yref dery ycalcnd] = process_output_one(ent,xdm=0,derivs=0)
     dy = ycalc - yref;
     dery = 0;
   elseif (strcmp(ent.type,"dipole"))
-    ## Read the output energy
+    ## Read the dipole from the output
     file = sprintf("%s_%4.4d_%s_mol.log",prefix,nstep,ent.name);
     if (!exist(file,"file"))
       dy = ycalc = yref = ycalcnd = Inf;
@@ -166,6 +166,42 @@ function [dy ycalc yref dery ycalcnd] = process_output_one(ent,xdm=0,derivs=0)
       dy = ycalc = yref = ycalcnd = Inf;
       return
     endif
+
+    ## Compare to the reference molecule
+    ycalc = e;
+    ycalcnd = e;
+    yref = ent.ref;
+    dy = e-ent.ref;
+    dery = 0;
+  elseif (strcmp(ent.type,"multipoles"))
+    ## Read the multipoles from the output
+    file = sprintf("%s_%4.4d_%s_mol.log",prefix,nstep,ent.name);
+
+    if (!exist(file,"file"))
+      dy = ycalc = yref = ycalcnd = Inf;
+      return
+    endif
+
+    e = zeros(1,34);
+    if (ent.reftype >= 1 && ent.reftype <= 3)
+      [s out] = system(sprintf("grep -A 1 'Dipole moment' %s | tail -n 1 | awk '{print $2, $4, $6}' | tr '\n' ' '",file));
+      e(1:3) = str2num(out);
+    elseif (ent.reftype >= 4 && ent.reftype <= 9)
+      [s out] = system(sprintf("grep -A 2 '^ *Quadrupole moment' %s | tail -n 2 | awk '{print $2, $4, $6}' | tr '\n' ' '",file));
+      e(4:9) = str2num(out);
+    elseif (ent.reftype >= 10 && ent.reftype <= 19)
+      [s out] = system(sprintf("grep -A 3 'Octapole moment' %s | tail -n 3 | awk '{print $2, $4, $6, $8}' | tr '\n' ' '",file));
+      e(10:19) = str2num(out);
+    elseif (ent.reftype >= 20 && ent.reftype <= 34)
+      [s out] = system(sprintf("grep -A 4 'Hexadecapole moment' %s | tail -n 4 | awk '{print $2, $4, $6, $8}' | tr '\n' ' '",file));
+      e(20:34) = str2num(out);
+    endif
+
+    if (s != 0 || isempty(e)) 
+      dy = ycalc = yref = ycalcnd = Inf;
+      return
+    endif
+    e = e(ent.reftype);
 
     ## Compare to the reference molecule
     ycalc = e;

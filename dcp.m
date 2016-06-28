@@ -189,7 +189,7 @@ endfor
 
 ## print out of the db, for checking the names, number of dimers, and weight assigments
 ## for i = 1:length(db)
-##   printf("| %d | %s | %.1f | %14.8f |\n",i,db{i}.name,db{i}.wei,db{i}.ref);
+##   printf("| %d | %s | %.1f | %14.8f |\n",i,db{i}.outname,db{i}.wei,db{i}.ref);
 ## endfor
 ## exit
 
@@ -262,7 +262,7 @@ for i = 1:length(db)
   yref(i) = db{i}.ref;
   dy(i) = ycur(i) - yref(i);
   printf("| %d | %s | %.8f | %.8f | %.8f |\n",...
-         i,db{i}.name,yref(i),ycur(i),dy(i));
+         i,db{i}.outname,yref(i),ycur(i),dy(i));
 endfor
 printf("# Norm of the coeffs = %.4e\n",sqrt(sum(xmin(2:2:end).^2)));
 printf("# MAE = %.4f\n",mean(abs(yref-ycur)));

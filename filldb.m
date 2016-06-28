@@ -23,6 +23,11 @@ function db = filldb(db,weis=[],method=[],extragau);
   %%
   %% and only apply if the same fields were not found in the database.
 
+  mpoletr = {"x","y","z","xx","yy","zz","xy","xz","yz","xxx","yyy","zzz",...
+             "xyy","xxy","xxz","xzz","yzz","yyz","xyz","xxxx","yyyy",...
+             "zzzz","xxxy","xxxz","yyyx","yyyz","zzzx","zzzy","xxyy",...
+             "xxzz","yyzz","xxyz","yyxz","zzxy"};
+          
   ## Check that the weights are sane and normalize
   if (!isempty(weis))
     if (length(weis) != length(db))
@@ -35,6 +40,7 @@ function db = filldb(db,weis=[],method=[],extragau);
 
   ## Run over all entries in the database
   for i = 1:length(db)
+
     ## Check that the entry is associated to a file
     if (!isfield(db{i},"file"))
       error(sprintf("Entry number %d has no associated file",i))
@@ -54,6 +60,8 @@ function db = filldb(db,weis=[],method=[],extragau);
         db{i}.name = substr(db{i}.name,idx+1);
       endif
     endif
+    ## Output name is the same as name (see multipoles below)
+    db{i}.outname = db{i}.name;
 
     ## Fill missing fields in the database with default values
     if (!isfield(db{i},"wei"))
@@ -174,6 +182,30 @@ function db = filldb(db,weis=[],method=[],extragau);
       if (!isfield(db{i}.mol,"at") || !isfield(db{i}.mol,"x"))
         error(sprintf("Molecule entry %s is not sane",db{i}.file))
       endif
+    elseif (strcmp(db{i}.type,"multipoles"))
+      ## Sanity checks for the multipole calculations
+      if (!isfield(db{i},"mol"))
+        error(sprintf("Entry %s has no molecular structure",db{i}.file))
+      endif
+      if (!isfield(db{i}.mol,"q"))
+        db{i}.mol.q = 0;
+      endif
+      if (!isfield(db{i}.mol,"mult"))
+        db{i}.mol.mult = 1;
+      endif
+      if (!isfield(db{i}.mol,"nat") || db{i}.mol.nat <= 0)
+        error(sprintf("Molecule entry %s has no atoms",db{i}.file))
+      endif
+      if (!isfield(db{i}.mol,"at") || !isfield(db{i}.mol,"x"))
+        error(sprintf("Molecule entry %s is not sane",db{i}.file))
+      endif
+      if (!isfield(db{i},"reftype"))
+        error(sprintf("multipole/reftype entry in %s is missing",db{i}.file))
+      endif
+
+      ## Include the multipole type in the name 
+      db{i}.outname = sprintf("%s (%s)",db{i}.name,mpoletr{db{i}.reftype});
+      
     else
       ## I don't know what that type is
       error(sprintf("Unknown type (%s) in entry %s",db{i}.type,db{i}.file))
