@@ -1,0 +1,8 @@
+## Database entry number 1
+## Read from file: atz_blyp/energy_mon_nh.db
+type total_energy
+ref -55.2069903300
+mol 0 3
+N 0.0000000000 0.0000000000 0.1306200000
+H 0.0000000000 0.0000000000 -0.9143600000
+end

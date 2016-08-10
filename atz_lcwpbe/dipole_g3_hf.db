@@ -1,0 +1,8 @@
+## Database entry number 1
+## Read from file: atz_blyp/dipole_g3_hf.db
+type dipole
+ref 1.8510000000
+mol 0 1
+F 0.0000000000 0.0000000000 0.0996920000
+H 0.0000000000 0.0000000000 -0.8352620000
+end

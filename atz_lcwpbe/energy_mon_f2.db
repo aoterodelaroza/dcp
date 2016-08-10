@@ -1,0 +1,8 @@
+## Database entry number 1
+## Read from file: atz_blyp/energy_mon_f2.db
+type total_energy
+ref -199.4821724700
+mol 0 1
+F 0.0000000000 0.0000000000 0.6894800000
+F 0.0000000000 0.0000000000 -0.6894800000
+end
