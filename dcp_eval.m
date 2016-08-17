@@ -120,7 +120,7 @@ if (!iscell(dcpini))
 endif
 
 ## Read and evaluate the DCPs one by one, prepare all input files
-for idcp = 17:length(dcpini)
+for idcp = 1:length(dcpini)
   ## Debug
   if (ferr > 0) 
     fprintf(ferr,"# Start DCP %d (%s) - %s\n",idcp,dcpini{idcp},strtrim(ctime(time())));
