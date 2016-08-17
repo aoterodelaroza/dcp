@@ -19,8 +19,20 @@ function iload = read_jobload(ilist,iload0=[])
   %% If iload0 is present its values are used to fill in for
   %% the outputs for which Gaussian crashed.
 
+  global ferr
+
+  ## Debug
+  if (ferr > 0) 
+    fprintf(ferr,"# Start read_jobload - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
+
   iload = zeros(size(ilist));
   for i = 1:length(ilist)
+    if (ferr > 0) 
+      fprintf(ferr,"# jobload %d (%s) - %s\n",i,ilist{i},strtrim(ctime(time())));
+      fflush(ferr);
+    endif
     isdone = 0;
     if (exist(sprintf("%s.log",ilist{i}),"file"))
       [s out] = system(sprintf("tail -n 1 %s.log | grep 'Normal termination' | wc -l",ilist{i}));

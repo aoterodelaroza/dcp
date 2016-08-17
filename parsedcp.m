@@ -19,6 +19,14 @@ function dcp = parsedcp(alist)
   %% file. The parsedcp routine returns the DCPs in a cell array of
   %% structures.
 
+  global ferr
+
+  ## Debug
+  if (ferr > 0) 
+    fprintf(ferr,"# Start parsedcp - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
+
   ## Accept a string instead of a cell array
   if (ischar(alist))
     alist = {alist};
@@ -105,4 +113,10 @@ function dcp = parsedcp(alist)
     endwhile
     fclose(fid);
   endfor
+
+  ## Debug
+  if (ferr > 0) 
+    fprintf(ferr,"# End parsedcp - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
 end

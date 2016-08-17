@@ -22,6 +22,13 @@ function basis = parsebasis(alist)
   %% inside a simple cell array. This signals writebasis to use it as
   %% a Gaussian basis set keyword.
 
+  global ferr
+
+  if (ferr > 0) 
+    fprintf(ferr,"# Start parsebasis - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
+
   ## Accept a string instead of a cell array
   if (ischar(alist))
     if (!exist(alist,"file"))
@@ -36,6 +43,12 @@ function basis = parsebasis(alist)
   nbas = 0;
   basis = cell();
   for i = 1:length(alist)
+    ## Debug
+    if (ferr > 0)
+      fprintf(ferr,"# Reading file %d (%s) at %s\n",i,alist{i},strtrim(ctime(time())));
+      fflush(ferr);
+    endif
+
     ## Check that the file exists
     if (!exist(alist{i},"file"))
       error(sprintf("Initial basis file not found: %s\n",alist{i}));
@@ -115,6 +128,21 @@ function basis = parsebasis(alist)
         basis{nbas}.name = curatoms{k};
       endfor
     endwhile
+    ## Debug
+    if (ferr > 0)
+      fprintf(ferr,"# Read basis set for atoms: ");
+      for i = 1:nbas
+        fprintf(ferr,"%s ",basis{i}.atom);
+      endfor
+      fprintf(ferr,"\n");
+      fflush(ferr);
+    endif
     fclose(fid);
   endfor
+
+  if (ferr > 0) 
+    fprintf(ferr,"# End parsebasis - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
+
 end

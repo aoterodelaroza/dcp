@@ -23,7 +23,13 @@ function [dy ycalc yref dery ycalcnd] = process_output_one(ent,xdm=0,derivs=0)
   %% is given, return the bare binding energy in ycalcnd.
 
   h2k = 627.50947;
-  global prefix nstep
+  global prefix nstep ferr
+
+  ## Debug
+  if (ferr > 0) 
+    fprintf(ferr,"# process_output_one %s - %s\n",ent.name,strtrim(ctime(time())));
+    fflush(ferr);
+  endif
 
   if (strcmp(ent.type,"reaction_frozen"))
     ycalc = ycalcnd = 0;

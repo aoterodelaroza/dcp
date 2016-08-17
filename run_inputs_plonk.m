@@ -31,8 +31,14 @@ function sout = run_inputs_plonk(ilist,xdm=[],xdmfun="")
   %% for the calc results. When all jobs are done, control is given
   %% back to the caller.
   
-  global verbose iload
+  global verbose iload ferr
   
+  ## Debug
+  if (ferr > 0) 
+    fprintf(ferr,"# Start run_inputs_plonk - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
+
   ## Parameters for the run
   sleeptime = 5; ## time in seconds between job completion checks
   maxtime = Inf; ## maximum sleep time in seconds. Crash if the script sleeps
@@ -42,10 +48,18 @@ function sout = run_inputs_plonk(ilist,xdm=[],xdmfun="")
   lockdir = "~/plonk.lock";
 
   ## Create submission scripts for all inputs on the list
+  if (ferr > 0) 
+    fprintf(ferr,"# Creating submission scripts - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
   fid = -1;
   jobname = {};
   for i = 1:length(ilist)
     name = ilist{i};
+    if (ferr > 0) 
+      fprintf(ferr,"# script %d (%s) - %s\n",i,name,strtrim(ctime(time())));
+      fflush(ferr);
+    endif
     fid = fopen(sprintf("%s.sub",name),"w");
     if (fid < 0) 
       error("Could not create submission script: %s.sub",name);
@@ -67,6 +81,10 @@ function sout = run_inputs_plonk(ilist,xdm=[],xdmfun="")
   endwhile
 
   ## Submit all the scripts to the queue
+  if (ferr > 0) 
+    fprintf(ferr,"# Appending scripts to the plonk queue - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
   fid = fopen(jobfile,"a");
   for i = 1:length(jobname)
     fprintf(fid,sprintf("%s/%s\n",pwd(),jobname{i}));
@@ -77,10 +95,18 @@ function sout = run_inputs_plonk(ilist,xdm=[],xdmfun="")
   system(sprintf("rm -rf %s",lockdir));
 
   ## Wait until all the calcs and jobs are done
+  if (ferr > 0) 
+    fprintf(ferr,"# Waiting for calcs to finish - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
   done = zeros(1,length(ilist));
   nslept = 0;
   nslept0 = 0;
   do 
+     if (ferr > 0) 
+       fprintf(ferr,"# waiting... (%d/%d done) %s\n",sum(done),length(done),strtrim(ctime(time())));
+       fflush(ferr);
+     endif
      sleep(sleeptime);
      nslept0 += sleeptime;
      nslept += sleeptime;
@@ -100,6 +126,10 @@ function sout = run_inputs_plonk(ilist,xdm=[],xdmfun="")
        endif
      endfor
   until(all(done))
+  if (ferr > 0) 
+    fprintf(ferr,"# All calcs finished - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
   if (verbose)
     printf("All Gaussian outputs are ready after %d seconds\n",nslept0);
   endif
@@ -108,7 +138,15 @@ function sout = run_inputs_plonk(ilist,xdm=[],xdmfun="")
   sleep(sleeptime);
 
   ## Clean up the done and the err files
+  if (ferr > 0) 
+    fprintf(ferr,"# Cleaning up the done/err/sub files - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
   for i = 1:length(ilist)
+    if (ferr > 0) 
+      fprintf(ferr,"# deleting entry %d (%s) - %s\n",i,ilist{i},strtrim(ctime(time())));
+      fflush(ferr);
+    endif
     [s out] = system(sprintf("rm -f %s.done %s.err %s.sub",ilist{i},ilist{i},ilist{i}));
   endfor
 
@@ -126,8 +164,16 @@ function sout = run_inputs_plonk(ilist,xdm=[],xdmfun="")
 
   ## Check that we have a normal termination. If not, pass the error 
   ## back to the caller.
+  if (ferr > 0) 
+    fprintf(ferr,"# Check for normal/error termination - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
   sout = [];
   for i = 1:length(ilist)
+    if (ferr > 0) 
+      fprintf(ferr,"# normal/error termination %d (%s) - %s\n",i,ilist{i},strtrim(ctime(time())));
+      fflush(ferr);
+    endif
     if (!exist(sprintf("%s.log",ilist{i}),"file"))
       sout = [sout i];
       continue
@@ -137,5 +183,11 @@ function sout = run_inputs_plonk(ilist,xdm=[],xdmfun="")
       sout = [sout i];
     endif
   endfor  
+
+  ## Debug
+  if (ferr > 0) 
+    fprintf(ferr,"# End run_inputs_plonk - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
 
 endfunction

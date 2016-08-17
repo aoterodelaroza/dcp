@@ -21,7 +21,13 @@ function ilist = setup_input_one(ent,dcp,derivs=0)
   %% up to derivs order. If derivs is negative, prepare the inputs for
   %% theevaluation of the DCP terms.
 
-  global prefix nstep basis dcp0
+  global prefix nstep basis dcp0 ferr
+
+  ## Debug
+  if (ferr > 0) 
+    fprintf(ferr,"# setup_input_one (%s) - %s\n",ent.name,strtrim(ctime(time())));
+    fflush(ferr);
+  endif
 
   ilist = {};
   if (strcmp(ent.type,"reaction_frozen"))

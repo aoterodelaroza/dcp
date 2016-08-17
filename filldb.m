@@ -23,6 +23,14 @@ function db = filldb(db,weis=[],method=[],extragau);
   %%
   %% and only apply if the same fields were not found in the database.
 
+  global ferr
+
+  ## Debug
+  if (ferr > 0) 
+    fprintf(ferr,"# Start filldb - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
+
   mpoletr = {"x","y","z","xx","yy","zz","xy","xz","yz","xxx","yyy","zzz",...
              "xyy","xxy","xxz","xzz","yzz","yyz","xyz","xxxx","yyyy",...
              "zzzz","xxxy","xxxz","yyyx","yyyz","zzzx","zzzy","xxyy",...
@@ -40,6 +48,11 @@ function db = filldb(db,weis=[],method=[],extragau);
 
   ## Run over all entries in the database
   for i = 1:length(db)
+    ## Debug
+    if (ferr > 0)
+      fprintf(ferr,"# Db entry %d (%s) at %s\n",i,db{i}.file,strtrim(ctime(time())));
+      fflush(ferr);
+    endif
 
     ## Check that the entry is associated to a file
     if (!isfield(db{i},"file"))
@@ -211,6 +224,12 @@ function db = filldb(db,weis=[],method=[],extragau);
       error(sprintf("Unknown type (%s) in entry %s",db{i}.type,db{i}.file))
     endif
   endfor
+
+  ## Debug
+  if (ferr > 0) 
+    fprintf(ferr,"# End filldb - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
 
 endfunction
 

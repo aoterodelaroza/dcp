@@ -10,8 +10,8 @@
 % FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
 % more details.
 
-function sout = run_inputs_nint_trasgu(ilist,xdm=[],xdmfun="")
-  %% function run_inputs_plonk(ilist,xdm=[],xdmfun="")
+function sout = run_inputs_nint(ilist,xdm=[],xdmfun="")
+  %% function run_inputs_nint(ilist,xdm=[],xdmfun="")
   %% 
   %% Run all the inputs in the job list (ilist). The jobs should be  
   %% in the current working directory, with extension gjf. This
@@ -31,8 +31,14 @@ function sout = run_inputs_nint_trasgu(ilist,xdm=[],xdmfun="")
   %% for the calc results. When all jobs are done, control is given
   %% back to the caller.
   
-  global verbose iload prefix
+  global verbose iload prefix ferr
   
+  ## Debug
+  if (ferr > 0) 
+    fprintf(ferr,"# Start run_inputs_nint - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
+
   ## Parameters for the run
   sleeptime = 10; ## time in seconds between job completion checks
   maxtime = Inf; ## maximum sleep time in seconds. Crash if the script sleeps
@@ -49,10 +55,18 @@ function sout = run_inputs_nint_trasgu(ilist,xdm=[],xdmfun="")
   ilistr = ilist(iperm);
 
   ## pack
+  if (ferr > 0) 
+    fprintf(ferr,"# Packing the input files - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
   ngjf = ceil(length(ilist) / npack);
   npack = ceil(length(ilist) / ngjf);
   k = 0;
   for i = 1:npack
+    if (ferr > 0) 
+      fprintf(ferr,"# packing %d/%d - %s\n",i,npack,strtrim(ctime(time())));
+      fflush(ferr);
+    endif
     str = "";
     for j = 1:ngjf
       k++;
@@ -65,10 +79,18 @@ function sout = run_inputs_nint_trasgu(ilist,xdm=[],xdmfun="")
   endfor
 
   ## Create submission scripts for all inputs on the list
+  if (ferr > 0) 
+    fprintf(ferr,"# Creating submission scripts - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
   fid = -1;
   jobname = {};
   for i = 1:npack
     name = sprintf("%s_%4.4d",prefix,i);
+    if (ferr > 0) 
+      fprintf(ferr,"# script %d (%s) - %s\n",i,name,strtrim(ctime(time())));
+      fflush(ferr);
+    endif
     fid = fopen(sprintf("%s.sub",name),"w");
     if (fid < 0) 
       error("Could not create submission script: %s.sub",name);
@@ -105,6 +127,10 @@ function sout = run_inputs_nint_trasgu(ilist,xdm=[],xdmfun="")
   endfor
 
   ## Move all the files to the run directory
+  if (ferr > 0) 
+    fprintf(ferr,"# Moving files to the run directory - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
   [s out] = system(sprintf("mkdir -p /home/delarozao/run/%s",dirname));
   [s out] = system(sprintf("find . -maxdepth 1 -name '%s_*.tar.bz2' | xargs mv -t /home/delarozao/run/%s",prefix,dirname));
   [s out] = system(sprintf("find . -maxdepth 1 -name '%s_*.sub' | xargs mv -t /home/delarozao/run/%s",prefix,dirname));
@@ -115,6 +141,10 @@ function sout = run_inputs_nint_trasgu(ilist,xdm=[],xdmfun="")
   endwhile
 
   ## Submit all the scripts to the queue
+  if (ferr > 0) 
+    fprintf(ferr,"# Appending scripts to the plonk queue - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
   fid = fopen(jobfile,"a");
   for i = 1:length(jobname)
     fprintf(fid,sprintf("%s\n",jobname{i}));
@@ -125,10 +155,18 @@ function sout = run_inputs_nint_trasgu(ilist,xdm=[],xdmfun="")
   system(sprintf("rm -rf %s",lockdir));
 
   ## Wait until all the calcs and jobs are done
+  if (ferr > 0) 
+    fprintf(ferr,"# Waiting for calcs to finish - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
   done = zeros(1,npack);
   nslept = 0;
   nslept0 = 0;
   do 
+     if (ferr > 0) 
+       fprintf(ferr,"# waiting... (%d/%d done) %s\n",sum(done),length(done),strtrim(ctime(time())));
+       fflush(ferr);
+     endif
      sleep(sleeptime);
      nslept0 += sleeptime;
      nslept += sleeptime;
@@ -145,13 +183,27 @@ function sout = run_inputs_nint_trasgu(ilist,xdm=[],xdmfun="")
        endif
      endfor
   until(all(done))
+  if (ferr > 0) 
+    fprintf(ferr,"# All calcs finished - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
   if (verbose)
     printf("All Gaussian outputs are ready after %d seconds\n",nslept0);
   endif
 
   ## Clean up the done and the err files
+  if (ferr > 0) 
+    fprintf(ferr,"# Cleaning up/moving bz2 back - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
   [s out] = system(sprintf("rm -f /home/delarozao/run/%s/*.done /home/delarozao/run/%s/*sub",dirname,dirname));
   [s out] = system(sprintf("find /home/delarozao/run/%s/ -maxdepth 1 -name '*.tar.bz2' | xargs mv -t .",dirname));
+
+  ## Unpack
+  if (ferr > 0) 
+    fprintf(ferr,"# Unpacking the bz2 - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
   for i = 1:npack
     system(sprintf("tar xjf %s_%4.4d.tar.bz2",prefix,i));
     system(sprintf("rm -f %s_%4.4d.tar.bz2",prefix,i));
@@ -172,6 +224,10 @@ function sout = run_inputs_nint_trasgu(ilist,xdm=[],xdmfun="")
 
   ## Check that we have a normal termination. If not, pass the error 
   ## back to the caller.
+  if (ferr > 0) 
+    fprintf(ferr,"# Check for normal/error termination - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
   sout = [];
   for i = 1:length(ilist)
     if (!exist(sprintf("%s.log",ilist{i}),"file"))
@@ -183,5 +239,11 @@ function sout = run_inputs_nint_trasgu(ilist,xdm=[],xdmfun="")
       sout = [sout i];
     endif
   endfor  
+
+  ## Debug
+  if (ferr > 0) 
+    fprintf(ferr,"# End run_inputs_nint - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
 
 endfunction

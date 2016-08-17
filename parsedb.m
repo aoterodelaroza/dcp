@@ -17,6 +17,14 @@ function db = parsedb(files)
   %% with which the DCPs will be optimized and builds the internal database
   %% for the calculation. 
   
+  global ferr
+
+  ## Debug
+  if (ferr > 0) 
+    fprintf(ferr,"# Start parsedb - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
+
   ## Accept a string instead of a cell array
   if (ischar(files))
     files = {files};
@@ -26,6 +34,11 @@ function db = parsedb(files)
   db = {};
   ndb = 0;
   for i = 1:length(files)
+    ## Debug
+    if (ferr > 0)
+      fprintf(ferr,"# Reading file %d (%s) at %s\n",i,files{i},strtrim(ctime(time())));
+      fflush(ferr);
+    endif
     ## Check that the file exists
     if (!exist(files{i},"file"))
       aux = strcat(strtrim(files{i}),".db");
@@ -321,6 +334,11 @@ function db = parsedb(files)
     endif
 
   endfor
+
+  if (ferr > 0) 
+    fprintf(ferr,"# End parsedb - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
 
 end
 

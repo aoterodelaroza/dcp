@@ -11,10 +11,10 @@
 % FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
 % more details.
 
-
 format long
 global dcp basis db prefix nstep verbose run_inputs ycur...
-       dcpfin costmin iload stime0 astep savetarbz2 ncpu mem
+       dcpfin costmin iload stime0 astep savetarbz2 ncpu mem...
+       ferr
 
 #### Modify this to change the input behavior ####
 
@@ -28,10 +28,9 @@ method="blyp";
 ## If a file is found, it is parsed and the basis-set information read,
 ## then information for the relevant atoms passed to the inputs. 
 ## Several basis set files can be used (e.g. {"basis1","basis2"}).
-basis="aug-cc-pvtz";
+basis="minis.ini";
 
 ## Extra bits for gaussian (do not include pseudo=read here)
-# extragau="EmpiricalDispersion=GD3BJ SCF=(Conver=6, MaxCycle=40) Symm=none int=(grid=ultrafine)";
 extragau="SCF=(Conver=6, MaxCycle=40) Symm=none int=(grid=ultrafine)";
 
 ## Number of CPUs and memory (in GB) for Gaussian runs
@@ -39,14 +38,24 @@ ncpu=8;
 mem=2;
 
 ## List of database files to use in DCP optimization
-## [s out] = system("ls db/*.db");
-## listdb = strfields(out);
-listdb = {"atz_blyp/mpole_h2o.db"};
-weightdb=[];
+[listdb weightdb] = training_set(1,1,1,1,1);
 
 ## List of DCP files to evaluate (you can use a cell array of files
 ## here, like {"C.dcp","H.dcp"}, or a single string "bleh.dcp")
-dcpini={"empty.dcp"};
+dcpini={...
+         "f01l.bsip","f02l.bsip","f03l.bsip","f04l.bsip","f05l.bsip",...
+         "f06l.bsip","f07l.bsip","f08l.bsip","f09l.bsip","f10l.bsip",...
+         "f11l.bsip","f12l.bsip","f13l.bsip","f14l.bsip","f15l.bsip",...
+         "f16l.bsip","f17l.bsip","f18l.bsip","f19l.bsip","f20l.bsip",...
+         "f01s.bsip","f02s.bsip","f03s.bsip","f04s.bsip","f05s.bsip",...
+         "f06s.bsip","f07s.bsip","f08s.bsip","f09s.bsip","f10s.bsip",...
+         "f11s.bsip","f12s.bsip","f13s.bsip","f14s.bsip","f15s.bsip",...
+         "f16s.bsip","f17s.bsip","f18s.bsip","f19s.bsip","f20s.bsip",...
+         "f01p.bsip","f02p.bsip","f03p.bsip","f04p.bsip","f05p.bsip",...
+         "f06p.bsip","f07p.bsip","f08p.bsip","f09p.bsip","f10p.bsip",...
+         "f11p.bsip","f12p.bsip","f13p.bsip","f14p.bsip","f15p.bsip",...
+         "f16p.bsip","f17p.bsip","f18p.bsip","f19p.bsip","f20p.bsip",...
+};
 
 ## Prefix for the calculations. If prefix is "bleh", then all the
 ## inputs and outputs will be stored in subdirectory bleh/ of the
@@ -54,16 +63,16 @@ dcpini={"empty.dcp"};
 ## where xx is the DCP optimization evaluation number. The archive
 ## contains files bleh_xx_name, where name is the identifier for the
 ## database entry. 
-prefix="bleh";
+prefix="f";
 
 ## Name of the Gaussian input runner routine
 ## run_inputs = @run_inputs_serial; ## Run all Gaussian inputs sequentially on the same node
 ## run_inputs = @run_inputs_grex; ## Submit inputs to the queue, wait for all to finish. Grex version.
 ## run_inputs = @run_inputs_plonk; ## Submit inputs to a private queue, plonk version.
-run_inputs = @run_inputs_plonk_priority; ## plonk version, high priority.
+## run_inputs = @run_inputs_plonk_priority; ## plonk version, high priority.
 ## run_inputs = @run_inputs_plonk_packed; ## plonk version, pack the inputs.
-## run_inputs = @run_inputs_nint_trasgu; ## Submit inputs to a private queue on the NINT cluster.
-## run_inputs = @run_inputs_nint_gino; ## Submit inputs to a private queue on the NINT cluster (gino).
+## run_inputs = @run_inputs_nint; ## Submit inputs to a private queue on the NINT cluster.
+run_inputs = @run_inputs_nint_gino; ## Submit inputs to a private queue on the NINT cluster (gino).
 ## run_inputs = @run_inputs_elcap3; ## Submit inputs to elcap3.
 
 ## Save a compressed tar.bz2 with the inputs/outputs/wfxs?
@@ -76,13 +85,26 @@ savetarbz2=1;
 ## xdmcoef = [0.7647 0.8457];
 ## xdmfun = "blyp";
 
+## Name of the error file (timing, debug, etc.)
+errfile = "eval.err";
+
 #### No touching past this point. ####
+
+## Open error file
+ferr = -1;
+if (exist("errfile","var"))
+  ferr = fopen(errfile,"w");
+endif
 
 ## Header
 printf("### DCP evaluation started on %s ###\n",strtrim(ctime(time())));
 printf("### PID: %d ###\n",getpid());
 [s out] = system("hostname");
 printf("### hostname: %s ###\n",strrep(out,"\n",""));
+if (ferr > 0) 
+  fprintf(ferr,"# Started on %s with PID %d (%s)\n",strtrim(ctime(time())),getpid(),strrep(out,"\n",""));
+  fflush(ferr);
+endif
 
 ## Read the basis set
 basis = parsebasis(basis);
@@ -98,7 +120,14 @@ if (!iscell(dcpini))
 endif
 
 ## Read and evaluate the DCPs one by one, prepare all input files
-for idcp = 1:length(dcpini)
+for idcp = 17:length(dcpini)
+  ## Debug
+  if (ferr > 0) 
+    fprintf(ferr,"# Start DCP %d (%s) - %s\n",idcp,dcpini{idcp},strtrim(ctime(time())));
+    fflush(ferr);
+  endif
+
+  ## Initialize
   ilist = {};
   dcp = parsedcp(dcpini{idcp});
   nstep = idcp;
@@ -112,10 +141,18 @@ for idcp = 1:length(dcpini)
   endif
 
   ## Set up the Gaussian input files
+  if (ferr > 0) 
+    fprintf(ferr,"# Setting up Gaussian input files - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
   for i = 1:length(db)
     anew = setup_input_one(db{i},dcp);
     ilist = {ilist{:}, anew{:}};
   endfor
+  if (ferr > 0) 
+    fprintf(ferr,"# List of inputs has %d entries\n",length(ilist));
+    fflush(ferr);
+  endif
 
   ## Run all inputs
   if (!exist("xdmcoef","var") || isempty(xdmcoef))
@@ -128,6 +165,10 @@ for idcp = 1:length(dcpini)
   endif
 
   ## Collect the results and compare to the reference data
+  if (ferr > 0) 
+    fprintf(ferr,"# Collecting the results and calculating errors - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
   dy = ycalc = yref = ycalcnd = zeros(length(db),1);
   for i = 1:length(db)
     [dy(i) ycalc(i) yref(i) xdum ycalcnd(i)] = process_output_one(db{i},exist("xdmcoef","var") && !isempty(xdmcoef),0);
@@ -176,4 +217,12 @@ for idcp = 1:length(dcpini)
   stash_inputs_outputs(ilist);
 endfor
 
+## Close error file
+if (ferr > 0) 
+  fprintf(ferr,"# Finished on %s\n",strtrim(ctime(time())));
+  fflush(ferr);
+endif
+fclose(ferr);
+
+## Termination
 printf("### DCP evaluation finished on %s ###\n",strtrim(ctime(time())));

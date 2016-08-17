@@ -16,7 +16,13 @@ function stash_inputs_outputs(ilist)
   %% Move the gjf and the log files given by the names in cell
   %% array ilist to the stash directory (prefix).
   
-  global nstep prefix savetarbz2
+  global nstep prefix savetarbz2 ferr
+
+  ## debug
+  if (ferr > 0) 
+    fprintf(ferr,"# Start stash_inputs_outputs - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
 
   ## Create the prefix directory if it doesn't exist yet
   if (!exist(prefix,"dir"))
@@ -39,5 +45,11 @@ function stash_inputs_outputs(ilist)
   [s out] = system(sprintf("find . -maxdepth 1 -name '%s_*.wfx' -delete",prefix));
   [s out] = system(sprintf("find . -maxdepth 1 -name '%s_*.pgout' -delete",prefix));
   [s out] = system(sprintf("find . -maxdepth 1 -name '%s_*.chk' -delete",prefix));
+
+  ## debug
+  if (ferr > 0) 
+    fprintf(ferr,"# End stash_inputs_outputs - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
 
 endfunction
