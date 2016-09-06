@@ -1,5 +1,3 @@
-## Database entry number 1
-## Read from file: atz_blyp/s668_Ethyne-Water_CH-O_125.db
 type reaction_frozen
 ref -1.8927187900
 molc 1.0000000000 0 1

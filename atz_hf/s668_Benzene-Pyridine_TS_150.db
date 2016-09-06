@@ -1,5 +1,3 @@
-## Database entry number 1
-## Read from file: atz_blyp/s668_Benzene-Pyridine_TS_150.db
 type reaction_frozen
 ref -0.5822553700
 molc 1.0000000000 0 1

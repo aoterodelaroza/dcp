@@ -1,5 +1,3 @@
-## Database entry number 1
-## Read from file: atz_blyp/dipole_g3_h3csh.db
 type dipole
 ref 1.6963000000
 mol 0 1

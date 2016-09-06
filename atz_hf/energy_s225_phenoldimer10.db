@@ -1,5 +1,3 @@
-## Database entry number 1
-## Read from file: atz_blyp/energy_s225_phenoldimer10.db
 type total_energy
 ref -611.3470662100
 mol 0 1

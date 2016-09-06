@@ -1,5 +1,3 @@
-## Database entry number 1
-## Read from file: atz_blyp/bdex_o-o-01.db
 type reaction_frozen
 ref 46.7270227400
 extragau  scf(qc)

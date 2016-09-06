@@ -1,5 +1,3 @@
-## Database entry number 1
-## Read from file: atz_blyp/energy_s668_Benzene-Cyclopentane_125.db
 type total_energy
 ref -426.0113993700
 mol 0 1

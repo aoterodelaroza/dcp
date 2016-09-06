@@ -1,5 +1,3 @@
-## Database entry number 1
-## Read from file: atz_blyp/energy_f_c2h4_c2f4_090.db
 type total_energy
 ref -553.9986421600
 mol 0 1

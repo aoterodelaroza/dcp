@@ -1,0 +1,6 @@
+type total_energy
+ref -54.6028906800
+extragau    scf(qc)
+mol 0 4
+N 0.0000000000 0.0000000000 0.0000000000
+end

@@ -1,5 +1,3 @@
-## Database entry number 1
-## Read from file: atz_blyp/energy_s668_MeOH-Water_100.db
 type total_energy
 ref -192.1347850100
 mol 0 1

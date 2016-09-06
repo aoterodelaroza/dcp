@@ -1,5 +1,3 @@
-## Database entry number 1
-## Read from file: atz_blyp/energy_s668_MeNH2-Water_200.db
 type total_energy
 ref -172.2658946400
 mol 0 1

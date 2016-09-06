@@ -1,5 +1,3 @@
-## Database entry number 1
-## Read from file: atz_blyp/s668_MeOH-MeNH2_110.db
 type reaction_frozen
 ref -5.8896856000
 molc 1.0000000000 0 1

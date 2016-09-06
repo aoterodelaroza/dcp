@@ -1,5 +1,3 @@
-## Database entry number 1
-## Read from file: atz_blyp/energy_f.db
 type total_energy
 ref -99.7106761400
 extragau  scf(qc)

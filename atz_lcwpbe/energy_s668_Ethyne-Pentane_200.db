@@ -1,5 +1,3 @@
-## Database entry number 1
-## Read from file: atz_blyp/energy_s668_Ethyne-Pentane_200.db
 type total_energy
 ref -275.0120332900
 mol 0 1

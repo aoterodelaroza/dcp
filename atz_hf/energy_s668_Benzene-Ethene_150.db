@@ -1,5 +1,3 @@
-## Database entry number 1
-## Read from file: atz_blyp/energy_s668_Benzene-Ethene_150.db
 type total_energy
 ref -308.8456362700
 mol 0 1

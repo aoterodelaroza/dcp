@@ -1,5 +1,3 @@
-## Database entry number 1
-## Read from file: atz_blyp/bdex_c6h6ch2-h-05.db
 type reaction_frozen
 ref -60.0150810000
 molc 1.0000000000 0 1

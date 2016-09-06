@@ -1,5 +1,3 @@
-## Database entry number 1
-## Read from file: atz_blyp/bdexrel_ph2-nh2-07.db
 type reaction_frozen
 ref 18.5994949000
 molc 1.0000000000 0 1

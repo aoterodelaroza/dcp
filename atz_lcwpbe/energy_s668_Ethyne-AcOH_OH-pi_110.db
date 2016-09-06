@@ -1,5 +1,3 @@
-## Database entry number 1
-## Read from file: atz_blyp/energy_s668_Ethyne-AcOH_OH-pi_110.db
 type total_energy
 ref -306.3403735400
 mol 0 1

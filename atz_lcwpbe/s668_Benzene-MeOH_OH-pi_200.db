@@ -1,5 +1,3 @@
-## Database entry number 1
-## Read from file: atz_blyp/s668_Benzene-MeOH_OH-pi_200.db
 type reaction_frozen
 ref -0.4123904400
 molc 1.0000000000 0 1

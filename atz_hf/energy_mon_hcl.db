@@ -1,5 +1,3 @@
-## Database entry number 1
-## Read from file: atz_blyp/energy_mon_hcl.db
 type total_energy
 ref -460.1074706400
 mol 0 1

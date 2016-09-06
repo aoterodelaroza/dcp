@@ -1,5 +1,3 @@
-## Database entry number 1
-## Read from file: atz_blyp/s668_Uracil-Uracil_BP_200.db
 type reaction_frozen
 ref -3.0092775100
 molc 1.0000000000 0 1
