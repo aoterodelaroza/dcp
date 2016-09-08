@@ -1,5 +1,8 @@
+## Database entry number 1
+## Read from file: atz_blyp/energy_mon_c2h.db
 type total_energy
-ref mol 0 2
+ref -76.5313621000
+mol 0 2
 C 0.0000000000 0.0000000000 0.5994500000
 C 0.0000000000 0.0000000000 -0.5994500000
 H 0.0000000000 0.0000000000 -1.6616400000

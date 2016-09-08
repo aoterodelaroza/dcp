@@ -1,5 +1,8 @@
+## Database entry number 1
+## Read from file: atz_blyp/energy_mon_uracil.db
 type total_energy
-ref mol 0 1
+ref -414.5215624200
+mol 0 1
 O -1.4663300000 1.0121700000 0.0000000000
 C -0.6281500000 1.9142700000 0.0000000000
 N 0.7205100000 1.6882700000 0.0000000000

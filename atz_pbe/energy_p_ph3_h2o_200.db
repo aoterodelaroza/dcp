@@ -1,3 +1,5 @@
+## Database entry number 1
+## Read from file: atz_blyp/energy_p_ph3_h2o_200.db
 type total_energy
 ref -419.3662615900
 mol 0 1

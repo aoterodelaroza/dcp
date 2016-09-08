@@ -1,5 +1,8 @@
+## Database entry number 1
+## Read from file: atz_blyp/energy_mon_adenine.db
 type total_energy
-ref mol 0 1
+ref -466.9598630900
+mol 0 1
 N 0.2793000000 2.4068400000 -0.6057500000
 C -1.0848600000 2.4457500000 -0.5511600000
 H -1.6594400000 3.0230300000 -1.2560900000

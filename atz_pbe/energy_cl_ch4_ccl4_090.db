@@ -1,5 +1,8 @@
+## Database entry number 1
+## Read from file: atz_blyp/energy_cl_ch4_ccl4_090.db
 type total_energy
-ref mol 0 1
+ref -1918.6475986800
+mol 0 1
 C 0.0000000000 0.0000000000 -3.6403800000
 H 0.0000000000 0.0000000000 -4.7280000000
 H 0.0000000000 -1.0248600000 -3.2764200000

@@ -1,5 +1,8 @@
+## Database entry number 1
+## Read from file: atz_blyp/energy_cl_c2h4_hcl_105.db
 type total_energy
-ref mol 0 1
+ref -539.1398210000
+mol 0 1
 C 0.0000000000 0.6618200000 -1.8965500000
 H 0.9215200000 1.2293300000 -1.9002900000
 H -0.9215200000 1.2293300000 -1.9002900000

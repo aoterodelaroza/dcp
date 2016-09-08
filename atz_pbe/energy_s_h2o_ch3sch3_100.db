@@ -1,5 +1,8 @@
+## Database entry number 1
+## Read from file: atz_blyp/energy_s_h2o_ch3sch3_100.db
 type total_energy
-ref mol 0 1
+ref -554.1566949000
+mol 0 1
 S 0.9196400000 -1.6263800000 0.0000000000
 C -0.2547700000 -1.5015900000 -1.3607800000
 H -0.9633300000 -2.3264500000 -1.3285100000

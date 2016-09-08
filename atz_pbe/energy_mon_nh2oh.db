@@ -1,5 +1,8 @@
+## Database entry number 1
+## Read from file: atz_blyp/energy_mon_nh2oh.db
 type total_energy
-ref mol 0 1
+ref -131.6325157500
+mol 0 1
 H -2.4044700000 0.0376200000 0.0031900000
 H -2.4039400000 1.4437500000 -0.8098400000
 N -2.8245900000 0.9627400000 -0.0195600000

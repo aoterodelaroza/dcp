@@ -1,5 +1,8 @@
+## Database entry number 1
+## Read from file: atz_blyp/energy_mon_thiophene.db
 type total_energy
-ref mol 0 1
+ref -552.7094693900
+mol 0 1
 C -0.0045300000 -1.2297700000 0.0002400000
 C -1.2605700000 -0.7098700000 -0.0003600000
 C -1.2605700000 0.7098700000 0.0003200000

@@ -1,3 +1,5 @@
+## Database entry number 1
+## Read from file: atz_blyp/s668_Benzene-Water_OH-pi_100.db
 type reaction_frozen
 ref -2.1046331300
 molc 1.0000000000 0 1

@@ -1,3 +1,5 @@
+## Database entry number 1
+## Read from file: atz_blyp/energy_s225_benzenemethane20.db
 type total_energy
 ref -272.4801753100
 mol 0 1

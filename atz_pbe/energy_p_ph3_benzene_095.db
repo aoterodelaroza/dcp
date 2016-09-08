@@ -1,3 +1,5 @@
+## Database entry number 1
+## Read from file: atz_blyp/energy_p_ph3_benzene_095.db
 type total_energy
 ref -575.0021063700
 mol 0 1

@@ -1,5 +1,8 @@
+## Database entry number 1
+## Read from file: atz_blyp/energy_s_thiophenol_thiophenol_100.db
 type total_energy
-ref mol 0 1
+ref -1260.1187422800
+mol 0 1
 C -1.6349300000 -0.9960400000 -0.1587900000
 C -1.1145600000 -0.2296400000 -1.1952300000
 C -2.6707700000 -0.4873000000 0.6160800000

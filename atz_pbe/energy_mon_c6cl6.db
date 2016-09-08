@@ -1,5 +1,8 @@
+## Database entry number 1
+## Read from file: atz_blyp/energy_mon_c6cl6.db
 type total_energy
-ref mol 0 1
+ref -2988.6282538500
+mol 0 1
 C -1.3933700000 -0.0000700000 0.0000000000
 C -0.6966200000 -0.0001100000 1.2066000000
 C -0.6966200000 -0.0001100000 -1.2066000000

@@ -1,5 +1,8 @@
+## Database entry number 1
+## Read from file: atz_blyp/energy_cl_ccl3co2h_ccl3co2h_100.db
 type total_energy
-ref mol 0 1
+ref -3214.4392110300
+mol 0 1
 C 0.0017100000 1.8861700000 0.0006600000
 O 1.2045700000 1.3995400000 0.0009300000
 O -1.0263700000 1.2534700000 0.0006400000

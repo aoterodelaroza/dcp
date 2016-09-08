@@ -1,5 +1,8 @@
+## Database entry number 1
+## Read from file: atz_blyp/energy_s_tsoh_h2s_100.db
 type total_energy
-ref mol 0 1
+ref -1294.0978073500
+mol 0 1
 C 2.0932200000 1.2745500000 0.6711300000
 C 0.8274100000 0.7212600000 0.7741600000
 C 3.0954500000 0.6416700000 -0.0535900000

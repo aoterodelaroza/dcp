@@ -1,5 +1,8 @@
+## Database entry number 1
+## Read from file: atz_blyp/energy_s_ocs_ocs_095.db
 type total_energy
-ref mol 0 1
+ref -1022.6333965900
+mol 0 1
 C 1.8000000000 0.5500000000 0.0000000000
 S 1.8000000000 -1.0211000000 0.0000000000
 O 1.8000000000 1.7027000000 0.0000000000

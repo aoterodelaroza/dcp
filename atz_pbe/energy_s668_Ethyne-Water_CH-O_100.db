@@ -1,3 +1,5 @@
+## Database entry number 1
+## Read from file: atz_blyp/energy_s668_Ethyne-Water_CH-O_100.db
 type total_energy
 ref -153.6355521700
 mol 0 1

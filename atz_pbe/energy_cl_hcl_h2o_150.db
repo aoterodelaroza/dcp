@@ -1,5 +1,8 @@
+## Database entry number 1
+## Read from file: atz_blyp/energy_cl_hcl_h2o_150.db
 type total_energy
-ref mol 0 1
+ref -537.0177041300
+mol 0 1
 Cl 1.2022300000 0.0000000000 0.0072600000
 H -0.0955500000 -0.0003300000 -0.0696800000
 O -3.3415000000 0.0001400000 0.0211700000

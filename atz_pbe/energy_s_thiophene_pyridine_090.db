@@ -1,5 +1,8 @@
+## Database entry number 1
+## Read from file: atz_blyp/energy_s_thiophene_pyridine_090.db
 type total_energy
-ref mol 0 1
+ref -800.7574729700
+mol 0 1
 C -2.4331500000 0.5318700000 -0.7336500000
 C -1.7922300000 1.4811500000 -0.0023800000
 S -2.2175800000 -1.0257100000 -0.0616800000

@@ -1,3 +1,5 @@
+## Database entry number 1
+## Read from file: atz_blyp/energy_s668_Benzene-AcOH_200.db
 type total_energy
 ref -460.9403948100
 mol 0 1

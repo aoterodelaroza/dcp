@@ -1,3 +1,5 @@
+## Database entry number 1
+## Read from file: atz_blyp/energy_p_pme3_nh3_110.db
 type total_energy
 ref -517.3308533500
 mol 0 1

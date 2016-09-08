@@ -1,5 +1,8 @@
+## Database entry number 1
+## Read from file: atz_blyp/energy_cl.db
 type total_energy
-ref extragau    scf(qc)
+ref -459.9662364500
+extragau    scf(qc)
 mol 0 2
 Cl 0.0000000000 0.0000000000 0.0000000000
 end

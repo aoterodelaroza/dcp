@@ -1,5 +1,8 @@
+## Database entry number 1
+## Read from file: atz_blyp/energy_mon_indole.db
 type total_energy
-ref mol 0 1
+ref -363.4856729600
+mol 0 1
 H -2.9417700000 0.8953800000 2.2239000000
 C -2.0220700000 0.4258500000 1.9013500000
 C -0.8149400000 1.0740400000 2.1067000000

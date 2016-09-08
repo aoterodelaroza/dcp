@@ -1,5 +1,8 @@
+## Database entry number 1
+## Read from file: atz_blyp/energy_mon_cyclopentane.db
 type total_energy
-ref mol 0 1
+ref -196.3382464900
+mol 0 1
 C -0.7791800000 -0.7546000000 3.7122000000
 H -0.8854400000 -0.5796500000 2.6398900000
 H -1.4308200000 -1.5838600000 3.9853500000

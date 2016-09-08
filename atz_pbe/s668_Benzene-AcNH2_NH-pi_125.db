@@ -1,3 +1,5 @@
+## Database entry number 1
+## Read from file: atz_blyp/s668_Benzene-AcNH2_NH-pi_125.db
 type reaction_frozen
 ref -2.0469183200
 molc 1.0000000000 0 1

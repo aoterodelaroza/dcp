@@ -1,5 +1,8 @@
+## Database entry number 1
+## Read from file: atz_blyp/energy_mon_tsoh.db
 type total_energy
-ref mol 0 1
+ref -894.8551754700
+mol 0 1
 C 1.9371800000 -1.2015200000 -0.0389100000
 C 0.5527600000 -1.2095100000 -0.0829100000
 C -0.1292600000 -0.0051700000 -0.0762100000

@@ -1,5 +1,8 @@
+## Database entry number 1
+## Read from file: atz_blyp/energy_mon_2aminopyridine.db
 type total_energy
-ref mol 0 1
+ref -303.3861947100
+mol 0 1
 N 1.4327600000 0.3639700000 -0.0159500000
 C 2.1154200000 -0.7803400000 0.1681100000
 C 3.5237600000 -0.8016100000 0.1545000000

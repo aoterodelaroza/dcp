@@ -1,5 +1,8 @@
+## Database entry number 1
+## Read from file: atz_blyp/energy_mon_neopentane.db
 type total_energy
-ref mol 0 1
+ref -197.5426167400
+mol 0 1
 C 0.1847400000 0.5175300000 4.4811800000
 C 1.6309900000 0.6963200000 4.0262200000
 H 2.0468400000 1.6296000000 4.4096400000

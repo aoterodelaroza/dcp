@@ -1,5 +1,8 @@
+## Database entry number 1
+## Read from file: atz_blyp/energy_mon_peptide.db
 type total_energy
-ref mol 0 1
+ref -248.3166602300
+mol 0 1
 C 0.2394800000 1.9425200000 3.9256700000
 H -0.1186600000 2.1082500000 2.9123700000
 H 1.2640700000 2.2992300000 4.0071100000

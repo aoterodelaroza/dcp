@@ -1,5 +1,8 @@
+## Database entry number 1
+## Read from file: atz_blyp/energy_mon_ph3ch2.db
 type total_energy
-ref mol 0 1
+ref -382.1833336100
+mol 0 1
 P -0.4729500000 -0.0021000000 0.0000000000
 H -1.2236300000 -0.5814100000 1.0604800000
 H -1.2236200000 -0.5814600000 -1.0604500000

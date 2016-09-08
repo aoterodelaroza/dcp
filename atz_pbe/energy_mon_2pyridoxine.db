@@ -1,5 +1,8 @@
+## Database entry number 1
+## Read from file: atz_blyp/energy_mon_2pyridoxine.db
 type total_energy
-ref mol 0 1
+ref -323.2563675500
+mol 0 1
 O -1.3976200000 -1.8858400000 -0.3673100000
 N -1.4642600000 0.3641800000 0.0192300000
 C -4.1857400000 0.3696700000 0.0361000000

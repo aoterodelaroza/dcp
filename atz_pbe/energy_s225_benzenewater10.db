@@ -1,3 +1,5 @@
+## Database entry number 1
+## Read from file: atz_blyp/energy_s225_benzenewater10.db
 type total_energy
 ref -308.4001866000
 mol 0 1

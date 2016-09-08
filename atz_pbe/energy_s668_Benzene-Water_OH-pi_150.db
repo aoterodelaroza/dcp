@@ -1,3 +1,5 @@
+## Database entry number 1
+## Read from file: atz_blyp/energy_s668_Benzene-Water_OH-pi_150.db
 type total_energy
 ref -308.3982927900
 mol 0 1
