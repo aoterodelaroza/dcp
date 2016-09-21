@@ -10,8 +10,8 @@
 % FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
 % more details.
 
-function sout = run_inputs_grex(ilist,xdm=[],xdmfun="")
-  %% function run_inputs_grex(ilist,xdm=[],xdmfun="")
+function sout = run_inputs_grex(ilist,xdmcoef=[],xdmfun="",extrad3="")
+  %% function run_inputs_grex(ilist,xdmcoef=[],xdmfun="",extrad3="")
   %% 
   %% Run all the inputs in the job list (ilist). The jobs should be  
   %% in the current working directory, with extension gjf. This
@@ -22,7 +22,7 @@ function sout = run_inputs_grex(ilist,xdm=[],xdmfun="")
   %% all checkpoint files (with the same name) should also be
   %% in the CWD.
   %%
-  %% If xdm is non-empty, run postg on the resulting wfx with
+  %% If xdmcoef is non-empty, run postg on the resulting wfx with
   %% the indicated parameters and the functional in xdmfun.
   %%
   %% This version of run_inputs creates submission scripts for all
@@ -43,6 +43,10 @@ function sout = run_inputs_grex(ilist,xdm=[],xdmfun="")
   maxtime = Inf; ## maximum sleep time in seconds. Crash if the script sleeps
                  ## for longer than this number without a new Gaussian output
                  ## being written.
+
+  if (!isempty(extrad3))
+    error("d3 calculations not supported by this run_inputs driver")
+  endif
 
   if (usenodes > 0) 
     every = ceil(length(ilist) / usenodes);
@@ -92,15 +96,15 @@ function sout = run_inputs_grex(ilist,xdm=[],xdmfun="")
       fprintf(fid,"\n");
       fprintf(fid,"cd %s\n",pwd());
       fprintf(fid,"g09 %s.gjf\n",name);
-      if (!isempty(xdm))
-        fprintf(fid,"~/git/postg/postg %.10f %.10f %s.wfx %s > %s.pgout\n",xdm(1),xdm(2),name,xdmfun,name);
+      if (!isempty(xdmcoef))
+        fprintf(fid,"~/git/postg/postg %.10f %.10f %s.wfx %s > %s.pgout\n",xdmcoef(1),xdmcoef(2),name,xdmfun,name);
       endif
       fprintf(fid,"touch %s.done\n",name);
       jobname = {jobname{:} sprintf("%s.sub",name)};
     else
       fprintf(fid,"g09 %s.gjf\n",name);
-      if (!isempty(xdm))
-        fprintf(fid,"~/git/postg/postg %.10f %.10f %s.wfx %s > %s.pgout\n",xdm(1),xdm(2),name,xdmfun,name);
+      if (!isempty(xdmcoef))
+        fprintf(fid,"~/git/postg/postg %.10f %.10f %s.wfx %s > %s.pgout\n",xdmcoef(1),xdmcoef(2),name,xdmfun,name);
       endif
       fprintf(fid,"touch %s.done\n",name);
     endif

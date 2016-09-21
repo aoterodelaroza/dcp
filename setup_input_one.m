@@ -36,12 +36,14 @@ function ilist = setup_input_one(ent,dcp,derivs=0)
       chk = sprintf("%s_%4.4d_%s_mol%d.chk",prefix,nstep,ent.name,j);
       wfx = sprintf("%s_%4.4d_%s_mol%d.wfx",prefix,nstep,ent.name,j);
       file = sprintf("%s_%4.4d_%s_mol%d.gjf",prefix,nstep,ent.name,j);
+      filexyz = sprintf("%s_%4.4d_%s_mol%d.xyz",prefix,nstep,ent.name,j);
       if (isfield(ent.molc{j},"extragau"))
         extragau = ent.molc{j}.extragau;
       else
         extragau = "";
       endif
       writegjf(file,dcp,dcp0,basis,ent.molc{j}.at,ent.molc{j}.x,ent.molc{j}.q,ent.molc{j}.mult,ent,extragau,chk,wfx,derivs);
+      writexyz(filexyz,ent.molc{j}.at,ent.molc{j}.x,ent.molc{j}.q,ent.molc{j}.mult);
       ilist = {ilist{:}, sprintf("%s_%4.4d_%s_mol%d",prefix,nstep,ent.name,j)};
     endfor
   elseif (strcmp(ent.type,"total_energy"))
@@ -49,16 +51,19 @@ function ilist = setup_input_one(ent,dcp,derivs=0)
     chk = sprintf("%s_%4.4d_%s_mol.chk",prefix,nstep,ent.name);
     wfx = sprintf("%s_%4.4d_%s_mol.wfx",prefix,nstep,ent.name);
     file = sprintf("%s_%4.4d_%s_mol.gjf",prefix,nstep,ent.name);
+    filexyz = sprintf("%s_%4.4d_%s_mol.xyz",prefix,nstep,ent.name);
     if (isfield(ent.mol,"extragau"))
       extragau = ent.mol.extragau;
     else
       extragau = "";
     endif
     writegjf(file,dcp,dcp0,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult,ent,extragau,chk,wfx,derivs);
+    writexyz(filexyz,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult);
     ilist = {ilist{:}, sprintf("%s_%4.4d_%s_mol",prefix,nstep,ent.name)};
   elseif (strcmp(ent.type,"intramol_geometry") || strcmp(ent.type,"intermol_geometry"))
     ## A geometry relaxation; append "opt" to extragau
     file = sprintf("%s_%4.4d_%s_mol.gjf",prefix,nstep,ent.name);
+    filexyz = sprintf("%s_%4.4d_%s_mol.xyz",prefix,nstep,ent.name);
     ent.extragau = sprintf("%s opt=(nomicro)",ent.extragau);
     if (isfield(ent.mol,"extragau"))
       extragau = ent.mol.extragau;
@@ -66,21 +71,25 @@ function ilist = setup_input_one(ent,dcp,derivs=0)
       extragau = "";
     endif
     writegjf(file,dcp,dcp0,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult,ent,extragau,:,:,0);
+    writexyz(filexyz,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult);
     ilist = {ilist{:}, sprintf("%s_%4.4d_%s_mol",prefix,nstep,ent.name)};
   elseif (strcmp(ent.type,"dipole"))
     ## A dipole calculation
     file = sprintf("%s_%4.4d_%s_mol.gjf",prefix,nstep,ent.name);
+    filexyz = sprintf("%s_%4.4d_%s_mol.xyz",prefix,nstep,ent.name);
     if (isfield(ent.mol,"extragau"))
       extragau = ent.mol.extragau;
     else
       extragau = "";
     endif
     writegjf(file,dcp,dcp0,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult,ent,extragau,:,:,0);
+    writexyz(filexyz,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult);
     ilist = {ilist{:}, sprintf("%s_%4.4d_%s_mol",prefix,nstep,ent.name)};
   elseif (strcmp(ent.type,"multipoles"))
     ## A multipole calculation. They usually come in bunches, so if the input
     ## file already exists, skip it.
     file = sprintf("%s_%4.4d_%s_mol.gjf",prefix,nstep,ent.name);
+    filexyz = sprintf("%s_%4.4d_%s_mol.xyz",prefix,nstep,ent.name);
     if (!exist(file,"file"))
       if (isfield(ent.mol,"extragau"))
         extragau = ent.mol.extragau;
@@ -88,6 +97,7 @@ function ilist = setup_input_one(ent,dcp,derivs=0)
         extragau = "";
       endif
       writegjf(file,dcp,dcp0,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult,ent,extragau,:,:,0);
+      writexyz(filexyz,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult);
       ilist = {ilist{:}, sprintf("%s_%4.4d_%s_mol",prefix,nstep,ent.name)};
     endif
   else

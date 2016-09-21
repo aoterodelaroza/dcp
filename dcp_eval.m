@@ -28,7 +28,7 @@ method="blyp";
 ## If a file is found, it is parsed and the basis-set information read,
 ## then information for the relevant atoms passed to the inputs. 
 ## Several basis set files can be used (e.g. {"basis1","basis2"}).
-basis="minis.ini";
+basis="sto-3g";
 
 ## Extra bits for gaussian (do not include pseudo=read here)
 extragau="SCF=(Conver=6, MaxCycle=40) Symm=none int=(grid=ultrafine)";
@@ -38,24 +38,18 @@ ncpu=8;
 mem=2;
 
 ## List of database files to use in DCP optimization
-[listdb weightdb] = training_set(1,1,1,1,1);
+## [listdb weightdb] = training_set(1,1,1,1,1);
+listdb = {
+          "atz_blyp/s225_waterdimer09.db",...
+          "atz_blyp/s225_waterdimer10.db",...
+          "atz_blyp/s225_waterdimer12.db",...
+          "atz_blyp/s225_waterdimer15.db",...
+          "atz_blyp/s225_waterdimer20.db",...
+};
 
 ## List of DCP files to evaluate (you can use a cell array of files
 ## here, like {"C.dcp","H.dcp"}, or a single string "bleh.dcp")
-dcpini={...
-         "f01l.bsip","f02l.bsip","f03l.bsip","f04l.bsip","f05l.bsip",...
-         "f06l.bsip","f07l.bsip","f08l.bsip","f09l.bsip","f10l.bsip",...
-         "f11l.bsip","f12l.bsip","f13l.bsip","f14l.bsip","f15l.bsip",...
-         "f16l.bsip","f17l.bsip","f18l.bsip","f19l.bsip","f20l.bsip",...
-         "f01s.bsip","f02s.bsip","f03s.bsip","f04s.bsip","f05s.bsip",...
-         "f06s.bsip","f07s.bsip","f08s.bsip","f09s.bsip","f10s.bsip",...
-         "f11s.bsip","f12s.bsip","f13s.bsip","f14s.bsip","f15s.bsip",...
-         "f16s.bsip","f17s.bsip","f18s.bsip","f19s.bsip","f20s.bsip",...
-         "f01p.bsip","f02p.bsip","f03p.bsip","f04p.bsip","f05p.bsip",...
-         "f06p.bsip","f07p.bsip","f08p.bsip","f09p.bsip","f10p.bsip",...
-         "f11p.bsip","f12p.bsip","f13p.bsip","f14p.bsip","f15p.bsip",...
-         "f16p.bsip","f17p.bsip","f18p.bsip","f19p.bsip","f20p.bsip",...
-};
+dcpini={"empty.bsip"};
 
 ## Prefix for the calculations. If prefix is "bleh", then all the
 ## inputs and outputs will be stored in subdirectory bleh/ of the
@@ -63,16 +57,16 @@ dcpini={...
 ## where xx is the DCP optimization evaluation number. The archive
 ## contains files bleh_xx_name, where name is the identifier for the
 ## database entry. 
-prefix="f";
+prefix="bleh";
 
 ## Name of the Gaussian input runner routine
-## run_inputs = @run_inputs_serial; ## Run all Gaussian inputs sequentially on the same node
+run_inputs = @run_inputs_serial; ## Run all Gaussian inputs sequentially on the same node
 ## run_inputs = @run_inputs_grex; ## Submit inputs to the queue, wait for all to finish. Grex version.
 ## run_inputs = @run_inputs_plonk; ## Submit inputs to a private queue, plonk version.
 ## run_inputs = @run_inputs_plonk_priority; ## plonk version, high priority.
 ## run_inputs = @run_inputs_plonk_packed; ## plonk version, pack the inputs.
 ## run_inputs = @run_inputs_nint; ## Submit inputs to a private queue on the NINT cluster.
-run_inputs = @run_inputs_nint_gino; ## Submit inputs to a private queue on the NINT cluster (gino).
+## run_inputs = @run_inputs_nint_gino; ## Submit inputs to a private queue on the NINT cluster (gino).
 ## run_inputs = @run_inputs_elcap3; ## Submit inputs to elcap3.
 
 ## Save a compressed tar.bz2 with the inputs/outputs/wfxs?
@@ -84,6 +78,10 @@ savetarbz2=1;
 ## passed to postg.
 ## xdmcoef = [0.7647 0.8457];
 ## xdmfun = "blyp";
+
+## To use D3, put the arguments for the command line call to the
+## dftd3 program here. 
+extrad3 = "-func hf -bj";
 
 ## Name of the error file (timing, debug, etc.)
 errfile = "eval.err";
@@ -154,15 +152,20 @@ for idcp = 1:length(dcpini)
     fflush(ferr);
   endif
 
-  ## Run all inputs
-  if (!exist("xdmcoef","var") || isempty(xdmcoef))
-    srun = run_inputs(ilist);
-  else
-    if (!exist("xdmfun","var") || isempty(xdmfun))
-      xdmfun = method;
-    endif
-    srun = run_inputs(ilist,xdmcoef,xdmfun);
+  ## Default values for XDM and D3, if applicable
+  if (!exist("xdmcoef","var"))
+    xdmcoef = [];
+    xdmfun = "";
   endif
+  if (!exist("extrad3","var"))
+    extrad3 = "";
+  endif
+  if (!isempty(xdmcoef) && !isempty(extrad3))
+    error("Can not run XDM and D3 at the same time")
+  endif
+
+  ## Run all inputs
+  srun = run_inputs(ilist,xdmcoef,xdmfun,extrad3);
 
   ## Collect the results and compare to the reference data
   if (ferr > 0) 
@@ -171,7 +174,7 @@ for idcp = 1:length(dcpini)
   endif
   dy = ycalc = yref = ycalcnd = zeros(length(db),1);
   for i = 1:length(db)
-    [dy(i) ycalc(i) yref(i) xdum ycalcnd(i)] = process_output_one(db{i},exist("xdmcoef","var") && !isempty(xdmcoef),0);
+    [dy(i) ycalc(i) yref(i) xdum ycalcnd(i)] = process_output_one(db{i},xdmcoef,extrad3,0);
   endfor
   if (any(ycalc == Inf))
     mae = Inf;
@@ -198,7 +201,7 @@ for idcp = 1:length(dcpini)
   printf("# DCP %d (%s) | Cost = %.10f | wRMS = %.4f | MAE = %.4f | MAPE = %.4f | RMS = %.4f | Time = %.1f |\n",...
          idcp,dcpini{idcp},cost,wrms,mae,mape,rms,sum(iload));
   
-  if (!exist("xdmcoef","var") || isempty(xdmcoef))
+  if (isempty(xdmcoef) && isempty(extrad3))
     printf("| Id|           Name       |       yref   |      ycalc   |       dy     |\n");
     for i = 1:length(db)
       printf("| %d | %20s | %14.8f | %14.8f | %14.8f |\n",...

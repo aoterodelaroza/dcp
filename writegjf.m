@@ -28,14 +28,6 @@ function writegjf(file,dcp,dcp0,basis,at,x,q,mult,ent,extragau="",chk="",wfx="",
   
   global ncpu mem
 
-  ## Build the atom list
-  atlist = {};
-  for i = 1:length(at)
-    if (!any(ismember(at{i},atlist)))
-      atlist = {atlist{:}, at{i}};
-    endif
-  endfor
-
   ## Open the input file for writing
   fid = fopen(file,"w");
   if (fid <= 0) 

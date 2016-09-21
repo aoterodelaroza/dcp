@@ -10,8 +10,8 @@
 % FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
 % more details.
 
-function sout = run_inputs_plonk_priority(ilist,xdm=[],xdmfun="")
-  %% sout = run_inputs_plonk_priority(ilist,xdm=[],xdmfun="")
+function sout = run_inputs_plonk_priority(ilist,xdmcoef=[],xdmfun="",extrad3="")
+  %% sout = run_inputs_plonk_priority(ilist,xdmcoef=[],xdmfun="",extrad3="")
   %% 
   %% Run all the inputs in the job list (ilist). The jobs should be  
   %% in the current working directory, with extension gjf. This
@@ -22,7 +22,7 @@ function sout = run_inputs_plonk_priority(ilist,xdm=[],xdmfun="")
   %% all checkpoint files (with the same name) should also be
   %% in the CWD.
   %%
-  %% If xdm is non-empty, run postg on the resulting wfx with
+  %% If xdmcoef is non-empty, run postg on the resulting wfx with
   %% the indicated parameters and the functional in xdmfun.
   %%
   %% This version of run_inputs creates submission scripts for all
@@ -68,8 +68,8 @@ function sout = run_inputs_plonk_priority(ilist,xdm=[],xdmfun="")
     endif
     fprintf(fid,"cd %s\n",pwd());
     fprintf(fid,"g09 %s.gjf\n",name);
-    if (!isempty(xdm))
-      fprintf(fid,"~/git/postg/postg %.10f %.10f %s.wfx %s > %s.pgout\n",xdm(1),xdm(2),name,xdmfun,name);
+    if (!isempty(xdmcoef))
+      fprintf(fid,"~/git/postg/postg %.10f %.10f %s.wfx %s > %s.pgout\n",xdmcoef(1),xdmcoef(2),name,xdmfun,name);
     endif
     fprintf(fid,"rm -f %s.chk\n",name);
     fprintf(fid,"touch %s.done\n",name);

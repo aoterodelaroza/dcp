@@ -10,8 +10,8 @@
 % FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
 % more details.
 
-function sout = run_inputs_nint(ilist,xdm=[],xdmfun="")
-  %% function run_inputs_nint(ilist,xdm=[],xdmfun="")
+function sout = run_inputs_nint(ilist,xdmcoef=[],xdmfun="",extrad3="")
+  %% function run_inputs_nint(ilist,xdmcoef=[],xdmfun="",extrad3="")
   %% 
   %% Run all the inputs in the job list (ilist). The jobs should be  
   %% in the current working directory, with extension gjf. This
@@ -33,6 +33,10 @@ function sout = run_inputs_nint(ilist,xdm=[],xdmfun="")
   
   global verbose iload prefix ferr
   
+  if (!isempty(extrad3))
+    error("d3 calculations not supported by this run_inputs driver")
+  endif
+
   ## Debug
   if (ferr > 0) 
     fprintf(ferr,"# Start run_inputs_nint - %s\n",strtrim(ctime(time())));
@@ -109,11 +113,11 @@ function sout = run_inputs_nint(ilist,xdm=[],xdmfun="")
     fprintf(fid,"tar xjf %s.tar.bz2\n",name);
     fprintf(fid,"for j in *.gjf ; do\n");
     fprintf(fid,"  g03 $j\n");
-    if (!isempty(xdm))
-      fprintf(fid,"  /home/delarozao/src/postg/postg %.10f %.10f ${j%%gjf}wfx %s > ${j%%gjf}pgout\n",xdm(1),xdm(2),xdmfun);
+    if (!isempty(xdmcoef))
+      fprintf(fid,"  /home/delarozao/src/postg/postg %.10f %.10f ${j%%gjf}wfx %s > ${j%%gjf}pgout\n",xdmcoef(1),xdmcoef(2),xdmfun);
     endif
     fprintf(fid,"done\n");
-    if (!isempty(xdm))
+    if (!isempty(xdmcoef))
       fprintf(fid,"tar cjf %s.tar.bz2 *.log *.pgout\n",name);
     else
       fprintf(fid,"tar cjf %s.tar.bz2 *.log\n",name);

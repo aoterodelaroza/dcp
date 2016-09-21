@@ -10,8 +10,8 @@
 % FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
 % more details.
 
-function sout = run_inputs_nint_gino(ilist,xdm=[],xdmfun="")
-  %% function run_inputs_nint_gino(ilist,xdm=[],xdmfun="")
+function sout = run_inputs_nint_gino(ilist,xdmcoef=[],xdmfun="",extrad3="")
+  %% function run_inputs_nint_gino(ilist,xdmcoef=[],xdmfun="",extrad3="")
   %% 
   %% Run all the inputs in the job list (ilist). The jobs should be  
   %% in the current working directory, with extension gjf. This
@@ -22,7 +22,7 @@ function sout = run_inputs_nint_gino(ilist,xdm=[],xdmfun="")
   %% all checkpoint files (with the same name) should also be
   %% in the CWD.
   %%
-  %% If xdm is non-empty, run postg on the resulting wfx with
+  %% If xdmcoef is non-empty, run postg on the resulting wfx with
   %% the indicated parameters and the functional in xdmfun.
   %%
   %% This version of run_inputs creates submission scripts for all
@@ -33,6 +33,10 @@ function sout = run_inputs_nint_gino(ilist,xdm=[],xdmfun="")
   
   global verbose iload prefix ferr
   
+  if (!isempty(extrad3))
+    error("d3 calculations not supported by this run_inputs driver")
+  endif
+
   ## Debug
   if (ferr > 0) 
     fprintf(ferr,"# Start run_inputs_nint_gino - %s\n",strtrim(ctime(time())));
@@ -107,7 +111,7 @@ function sout = run_inputs_nint_gino(ilist,xdm=[],xdmfun="")
     fprintf(fid,"for j in *.gjf ; do\n");
     fprintf(fid,"  g03 $j\n");
     fprintf(fid,"done\n");
-    if (!isempty(xdm))
+    if (!isempty(xdmcoef))
       fprintf(fid,"tar cjf %s.tar.bz2 *.log *.wfx *.pgout\n",name);
     else
       fprintf(fid,"tar cjf %s.tar.bz2 *.log *.wfx\n",name);

@@ -10,8 +10,8 @@
 % FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
 % more details.
 
-function sout = run_inputs_plonk_packed(ilist,xdm=[],xdmfun="")
-  %% function run_inputs_plonk_packed(ilist,xdm=[],xdmfun="")
+function sout = run_inputs_plonk_packed(ilist,xdmcoef=[],xdmfun="",extrad3="")
+  %% function run_inputs_plonk_packed(ilist,xdmcoef=[],xdmfun="",extrad3="")
   %% 
   %% Run all the inputs in the job list (ilist). The jobs should be  
   %% in the current working directory, with extension gjf. This
@@ -43,6 +43,10 @@ function sout = run_inputs_plonk_packed(ilist,xdm=[],xdmfun="")
   lockdir = "~/plonk.lock";
   dirname = sprintf("%s_%d",prefix,getpid());
   npack = 200;
+
+  if (!isempty(extrad3))
+    error("d3 calculations not supported by this run_inputs driver")
+  endif
 
   ## randomize ilist
   iperm = randperm(length(ilist));

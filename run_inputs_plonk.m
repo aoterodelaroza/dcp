@@ -10,8 +10,8 @@
 % FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
 % more details.
 
-function sout = run_inputs_plonk(ilist,xdm=[],xdmfun="")
-  %% function run_inputs_plonk(ilist,xdm=[],xdmfun="")
+function sout = run_inputs_plonk(ilist,xdmcoef=[],xdmfun="",extrad3="")
+  %% function run_inputs_plonk(ilist,xdmcoef=[],xdmfun="",extrad3="")
   %% 
   %% Run all the inputs in the job list (ilist). The jobs should be  
   %% in the current working directory, with extension gjf. This
@@ -22,8 +22,8 @@ function sout = run_inputs_plonk(ilist,xdm=[],xdmfun="")
   %% all checkpoint files (with the same name) should also be
   %% in the CWD.
   %%
-  %% If xdm is non-empty, run postg on the resulting wfx with
-  %% the indicated parameters and the functional in xdmfun.
+  %% If xdmcoef is non-empty, run postg on the resulting wfx with the
+  %% indicated parameters and the functional in xdmfun.
   %%
   %% This version of run_inputs creates submission scripts for all
   %% inputs in the list and submits them to a private queue. After
@@ -47,6 +47,19 @@ function sout = run_inputs_plonk(ilist,xdm=[],xdmfun="")
   jobfile = "~/plonk.jobs"; 
   lockdir = "~/plonk.lock";
 
+  ## Check the necessary programs are in the path
+  if (!isempty(xdmcoef)) 
+    [s out] = system("which postg");
+    if (s != 0) 
+      error("program postg not found")
+    endif
+  elseif (!isempty(extrad3))
+    [s out] = system("which dftd3");
+    if (s != 0) 
+      error("program dftd3 not found")
+    endif
+  endif
+  
   ## Create submission scripts for all inputs on the list
   if (ferr > 0) 
     fprintf(ferr,"# Creating submission scripts - %s\n",strtrim(ctime(time())));
@@ -66,8 +79,10 @@ function sout = run_inputs_plonk(ilist,xdm=[],xdmfun="")
     endif
     fprintf(fid,"cd %s\n",pwd());
     fprintf(fid,"g09 %s.gjf\n",name);
-    if (!isempty(xdm))
-      fprintf(fid,"~/git/postg/postg %.10f %.10f %s.wfx %s > %s.pgout\n",xdm(1),xdm(2),name,xdmfun,name);
+    if (!isempty(xdmcoef))
+      fprintf(fid,"postg %.10f %.10f %s.wfx %s > %s.pgout\n",xdmcoef(1),xdmcoef(2),name,xdmfun,name);
+    elseif (!isempty(extrad3))
+      fprintf(fid,"dftd3 %s.xyz %s > %s.d3out\n",name,extrad3,name);
     endif
     fprintf(fid,"rm -f %s.chk\n",name);
     fprintf(fid,"touch %s.done\n",name);

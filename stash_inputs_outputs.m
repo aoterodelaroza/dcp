@@ -13,8 +13,8 @@
 function stash_inputs_outputs(ilist)
   %% function stash_inputs_outputs(ilist)
   %% 
-  %% Move the gjf and the log files given by the names in cell
-  %% array ilist to the stash directory (prefix).
+  %% Move the gjf, the xyz, and the log files given by the names in
+  %% cell array ilist to the stash directory (prefix).
   
   global nstep prefix savetarbz2 ferr
 
@@ -35,15 +35,18 @@ function stash_inputs_outputs(ilist)
   ## Tar all the inputs and outputs and move to the stash
   if (exist("savetarbz2","var") && savetarbz2)
     [s out] = system(sprintf("find . -maxdepth 1 -name '%s_*.chk' -delete",prefix));
-    [s out] = system(sprintf("find . -maxdepth 1 -name '%s_*.gjf' -or -name '%s_*.log' -or -name '%s_*.wfx' -or -name '%s_*.pgout' > filelist.tmp",prefix,prefix,prefix,prefix));
+    [s out] = system(sprintf("find . -maxdepth 1 -name '%s_*.gjf' -or -name '%s_*.log' -or -name '%s_*.xyz' -or -name '%s_*.wfx' -or -name '%s_*.pgout' -or -name '%s_*.d3out' > filelist.tmp",...
+                             prefix,prefix,prefix,prefix,prefix,prefix));
     [s out] = system(sprintf("tar cjvf %s_%4.4d.tar.bz2 -T filelist.tmp",prefix,nstep));
     [s out] = system(sprintf("rm -f filelist.tmp"));
     [s out] = system(sprintf("mv %s_%4.4d.tar.bz2 %s",prefix,nstep,prefix));
   endif
   [s out] = system(sprintf("find . -maxdepth 1 -name '%s_*.gjf' -delete",prefix));
+  [s out] = system(sprintf("find . -maxdepth 1 -name '%s_*.xyz' -delete",prefix));
   [s out] = system(sprintf("find . -maxdepth 1 -name '%s_*.log' -delete",prefix));
   [s out] = system(sprintf("find . -maxdepth 1 -name '%s_*.wfx' -delete",prefix));
   [s out] = system(sprintf("find . -maxdepth 1 -name '%s_*.pgout' -delete",prefix));
+  [s out] = system(sprintf("find . -maxdepth 1 -name '%s_*.d3out' -delete",prefix));
   [s out] = system(sprintf("find . -maxdepth 1 -name '%s_*.chk' -delete",prefix));
 
   ## debug
