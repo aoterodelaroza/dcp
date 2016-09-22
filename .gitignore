@@ -6,5 +6,12 @@ basis.ini
 dcp.log
 pdf/
 
+# compiled objects and modules
+*.o
+*.mod
+fit-bsip/post_eval
+fit-bsip/scan_ls
+fit-bsip/dat/*.dat
+
 # emacs backups
 *~
