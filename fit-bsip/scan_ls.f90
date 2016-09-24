@@ -7,7 +7,7 @@ program scan_least_squares
   character*(20), parameter :: reffile = "dat/ref.dat"
   character*(20), parameter :: wfile = "dat/w.dat"
   character*(20), parameter :: namefile = "dat/names.dat"
-  character*(20), parameter :: filelist(32) = (/character(len=20)::&
+  character*(20), parameter :: filelist(33) = (/character(len=20)::&
      "dat/f_l.dat",&
      "dat/f_s.dat",&
      "dat/f_p.dat",&
@@ -39,7 +39,8 @@ program scan_least_squares
      "dat/h_l.dat",&
      "dat/h_s.dat",&
      "dat/h_p.dat",&
-     "dat/h_p.dat"/)
+     "dat/h_p.dat",&
+     "dat/disp.dat"/)
 
   ! Terms to use and atom/channel distribution
   integer, parameter :: useterms(8,4) = reshape((/&
@@ -73,7 +74,7 @@ program scan_least_squares
   ! 
   integer :: i, j, k, n1, n2, ncols, iat, ichan, ifile
   integer :: n, nnew, nterms, natom, nchan
-  real*8, allocatable :: yref(:), yempty(:), xread(:), y0(:)
+  real*8, allocatable :: yref(:), yempty(:), ysub(:), xread(:), y0(:)
   real*8, allocatable :: x0(:,:), xw(:,:), yw(:)
   logical, allocatable :: lexp(:)
   ! for lapack
@@ -137,6 +138,17 @@ program scan_least_squares
   write (*,'("  Number of DCP terms per atom and channel: ",I2)') nterms
   write (*,'("  Number of columns: ",I4," out of max ",I4)') ncols, mcols
   deallocate(xread)
+
+  if (size(filelist) > ifile) then
+     allocate(ysub(size(yref)))
+     do i = ifile+1, size(filelist)
+        write (*,'("  Subtracting the contents of file from reference: ",A)') trim(filelist(i))
+        call readfile(filelist(i),1,ysub)
+        if (size(ysub) /= size(yref)) call error("inconsistent ysub/yref")
+        yref = yref - ysub
+     end do
+     deallocate(ysub)
+  end if
 
   ! read the names
   call readfile_string(namefile,name)
