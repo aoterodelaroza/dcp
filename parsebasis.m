@@ -70,10 +70,10 @@ function basis = parsebasis(alist)
       ## This is the 'Atom 0' line at the beginning
       curatoms = {};
       anew = strfields(line);
-      if (anew{end} != "0")
-        error(sprintf("Incorrect Gaussian basis format in file %s, line '%s'",alist{i},line));
-      endif
       curatoms = anew(1:end-1);
+      for j = 1:length(curatoms)
+        curatoms{j} = strrep(curatoms{j},"-","");
+      endfor
       ## Add the new basis set for this atom
       nbas++;
       basis{nbas}.atom = curatoms{1};
