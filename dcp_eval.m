@@ -13,7 +13,7 @@
 
 format long
 global dcp basis db prefix nstep verbose run_inputs ycur...
-       dcpfin costmin iload stime0 astep savetarbz2 ncpu mem...
+       dcpfin costmin iload stime0 astep savetar ncpu mem...
        ferr
 
 #### Modify this to change the input behavior ####
@@ -49,7 +49,7 @@ listdb = {
 
 ## List of DCP files to evaluate (you can use a cell array of files
 ## here, like {"C.dcp","H.dcp"}, or a single string "bleh.dcp")
-dcpini={"empty.bsip"};
+dcpini={"empty1.bsip","empty2.bsip","empty3.bsip"};
 
 ## Prefix for the calculations. If prefix is "bleh", then all the
 ## inputs and outputs will be stored in subdirectory bleh/ of the
@@ -69,9 +69,12 @@ run_inputs = @run_inputs_serial; ## Run all Gaussian inputs sequentially on the 
 ## run_inputs = @run_inputs_nint_gino; ## Submit inputs to a private queue on the NINT cluster (gino).
 ## run_inputs = @run_inputs_elcap3; ## Submit inputs to elcap3.
 
-## Save a compressed tar.bz2 with the inputs/outputs/wfxs?
-## savetarbz2="";
-savetarbz2=1;
+## Save a compressed tar file with the inputs/outputs/wfxs?
+## savetar="";
+## savetar="tar";
+## savetar="gz";
+## savetar="bz2";
+savetar="xz";
 
 ## To use XDM, put the damping function coefficients here.
 ## [a1 a2], with a2 in angstrom. xdmfun is the functional keyword
@@ -81,7 +84,7 @@ savetarbz2=1;
 
 ## To use D3, put the arguments for the command line call to the
 ## dftd3 program here. 
-extrad3 = "-func hf -bj";
+## extrad3 = "-func hf -bj";
 
 ## Name of the error file (timing, debug, etc.)
 errfile = "eval.err";

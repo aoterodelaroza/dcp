@@ -15,7 +15,7 @@
 format long
 global dcp basis db prefix nstep verbose run_inputs ycur dcpfin...
        costmin iload stime0 astep dcpeval maxnorm fixnorm muk dcp0...
-       savetarbz2 errcontinue ncpu mem
+       savetar errcontinue ncpu mem
 
 #### Modify this to change the input behavior ####
 
@@ -107,8 +107,8 @@ errcontinue = 1;
 ## errcontinue = "";
 
 ## Save a compressed tar.bz2 with the inputs/outputs/wfxs?
-## savetarbz2="";
-savetarbz2=1;
+## savetar="";
+savetar="bz2";
 
 ## Name of the error file (timing, debug, etc.)
 errfile = "eval.err";
