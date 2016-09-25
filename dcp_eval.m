@@ -120,6 +120,14 @@ if (!iscell(dcpini))
   dcpini = {dcpini};
 endif
 
+## Create the prefix directory if it doesn't exist yet
+if (!exist(prefix,"dir"))
+  [s out] = system(sprintf("mkdir %s",prefix));
+  if (s != 0)
+    error(sprintf("Could not create directory %s",prefix));
+  endif
+endif
+
 ## Read and evaluate the DCPs one by one, prepare all input files
 for idcp = 1:length(dcpini)
   ## Debug
@@ -132,14 +140,6 @@ for idcp = 1:length(dcpini)
   ilist = {};
   dcp = parsedcp(dcpini{idcp});
   nstep = idcp;
-
-  ## Create the prefix directory if it doesn't exist yet
-  if (!exist(prefix,"dir"))
-    [s out] = system(sprintf("mkdir %s",prefix));
-    if (s != 0)
-      error(sprintf("Could not create directory %s",prefix));
-    endif
-  endif
 
   ## Set up the Gaussian input files
   if (ferr > 0) 
