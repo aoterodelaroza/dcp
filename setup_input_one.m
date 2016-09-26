@@ -58,7 +58,7 @@ function ilist = setup_input_one(ent,dcp,derivs=0)
       extragau = "";
     endif
     writegjf(file,dcp,dcp0,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult,ent,extragau,chk,wfx,derivs);
-    writexyz(filexyz,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult);
+    writexyz(filexyz,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult);
     ilist = {ilist{:}, sprintf("%s_%4.4d_%s_mol",prefix,nstep,ent.name)};
   elseif (strcmp(ent.type,"intramol_geometry") || strcmp(ent.type,"intermol_geometry"))
     ## A geometry relaxation; append "opt" to extragau
@@ -71,7 +71,7 @@ function ilist = setup_input_one(ent,dcp,derivs=0)
       extragau = "";
     endif
     writegjf(file,dcp,dcp0,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult,ent,extragau,:,:,0);
-    writexyz(filexyz,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult);
+    writexyz(filexyz,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult);
     ilist = {ilist{:}, sprintf("%s_%4.4d_%s_mol",prefix,nstep,ent.name)};
   elseif (strcmp(ent.type,"dipole"))
     ## A dipole calculation
@@ -97,7 +97,7 @@ function ilist = setup_input_one(ent,dcp,derivs=0)
         extragau = "";
       endif
       writegjf(file,dcp,dcp0,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult,ent,extragau,:,:,0);
-      writexyz(filexyz,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult);
+      writexyz(filexyz,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult);
       ilist = {ilist{:}, sprintf("%s_%4.4d_%s_mol",prefix,nstep,ent.name)};
     endif
   else

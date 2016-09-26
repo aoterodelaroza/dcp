@@ -28,7 +28,7 @@ method="blyp";
 ## If a file is found, it is parsed and the basis-set information read,
 ## then information for the relevant atoms passed to the inputs. 
 ## Several basis set files can be used (e.g. {"basis1","basis2"}).
-basis="sto-3g";
+basis="minis.ini";
 
 ## Extra bits for gaussian (do not include pseudo=read here)
 extragau="SCF=(Conver=6, MaxCycle=40) Symm=none int=(grid=ultrafine)";
@@ -38,18 +38,11 @@ ncpu=8;
 mem=2;
 
 ## List of database files to use in DCP optimization
-## [listdb weightdb] = training_set(1,1,1,1,1);
-listdb = {
-          "atz_blyp/s225_waterdimer09.db",...
-          "atz_blyp/s225_waterdimer10.db",...
-          "atz_blyp/s225_waterdimer12.db",...
-          "atz_blyp/s225_waterdimer15.db",...
-          "atz_blyp/s225_waterdimer20.db",...
-};
+[listdb weightdb] = training_set(1,1,1,1,1);
 
 ## List of DCP files to evaluate (you can use a cell array of files
 ## here, like {"C.dcp","H.dcp"}, or a single string "bleh.dcp")
-dcpini={"empty1.bsip","empty2.bsip","empty3.bsip"};
+dcpini={"empty.bsip"};
 
 ## Prefix for the calculations. If prefix is "bleh", then all the
 ## inputs and outputs will be stored in subdirectory bleh/ of the
@@ -57,7 +50,7 @@ dcpini={"empty1.bsip","empty2.bsip","empty3.bsip"};
 ## where xx is the DCP optimization evaluation number. The archive
 ## contains files bleh_xx_name, where name is the identifier for the
 ## database entry. 
-prefix="bleh";
+prefix="empty";
 
 ## Save a compressed tar file with the inputs/outputs/wfxs?
 ## savetar="";
@@ -158,7 +151,7 @@ for idcp = 1:length(dcpini)
   endif
 
   ## Unpack the results
-  file = ""
+  file = "";
   if (exist("savetar","var") && exist(sprintf("%s/%s_%4.4d.tar.%s",prefix,prefix,nstep,savetar),"file"))
     file = sprintf("%s/%s_%4.4d.tar.%s",prefix,prefix,nstep,savetar);
   else
@@ -244,4 +237,4 @@ endif
 fclose(ferr);
 
 ## Termination
-printf("### DCP evaluation finished on %s ###\n",strtrim(ctime(time())));
+printf("### DCP repacking finished on %s ###\n",strtrim(ctime(time())));
