@@ -37,6 +37,14 @@ function [dy ycalc yref dery ycalcnd] = process_output_one(ent,xdm=[],d3="",deri
     ycalc = ycalcnd = 0;
     dery = [];
     for j = 1:ent.nmol
+      ## Normal termination
+      file = sprintf("%s_%4.4d_%s_mol%d.log",prefix,nstep,ent.name,j);
+      [s out] = system(sprintf("tail -n 1 %s | grep Normal",file));
+      if (s != 0)
+        dy = ycalc = yref = ycalcnd = Inf;
+        return
+      endif
+
       ## Read the energy for the dimer
       if (!isempty(xdm))
         file = sprintf("%s_%4.4d_%s_mol%d.pgout",prefix,nstep,ent.name,j);
@@ -53,6 +61,8 @@ function [dy ycalc yref dery ycalcnd] = process_output_one(ent,xdm=[],d3="",deri
         dy = ycalc = yref = ycalcnd = Inf;
         return
       endif
+
+      s = s2 = 0;
       if (!isempty(xdm))
         [s out] = system(sprintf("grep 'total energy' %s | awk '{print $NF}'",file));
         [s2 out2] = system(sprintf("grep 'scf energy' %s | awk '{print $NF}'",file));
@@ -61,7 +71,7 @@ function [dy ycalc yref dery ycalcnd] = process_output_one(ent,xdm=[],d3="",deri
       elseif (!isempty(d3))
         [s out] = system(sprintf("grep Done %s | awk '{print $5}'",file));
         e2s = str2num(out);
-        [s out] = system(sprintf("grep 'Edisp' %s | awk '{print $NF}'",filed3));
+        [s2 out] = system(sprintf("grep 'Edisp' %s | awk '{print $NF}'",filed3));
         e2d = str2num(out);
         e2 = e2s + e2d;
       else
@@ -69,7 +79,7 @@ function [dy ycalc yref dery ycalcnd] = process_output_one(ent,xdm=[],d3="",deri
         e2 = str2num(out);
         e2s = 0;
       endif
-      if (s != 0 || isempty(e2)) 
+      if (s != 0 || s2 != 0 || isempty(e2)) 
         dy = ycalc = yref = ycalcnd = Inf;
         return
       endif
@@ -101,8 +111,15 @@ function [dy ycalc yref dery ycalcnd] = process_output_one(ent,xdm=[],d3="",deri
     dy = ycalc - yref;
 
   elseif (strcmp(ent.type,"total_energy"))
-    ## Read the output energy
+    ## Normal termination
     file = sprintf("%s_%4.4d_%s_mol.log",prefix,nstep,ent.name);
+    [s out] = system(sprintf("tail -n 1 %s | grep Normal",file));
+    if (s != 0)
+      dy = ycalc = yref = ycalcnd = Inf;
+      return
+    endif
+
+    ## Read the output energy
     if (!exist(file,"file"))
       dy = ycalc = yref = ycalcnd = Inf;
       return
@@ -137,8 +154,15 @@ function [dy ycalc yref dery ycalcnd] = process_output_one(ent,xdm=[],d3="",deri
       dery = e_c';
     endif
   elseif (strcmp(ent.type,"intramol_geometry"))
-    ## Read the output geometry
+    ## Normal termination
     file = sprintf("%s_%4.4d_%s_mol.log",prefix,nstep,ent.name);
+    [s out] = system(sprintf("tail -n 1 %s | grep Normal",file));
+    if (s != 0)
+      dy = ycalc = yref = ycalcnd = Inf;
+      return
+    endif
+
+    ## Read the output geometry
     if (!exist(file,"file"))
       dy = ycalc = yref = ycalcnd = Inf;
       return
@@ -153,8 +177,15 @@ function [dy ycalc yref dery ycalcnd] = process_output_one(ent,xdm=[],d3="",deri
     dy = ycalc;
     dery = 0;
   elseif (strcmp(ent.type,"intermol_geometry"))
-    ## Read the output geometry
+    ## Normal termination
     file = sprintf("%s_%4.4d_%s_mol.log",prefix,nstep,ent.name);
+    [s out] = system(sprintf("tail -n 1 %s | grep Normal",file));
+    if (s != 0)
+      dy = ycalc = yref = ycalcnd = Inf;
+      return
+    endif
+
+    ## Read the output geometry
     if (!exist(file,"file"))
       dy = ycalc = yref = ycalcnd = Inf;
       return
@@ -175,8 +206,15 @@ function [dy ycalc yref dery ycalcnd] = process_output_one(ent,xdm=[],d3="",deri
     dy = ycalc - yref;
     dery = 0;
   elseif (strcmp(ent.type,"dipole"))
-    ## Read the dipole from the output
+    ## Normal termination
     file = sprintf("%s_%4.4d_%s_mol.log",prefix,nstep,ent.name);
+    [s out] = system(sprintf("tail -n 1 %s | grep Normal",file));
+    if (s != 0)
+      dy = ycalc = yref = ycalcnd = Inf;
+      return
+    endif
+
+    ## Read the dipole from the output
     if (!exist(file,"file"))
       dy = ycalc = yref = ycalcnd = Inf;
       return
@@ -195,14 +233,15 @@ function [dy ycalc yref dery ycalcnd] = process_output_one(ent,xdm=[],d3="",deri
     dy = e-ent.ref;
     dery = 0;
   elseif (strcmp(ent.type,"multipoles"))
-    ## Read the multipoles from the output
+    ## Normal termination
     file = sprintf("%s_%4.4d_%s_mol.log",prefix,nstep,ent.name);
-
-    if (!exist(file,"file"))
+    [s out] = system(sprintf("tail -n 1 %s | grep Normal",file));
+    if (s != 0)
       dy = ycalc = yref = ycalcnd = Inf;
       return
     endif
 
+    ## Read the multipoles from the output
     e = zeros(1,34);
     if (ent.reftype >= 1 && ent.reftype <= 3)
       [s out] = system(sprintf("grep -A 1 'Dipole moment' %s | tail -n 1 | awk '{print $2, $4, $6}' | tr '\n' ' '",file));
