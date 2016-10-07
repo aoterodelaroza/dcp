@@ -58,14 +58,10 @@ function dcp = parsedcp(alist)
       if (strcmp(line,"****"))
         continue
       endif
-      ## This is the 'Atom 0' line at the beginning
+      ## This is the 'Atom 0' line at the beginning. Add the new DCP
       anew = strfields(line);
-      if (length(anew) != 2)
-        error(sprintf("Incorrect Gaussian ECP format in file %s, line '%s'",alist{i},line));
-      endif
-      ## Add the new DCP
       ndcp++;
-      dcp{ndcp}.atom = anew{1};
+      dcp{ndcp}.atom = strrep(anew{1},"-","");
       ## Read the second line
       line = strtrim(fgetl(fid));
       if (!ischar(line) || length(line) == 0)
