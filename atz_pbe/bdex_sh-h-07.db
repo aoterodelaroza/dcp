@@ -2,6 +2,7 @@
 ## Read from file: atz_blyp/bdex_sh-h-07.db
 type reaction_frozen
 ref -78.3150059600
+extragau    scf(qc)
 molc 1.0000000000 0 1
 H 0.0000000000 0.9726000000 -0.6398000000
 S 0.0000000000 0.0000000000 0.2889300000
