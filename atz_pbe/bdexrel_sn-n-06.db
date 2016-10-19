@@ -2,6 +2,7 @@
 ## Read from file: atz_blyp/bdexrel_sn-n-06.db
 type reaction_frozen
 ref 5.7869965000
+extragau scf(qc)
 molc 1.0000000000 0 1
 N -2.1452313020 1.5274015090 0.0000000000
 S -3.8059500000 1.2427000000 0.0000000000
