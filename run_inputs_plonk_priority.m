@@ -49,6 +49,19 @@ function sout = run_inputs_plonk_priority(ilist,xdmcoef=[],xdmfun="",extrad3="")
   tempfile = "~/plonk.jobs.temp"; 
   lockdir = "~/plonk.lock";
 
+  ## Check the necessary programs are in the path
+  if (!isempty(xdmcoef)) 
+    [s out] = system("which postg");
+    if (s != 0) 
+      error("program postg not found")
+    endif
+  elseif (!isempty(extrad3))
+    [s out] = system("which dftd3");
+    if (s != 0) 
+      error("program dftd3 not found")
+    endif
+  endif
+  
   ## Create submission scripts for all inputs on the list
   if (ferr > 0) 
     fprintf(ferr,"# Creating submission scripts - %s\n",strtrim(ctime(time())));
@@ -69,7 +82,9 @@ function sout = run_inputs_plonk_priority(ilist,xdmcoef=[],xdmfun="",extrad3="")
     fprintf(fid,"cd %s\n",pwd());
     fprintf(fid,"g09 %s.gjf\n",name);
     if (!isempty(xdmcoef))
-      fprintf(fid,"~/git/postg/postg %.10f %.10f %s.wfx %s > %s.pgout\n",xdmcoef(1),xdmcoef(2),name,xdmfun,name);
+      fprintf(fid,"postg %.10f %.10f %s.wfx %s > %s.pgout\n",xdmcoef(1),xdmcoef(2),name,xdmfun,name);
+    elseif (!isempty(extrad3))
+      fprintf(fid,"dftd3 %s.xyz %s > %s.d3out\n",name,extrad3,name);
     endif
     fprintf(fid,"rm -f %s.chk\n",name);
     fprintf(fid,"touch %s.done\n",name);
