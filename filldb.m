@@ -64,7 +64,7 @@ function db = filldb(db,weis=[],method=[],extragau);
     endif
     ## Check that the entry is associated to a file
     if (!isfield(db{i},"name"))
-      idx = index(db{i}.file,".");
+      idx = index(db{i}.file,".","last");
       if (idx > 0) 
         db{i}.name = substr(db{i}.file,1,idx-1);
       endif
