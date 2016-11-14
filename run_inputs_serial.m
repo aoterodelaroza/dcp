@@ -30,9 +30,15 @@ function sout = run_inputs_serial(ilist,xdmcoef=[],xdmfun="",extrad3="")
   %% This version of run_inputs runs all input files sequentially
   %% on the same node in which the octave script is running.
   
-  global verbose
+  global verbose ferr
 
   sout = [];
+
+  ## Debug
+  if (ferr > 0)
+    fprintf(ferr,"# Start run_inputs_serial - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
 
   ## Check the necessary programs are in the path
   if (!isempty(xdmcoef)) 
@@ -49,6 +55,10 @@ function sout = run_inputs_serial(ilist,xdmcoef=[],xdmfun="",extrad3="")
   
   ## Run all the jobs in the current working directory
   for i = 1:length(ilist)
+    if (ferr > 0)
+      fprintf(ferr,"# Running %d (%s) - %s\n",i,ilist{i},strtrim(ctime(time())));
+      fflush(ferr);
+    endif
     if (verbose)
       printf("%d ",i);
       if (mod(i,10) == 0)
@@ -80,6 +90,10 @@ function sout = run_inputs_serial(ilist,xdmcoef=[],xdmfun="",extrad3="")
     printf("# All gaussian calcs done\n");
   endif
 
-  ## Clean-up everything that is not log or gjf
+  ## Debug
+  if (ferr > 0)
+    fprintf(ferr,"# End run_inputs_serial - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
 
 endfunction
