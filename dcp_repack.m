@@ -28,17 +28,24 @@ method="blyp";
 ## If a file is found, it is parsed and the basis-set information read,
 ## then information for the relevant atoms passed to the inputs. 
 ## Several basis set files can be used (e.g. {"basis1","basis2"}).
-basis="minis.ini";
+basis="sto-3g";
 
 ## Extra bits for gaussian (do not include pseudo=read here)
 extragau="SCF=(Conver=6, MaxCycle=40) Symm=none int=(grid=ultrafine)";
 
 ## Number of CPUs and memory (in GB) for Gaussian runs
-ncpu=8;
+ncpu=2;
 mem=2;
 
 ## List of database files to use in DCP optimization
-[listdb weightdb] = training_set(1,1,1,1,1);
+## [listdb weightdb] = training_set(1,1,1,1,1);
+listdb = {
+          "temp/bleh1.db",...
+          "temp/bleh2.db",...
+          "temp/bleh3.db",...
+          "temp/bleh4.db",...
+          "temp/bleh5.db",...
+};
 
 ## List of DCP files to evaluate (you can use a cell array of files
 ## here, like {"C.dcp","H.dcp"}, or a single string "bleh.dcp")
@@ -50,7 +57,7 @@ dcpini={"empty.bsip"};
 ## where xx is the DCP optimization evaluation number. The archive
 ## contains files bleh_xx_name, where name is the identifier for the
 ## database entry. 
-prefix="empty";
+prefix="bleh";
 
 ## Save a compressed tar file with the inputs/outputs/wfxs?
 ## savetar="";
@@ -85,7 +92,7 @@ printf("### DCP repacking started on %s ###\n",strtrim(ctime(time())));
 printf("### PID: %d ###\n",getpid());
 [s out] = system("hostname");
 printf("### hostname: %s ###\n",strrep(out,"\n",""));
-if (ferr > 0) 
+if (ferr > 0)
   fprintf(ferr,"# Started on %s with PID %d (%s)\n",strtrim(ctime(time())),getpid(),strrep(out,"\n",""));
   fflush(ferr);
 endif
@@ -114,7 +121,7 @@ endif
 ## Read and evaluate the DCPs one by one, prepare all input files
 for idcp = 1:length(dcpini)
   ## Debug
-  if (ferr > 0) 
+  if (ferr > 0)
     fprintf(ferr,"# Start DCP %d (%s) - %s\n",idcp,dcpini{idcp},strtrim(ctime(time())));
     fflush(ferr);
   endif
@@ -125,7 +132,7 @@ for idcp = 1:length(dcpini)
   nstep = idcp;
 
   ## Set up the Gaussian input files
-  if (ferr > 0) 
+  if (ferr > 0)
     fprintf(ferr,"# Setting up Gaussian input files - %s\n",strtrim(ctime(time())));
     fflush(ferr);
   endif
@@ -133,7 +140,7 @@ for idcp = 1:length(dcpini)
     anew = setup_input_one(db{i},dcp);
     ilist = {ilist{:}, anew{:}};
   endfor
-  if (ferr > 0) 
+  if (ferr > 0)
     fprintf(ferr,"# List of inputs has %d entries\n",length(ilist));
     fflush(ferr);
   endif
@@ -176,8 +183,17 @@ for idcp = 1:length(dcpini)
   endif
   [s out] = system(sprintf("rm -f %s",file));
 
+  ## Copy the results in the fail directory, if they exist
+  if (exist(sprintf("%s_fail",prefix),"dir"))
+    if (ferr > 0)
+      fprintf(ferr,"# Copying the calculations from the fail directory - %s\n",strtrim(ctime(time())));
+      fflush(ferr);
+    endif
+    [s out] = system(sprintf("cp -f %s_fail/%s_%4.4d_* .",prefix,prefix,nstep));
+  endif
+
   ## Collect the results and compare to the reference data
-  if (ferr > 0) 
+  if (ferr > 0)
     fprintf(ferr,"# Collecting the results and calculating errors - %s\n",strtrim(ctime(time())));
     fflush(ferr);
   endif
@@ -226,11 +242,11 @@ for idcp = 1:length(dcpini)
   printf("\n");
 
   ## Clean up
-  stash_inputs_outputs(ilist);
+  stash_inputs_outputs([]);
 endfor
 
 ## Close error file
-if (ferr > 0) 
+if (ferr > 0)
   fprintf(ferr,"# Finished on %s\n",strtrim(ctime(time())));
   fflush(ferr);
 endif
