@@ -10,19 +10,24 @@
 % FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
 % more details.
 
-function stash_inputs_outputs(ilist)
-  %% function stash_inputs_outputs(ilist)
+function stash_inputs_outputs(ycalc)
+  %% function stash_inputs_outputs(ycalc)
   %% 
   %% Move the gjf, the xyz, and the log files given by the names in
-  %% cell array ilist to the stash directory (prefix).
+  %% cell array ilist to the stash directory (prefix). If a calculated
+  %% energy is Inf, move all the information to the <prefix>_failed/
+  %% directory.
   
-  global nstep prefix savetar ferr
+  global nstep prefix db savetar ferr
 
   ## debug
   if (ferr > 0) 
     fprintf(ferr,"# Start stash_inputs_outputs - %s\n",strtrim(ctime(time())));
     fflush(ferr);
   endif
+
+  ## Clean up checkpoint files
+  [s out] = system(sprintf("find . -maxdepth 1 -name '%s_*.chk' -delete",prefix));
 
   ## Create the prefix directory if it doesn't exist yet
   if (!exist(prefix,"dir"))
@@ -32,9 +37,28 @@ function stash_inputs_outputs(ilist)
     endif
   endif
 
+  ## Create and populate the failed directory
+  if (any(isinf(ycalc)))
+    if (ferr > 0) 
+      fprintf(ferr,"# Some calcs failed; moving them to failed directory - %s\n",strtrim(ctime(time())));
+      fflush(ferr);
+    endif
+
+    ## Create directory
+    [s out] = system(sprintf("mkdir %s_fail",prefix));
+    if (s != 0)
+      error(sprintf("Could not create directory %s_fail",prefix));
+    endif
+
+    ## Make a copy of the failed calcs
+    idx = find(isinf(ycalc));
+    for i = 1:length(idx)
+      [s out] = system(sprintf("cp -f %s_%4.4d_%s_mol* %s_fail",prefix,nstep,db{idx(i)}.name,prefix));
+    endfor
+  endif
+
   ## Tar all the inputs and outputs and move to the stash
   if (exist("savetar","var") && !isempty(savetar))
-    [s out] = system(sprintf("find . -maxdepth 1 -name '%s_*.chk' -delete",prefix));
     [s out] = system(sprintf("find . -maxdepth 1 -name '%s_*.gjf' -or -name '%s_*.log' -or -name '%s_*.xyz' -or -name '%s_*.wfx' -or -name '%s_*.pgout' -or -name '%s_*.d3out' > filelist.tmp",...
                              prefix,prefix,prefix,prefix,prefix,prefix));
     if (strcmp(tolower(savetar),"bz2"))
