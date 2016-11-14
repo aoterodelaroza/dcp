@@ -31,27 +31,43 @@ function sout = run_inputs_elcap3(ilist,xdmcoef=[],xdmfun="",extrad3="")
   %% the calc results. When all jobs are done, control is given back
   %% to the caller.
   
-  global verbose iload
+  global verbose iload ferr
   
+  ## Debug
+  if (ferr > 0) 
+    fprintf(ferr,"# Start run_inputs_elcap3 - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
+
   ## Parameters for the run
-  hours = 2; ## walltime hours
   sleeptime = 5; ## time in seconds between job completion checks
-  usenodes = 6; ## pack all available jobs so that only usenodes number of nodes 
-                ## are used. If usenodes = -1, submit one job per Gaussian input.
+  usenodes = 200; ## pack all available jobs so that only usenodes number of nodes 
+                  ## are used. If usenodes = -1, submit one job per Gaussian input.
   maxtime = Inf; ## maximum sleep time in seconds. Crash if the script sleeps
                  ## for longer than this number without a new Gaussian output
                  ## being written.
 
-  if (!isempty(extrad3))
-    error("d3 calculations not supported by this run_inputs driver")
+  ## Check the necessary programs are in the path
+  if (!isempty(xdmcoef)) 
+    [s out] = system("which postg");
+    if (s != 0) 
+      error("program postg not found")
+    endif
+  elseif (!isempty(extrad3))
+    [s out] = system("which dftd3");
+    if (s != 0) 
+      error("program dftd3 not found")
+    endif
   endif
 
+  ## Prepare to make packages
   if (usenodes > 0) 
     every = ceil(length(ilist) / usenodes);
   else
     every = 1;
   endif
 
+  ## Even out the load across nodes
   if (isempty(iload)) 
     ## No information: randomize the input list
     idx = randperm(length(ilist));
@@ -66,6 +82,10 @@ function sout = run_inputs_elcap3(ilist,xdmcoef=[],xdmfun="",extrad3="")
   endif
 
   ## Create submission scripts for all inputs on the list
+  if (ferr > 0) 
+    fprintf(ferr,"# Creating submission scripts - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
   fid = -1;
   jobname = {};
   for i = 1:length(idx)
@@ -73,6 +93,10 @@ function sout = run_inputs_elcap3(ilist,xdmcoef=[],xdmfun="",extrad3="")
       continue
     endif
     name = ilist{idx(i)};
+    if (ferr > 0) 
+      fprintf(ferr,"# script %d (%s) - %s\n",i,name,strtrim(ctime(time())));
+      fflush(ferr);
+    endif
     if (mod(i-1,every) == 0)
       if (fid > 0)
         fclose(fid);
@@ -125,14 +149,20 @@ function sout = run_inputs_elcap3(ilist,xdmcoef=[],xdmfun="",extrad3="")
       fprintf(fid,"~/src/g09/g09 %s.gjf\n",name);
       if (!isempty(xdmcoef))
         fprintf(fid,"postg %.10f %.10f %s.wfx %s > %s.pgout\n",xdmcoef(1),xdmcoef(2),name,xdmfun,name);
+      elseif (!isempty(extrad3))
+        fprintf(fid,"dftd3 %s.xyz %s > %s.d3out\n",name,extrad3,name);
       endif
+      fprintf(fid,"rm -f %s.chk\n",name);
       fprintf(fid,"touch %s.done\n",name);
       jobname = {jobname{:} sprintf("%s.sub",name)};
     else
       fprintf(fid,"~/src/g09/g09 %s.gjf\n",name);
       if (!isempty(xdmcoef))
         fprintf(fid,"postg %.10f %.10f %s.wfx %s > %s.pgout\n",xdmcoef(1),xdmcoef(2),name,xdmfun,name);
+      elseif (!isempty(extrad3))
+        fprintf(fid,"dftd3 %s.xyz %s > %s.d3out\n",name,extrad3,name);
       endif
+      fprintf(fid,"rm -f %s.chk\n",name);
       fprintf(fid,"touch %s.done\n",name);
     endif
   endfor
@@ -144,6 +174,10 @@ function sout = run_inputs_elcap3(ilist,xdmcoef=[],xdmfun="",extrad3="")
   sleep(sleeptime);
 
   ## Submit all the scripts to the queue
+  if (ferr > 0) 
+    fprintf(ferr,"# Submitting scripts to the queue - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
   jobstr = "";
   for i = 1:length(jobname)
     [s out] = system(sprintf("qsub %s",jobname{i}));
@@ -153,10 +187,18 @@ function sout = run_inputs_elcap3(ilist,xdmcoef=[],xdmfun="",extrad3="")
   endfor
 
   ## Wait until all the calcs and jobs are done
+  if (ferr > 0) 
+    fprintf(ferr,"# Waiting for calcs to finish - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
   done = zeros(1,length(ilist));
   nslept = 0;
   nslept0 = 0;
   do 
+     if (ferr > 0) 
+       fprintf(ferr,"# waiting... (%d/%d done) %s\n",sum(done),length(done),strtrim(ctime(time())));
+       fflush(ferr);
+     endif
      sleep(sleeptime);
      nslept0 += sleeptime;
      nslept += sleeptime;
@@ -166,19 +208,38 @@ function sout = run_inputs_elcap3(ilist,xdmcoef=[],xdmfun="",extrad3="")
      endif
      ## See if calcs are done
      for i = find(!done)
-       if (exist(sprintf("%s.done",ilist{i}),"file"))
-         done(i) = 1;
-         nslept = 0;
+       if (exist(sprintf("%s.done",ilist{i}),"file") && exist(sprintf("%s.log",ilist{i}),"file"))
+	 [s1 out] = system(sprintf("tail -n 3 %s.log | grep -q 'Error termination'",ilist{i}));
+         [s2 out] = system(sprintf("tail -n 1 %s.log | grep -q 'Normal termination'",ilist{i}));
+         if (s1 == 0 || s2 == 0) 
+           done(i) = 1;
+           nslept = 0;
+         endif
        endif
      endfor
   until(all(done))
+  if (ferr > 0) 
+    fprintf(ferr,"# All calcs finished - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
   if (verbose)
     printf("All Gaussian outputs are ready after %d seconds\n",nslept0);
   endif
 
+  ## Give time to sync the NFS
+  sleep(sleeptime);
+
   ## Clean up the done and the err files
+  if (ferr > 0) 
+    fprintf(ferr,"# Cleaning up the done/err/sub files - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
   for i = 1:length(ilist)
-    [s out] = system(sprintf("rm -f %s.done %s.e* %s.sub %s.e*",ilist{i},ilist{i},ilist{i},ilist{i}));
+    if (ferr > 0) 
+      fprintf(ferr,"# deleting entry %d (%s) - %s\n",i,ilist{i},strtrim(ctime(time())));
+      fflush(ferr);
+    endif
+    [s out] = system(sprintf("rm -f %s.done %s.e* %s.sub",ilist{i},ilist{i},ilist{i}));
   endfor
 
   ## Calculate the load for subsequent runs
@@ -195,8 +256,16 @@ function sout = run_inputs_elcap3(ilist,xdmcoef=[],xdmfun="",extrad3="")
 
   ## Check that we have a normal termination. If not, pass the error 
   ## back to the caller.
+  if (ferr > 0) 
+    fprintf(ferr,"# Check for normal/error termination - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
   sout = [];
   for i = 1:length(ilist)
+    if (ferr > 0) 
+      fprintf(ferr,"# normal/error termination %d (%s) - %s\n",i,ilist{i},strtrim(ctime(time())));
+      fflush(ferr);
+    endif
     if (!exist(sprintf("%s.log",ilist{i}),"file"))
       sout = [sout i];
       continue
@@ -206,5 +275,11 @@ function sout = run_inputs_elcap3(ilist,xdmcoef=[],xdmfun="",extrad3="")
       sout = [sout i];
     endif
   endfor  
+
+  ## Debug
+  if (ferr > 0) 
+    fprintf(ferr,"# End run_inputs_elcap3 - %s\n",strtrim(ctime(time())));
+    fflush(ferr);
+  endif
 
 endfunction
