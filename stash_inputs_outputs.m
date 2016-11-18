@@ -46,9 +46,6 @@ function stash_inputs_outputs(ycalc)
 
     ## Create directory
     [s out] = system(sprintf("mkdir %s_fail",prefix));
-    if (s != 0)
-      error(sprintf("Could not create directory %s_fail",prefix));
-    endif
 
     ## Make a copy of the failed calcs
     idx = find(isinf(ycalc));
