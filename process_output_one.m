@@ -69,13 +69,13 @@ function [dy ycalc yref dery ycalcnd] = process_output_one(ent,xdm=[],d3="",deri
         e2 = str2num(out);
         e2s = str2num(out2);
       elseif (!isempty(d3))
-        [s out] = system(sprintf("grep Done %s | awk '{print $5}'",file));
+        [s out] = system(sprintf("grep Done %s | tail -n 1 | awk '{print $5}'",file));
         e2s = str2num(out);
         [s2 out] = system(sprintf("grep 'Edisp' %s | awk '{print $NF}'",filed3));
         e2d = str2num(out);
         e2 = e2s + e2d;
       else
-        [s out] = system(sprintf("grep Done %s | awk '{print $5}'",file));
+        [s out] = system(sprintf("grep Done %s | tail -n 1 | awk '{print $5}'",file));
         e2 = str2num(out);
         e2s = 0;
       endif
@@ -124,7 +124,7 @@ function [dy ycalc yref dery ycalcnd] = process_output_one(ent,xdm=[],d3="",deri
       dy = ycalc = yref = ycalcnd = Inf;
       return
     endif
-    [s out] = system(sprintf("grep Done %s | awk '{print $5}'",file));
+    [s out] = system(sprintf("grep Done %s | tail -n 1 | awk '{print $5}'",file));
     e = str2num(out);
     if (s != 0 || isempty(e)) 
       dy = ycalc = yref = ycalcnd = Inf;
