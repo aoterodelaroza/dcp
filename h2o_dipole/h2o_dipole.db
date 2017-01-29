@@ -1,0 +1,8 @@
+## Experimental dipole and Shields geometry for the monomer.
+type dipole
+ref 1.8546
+mol 0 1
+O 0.0000000000 0.0000000000 0.1183100000
+H 0.0000000000 0.7581300000 -0.4732500000
+H 0.0000000000 -0.7581300000 -0.4732500000
+end
