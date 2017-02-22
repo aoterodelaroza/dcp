@@ -50,12 +50,12 @@ function rmsd = mol_kabsch(x0, x1, allow_inversion=0)
   d = sign(det(w * v'));
   mat = [1 0 0; 0 1 0; 0 0 d];
   u = w * mat * v';
-  rmsd = sum(sum((u * x0 - x1).^2)) / 3 / n0;
+  rmsd = sum(sum((u * x0 - x1).^2)) / n0;
 
   if (allow_inversion)
     mat = [1 0 0; 0 1 0; 0 0 -d];
     u2 = w * mat * v';
-    rmsd2 = sum(sum((u * x0 - x1).^2)) / 3 / n0;
+    rmsd2 = sum(sum((u * x0 - x1).^2)) / n0;
     if (rmsd2 < rmsd)
       rmsd = rmsd2
       u = u2
