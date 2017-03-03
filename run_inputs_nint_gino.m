@@ -31,7 +31,7 @@ function sout = run_inputs_nint_gino(ilist,xdmcoef=[],xdmfun="",extrad3="")
   %% for the calc results. When all jobs are done, control is given
   %% back to the caller.
   
-  global verbose iload prefix ferr
+  global iload prefix ferr
   
   if (!isempty(extrad3))
     error("d3 calculations not supported by this run_inputs driver")
@@ -184,9 +184,6 @@ function sout = run_inputs_nint_gino(ilist,xdmcoef=[],xdmfun="",extrad3="")
   if (ferr > 0) 
     fprintf(ferr,"# All calcs finished - %s\n",strtrim(ctime(time())));
     fflush(ferr);
-  endif
-  if (verbose)
-    printf("All Gaussian outputs are ready after %d seconds\n",nslept0);
   endif
 
   ## Clean up the done and the err files

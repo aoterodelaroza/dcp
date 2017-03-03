@@ -31,7 +31,7 @@ function sout = run_inputs_plonk(ilist,xdmcoef=[],xdmfun="",extrad3="")
   %% for the calc results. When all jobs are done, control is given
   %% back to the caller.
   
-  global verbose iload ferr
+  global iload ferr
   
   ## Debug
   if (ferr > 0) 
@@ -145,9 +145,6 @@ function sout = run_inputs_plonk(ilist,xdmcoef=[],xdmfun="",extrad3="")
     fprintf(ferr,"# All calcs finished - %s\n",strtrim(ctime(time())));
     fflush(ferr);
   endif
-  if (verbose)
-    printf("All Gaussian outputs are ready after %d seconds\n",nslept0);
-  endif
 
   ## Give time to sync the NFS
   sleep(sleeptime);
@@ -167,15 +164,15 @@ function sout = run_inputs_plonk(ilist,xdmcoef=[],xdmfun="",extrad3="")
 
   ## Calculate the load for subsequent runs
   iload = read_jobload(ilist,iload);
-  if (verbose)
-    printf("# Job load\n")
-    printf("| Id | Name | Load (s) |\n")
-    for i = 1:length(ilist)
-      printf("| %d | %s | %.1f |\n",...
-             i,ilist{i},iload(i));
-    endfor
-    printf("#\n");
-  endif
+  ## if (verbose)
+  ##   printf("# Job load\n")
+  ##   printf("| Id | Name | Load (s) |\n")
+  ##   for i = 1:length(ilist)
+  ##     printf("| %d | %s | %.1f |\n",...
+  ##            i,ilist{i},iload(i));
+  ##   endfor
+  ##   printf("#\n");
+  ## endif
 
   ## Check that we have a normal termination. If not, pass the error 
   ## back to the caller.

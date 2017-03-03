@@ -32,7 +32,7 @@ function sout = run_inputs_plonk_packed(ilist,xdmcoef=[],xdmfun="",extrad3="")
   %% directory. When all archives are done, control is given 
   %% back to the caller.
   
-  global verbose iload prefix
+  global iload prefix
   
   ## Parameters for the run
   sleeptime = 5; ## time in seconds between job completion checks
@@ -137,9 +137,6 @@ function sout = run_inputs_plonk_packed(ilist,xdmcoef=[],xdmfun="",extrad3="")
        endif
      endfor
   until(all(done))
-  if (verbose)
-    printf("All Gaussian outputs are ready after %d seconds\n",nslept0);
-  endif
 
   ## Clean up the done and the err files
   [s out] = system(sprintf("rm -f /home/alberto/run/%s/*.done /home/alberto/run/%s/*sub",dirname,dirname));

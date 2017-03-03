@@ -13,17 +13,14 @@
 
 
 format long
-global dcp basis db prefix nstep verbose run_inputs ycur dcpfin...
-       costmin iload stime0 astep dcpeval maxnorm fixnorm muk dcp0...
-       savetar errcontinue ncpu mem
+global dcp basis db prefix nstep run_inputs ycur dcpfin...
+       costmin iload stime0 astep savetar dcpeval muk dcp0...
+       savetar errcontinue ncpu mem ferr
 
 #### Modify this to change the input behavior ####
 
-## Do you want lots of stuff in the output?
-verbose = 0;
-
 ## Functional
-method="blyp";
+method="hf";
 
 ## Basis set or basis file or files. You can use a single string
 ## or a cell array. If you use a string, then the script will look
@@ -32,7 +29,7 @@ method="blyp";
 ## If a file is found, it is parsed and the basis-set information read,
 ## then information for the relevant atoms passed to the inputs. 
 ## Several basis set files can be used (e.g. {"basis1","basis2"}).
-basis="basis.ini";
+basis="sto-3g";
 
 ## Extra bits for gaussian (do not include pseudo=read here)
 # extragau="EmpiricalDispersion=GD3BJ SCF=(Conver=6, MaxCycle=40) Symm=none int=(grid=ultrafine)";
@@ -44,12 +41,15 @@ mem=2;
 
 ## List of database files to use in DCP optimization
 listdb={...
+          "db/s22_h2o_h2o.db",...
+          "db/s22_nh3_nh3.db",...
 };
+
+## Weights. Must be the same length as listdb, or empty.
 weightdb=[];
 
-## Initial DCP file (you can use a cell array of files here, like
-## {"C.dcp","H.dcp"}, or a single string "bleh.dcp")
-dcpini="dcp.ini";
+## Initial DCP file
+dcpini="e4.bsip";
 
 ## Final DCP file (can be the same as the initial file). While 
 ## the script is running, dcpfin contains the DCP for the evaluation
@@ -58,7 +58,7 @@ dcpfin="dcp.fin";
 
 ## This DCP will be included in all the calculations but it will not 
 ## be optimized. 
-dcpfix="dcp.fix";
+## dcpfix="dcp.fix";
 
 ## Final evaluation file. Contains the evaluation of the best DCP
 ## found on hte parametrization set. While the script is running,
@@ -87,6 +87,7 @@ run_inputs = @run_inputs_serial; ## Run all Gaussian inputs sequentially on the 
 ## run_inputs = @run_inputs_nint; ## Submit inputs to a private queue on the NINT cluster.
 ## run_inputs = @run_inputs_nint_gino; ## Submit inputs to a private queue on the NINT cluster (gino).
 ## run_inputs = @run_inputs_elcap3; ## Submit inputs to elcap3.
+## run_inputs = @run_inputs_pass; ## Create the inputs and do not run anything.
 
 ## Tolerance criteria for the minimization (function difference between successive steps)
 ftol = 1d-2; ## function change tolerance
@@ -108,26 +109,41 @@ errcontinue = 1;
 
 ## Save a compressed tar.bz2 with the inputs/outputs/wfxs?
 ## savetar="";
+## savetar="tar";
+## savetar="gz";
 savetar="bz2";
+## savetar="xz";
 
 ## Name of the error file (timing, debug, etc.)
 errfile = "eval.err";
 
 #### No touching past this point. ####
 
+## Open error file
+ferr = -1;
+if (exist("errfile","var"))
+  ferr = fopen(errfile,"w");
+endif
+
 ## Header
 printf("### DCP optimization started on %s ###\n",strtrim(ctime(time())));
 printf("### PID: %d ###\n",getpid());
+[s out] = system("hostname");
+printf("### hostname: %s ###\n",strrep(out,"\n",""));
+if (ferr > 0) 
+  fprintf(ferr,"# Started on %s with PID %d (%s)\n",strtrim(ctime(time())),getpid(),strrep(out,"\n",""));
+  fflush(ferr);
+endif
 
 ## Read the basis set
 basis = parsebasis(basis);
 
+## Read the parametrization database 
+db = parsedb(listdb);
+db = filldb(db,weightdb,method,extragau);
+
 ## Read the initial DCP
 dcp = parsedcp(dcpini);
-if (verbose) 
-  printf("### Initial DCP ###\n");
-  writedcp(dcp);
-endif
 
 ## Read the fixed DCP
 if (exist("dcpfix","var") && !isempty(dcpfix))
@@ -136,66 +152,13 @@ if (exist("dcpfix","var") && !isempty(dcpfix))
   for i = 1:length(dcp)
     for j = 1:length(dcp0)
       if (strcmp(tolower(dcp{i}.atom),tolower(dcp0{j}.atom)))
-        error("Clashing atom in dcpini and dcpfix")
+        error("Same atom in dcpini and dcpfix")
       endif
     endfor
   endfor
 else
   dcp0 = {};
 endif
-
-## Read the parametrization database 
-db = parsedb(listdb);
-db = filldb(db,weightdb,method,extragau);
-if (verbose) 
-  printf("### Database for the parametrization ###\n");
-  writedb(db);
-endif
-
-## Crash if some of the DCP atoms are not used in any of the
-## db files
-for i = 1:length(dcp)
-  atom = dcp{i}.atom;
-  ifound = 0;
-  for j = 1:length(db)
-    if (isfield(db{j},"mol"))
-      for k = 1:db{j}.mol.nat
-        if (tolower(atom) == tolower(db{j}.mol.at{k}))
-          ifound = 1;
-          break
-        endif
-      endfor
-      if (ifound)
-        break
-      endif
-    endif
-    if (isfield(db{j},"nmol"))
-      for im = 1:db{j}.nmol
-        for k = 1:db{j}.molc{im}.nat
-          if (tolower(atom) == tolower(db{j}.molc{im}.at{k}))
-            ifound = 1;
-            break
-          endif
-        endfor
-        if (ifound == 1)
-          break
-        endif
-      endfor
-      if (ifound)
-        break
-      endif
-    endif
-  endfor
-  if (!ifound)
-    error(sprintf("Atom %s is present in the inital DCP file (%s) but is not present in any of the DB files.",atom,dcpini{i}))
-  endif
-endfor
-
-## print out of the db, for checking the names, number of dimers, and weight assigments
-## for i = 1:length(db)
-##   printf("| %d | %s | %.1f | %14.8f |\n",i,db{i}.outname,db{i}.wei,db{i}.ref);
-## endfor
-## exit
 
 ## Run the minimization, initialize global variables
 nstep = 0;
@@ -227,6 +190,10 @@ muk = 0;
 while true
   costmin = Inf;
   nopt = nopt + 1;
+  if (ferr > 0) 
+    fprintf(ferr,"# Minimization step number %d - %s\n",nopt,strtrim(ctime(time())));
+    fflush(ferr);
+  endif
   if (exist("fixnorm","var") && fixnorm > 0)
     printf("### Minimization number %d\n",nopt);
     printf("### Penalty mu: %.4e\n",muk);
@@ -254,6 +221,12 @@ while true
   endif
 endwhile
 
+## Message to the error file
+if (ferr > 0) 
+  fprintf(ferr,"# Writing final results - %s\n",strtrim(ctime(time())));
+  fflush(ferr);
+endif
+
 ## Write the final DCP
 dcp = unpackdcp(xmin,dcp);
 writedcp(dcp,dcpfin)
@@ -274,5 +247,13 @@ printf("# MAPE = %.4f\n",mean(abs((yref-ycur)./yref))*100);
 printf("# RMS = %.4f\n",sqrt(mean((yref-ycur).^2)));
 printf("# Penalty function minimum: %.10f\n",ymin)
 printf("# Final DCP written to: %s\n",dcpfin)
+
+## Close error file
+if (ferr > 0) 
+  fprintf(ferr,"# Finished on %s\n",strtrim(ctime(time())));
+  fflush(ferr);
+endif
+fclose(ferr);
+
 printf("### DCP optimization finished on %s ###\n",strtrim(ctime(time())));
 

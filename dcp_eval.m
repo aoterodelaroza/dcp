@@ -12,14 +12,14 @@
 % more details.
 
 format long
-global dcp basis db prefix nstep verbose run_inputs ycur...
+global dcp basis db prefix nstep run_inputs ycur...
        dcpfin costmin iload stime0 astep savetar ncpu mem...
        ferr
 
 #### Modify this to change the input behavior ####
 
 ## Functional
-method="blyp";
+method="hf";
 
 ## Basis set or basis file or files. You can use a single string
 ## or a cell array. If you use a string, then the script will look
@@ -40,16 +40,18 @@ mem=2;
 ## List of database files to use in DCP optimization
 ## [listdb weightdb] = training_set(1,1,1,1,1);
 listdb = {
-          "temp/bleh1.db",...
-          "temp/bleh2.db",...
-          "temp/bleh3.db",...
-          "temp/bleh4.db",...
-          "temp/bleh5.db",...
+          "atz_hf/energy_o.db",...
 };
 
 ## List of DCP files to evaluate (you can use a cell array of files
 ## here, like {"C.dcp","H.dcp"}, or a single string "bleh.dcp")
-dcpini={"empty.bsip"};
+dcpini={"empty.bsip",...
+        "e1.bsip","e2.bsip","e3.bsip","e4.bsip","e5.bsip","e6.bsip","e7.bsip",...
+        "eder.bsip",...
+       };
+dcpini={"empty.bsip",...
+        "eder.bsip",...
+       };
 
 ## Prefix for the calculations. If prefix is "bleh", then all the
 ## inputs and outputs will be stored in subdirectory bleh/ of the
@@ -71,11 +73,11 @@ run_inputs = @run_inputs_serial; ## Run all Gaussian inputs sequentially on the 
 ## run_inputs = @run_inputs_pass; ## Create the inputs and do not run anything.
 
 ## Save a compressed tar file with the inputs/outputs/wfxs?
-## savetar="";
+savetar="";
 ## savetar="tar";
 ## savetar="gz";
 ## savetar="bz2";
-savetar="xz";
+## savetar="xz";
 
 ## To use XDM, put the damping function coefficients here.
 ## [a1 a2], with a2 in angstrom. xdmfun is the functional keyword
@@ -116,7 +118,6 @@ db = parsedb(listdb);
 db = filldb(db,[],method,extragau);
 
 ## Initialization
-verbose = 0;
 if (!iscell(dcpini))
   dcpini = {dcpini};
 endif

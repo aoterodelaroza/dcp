@@ -21,16 +21,12 @@ function [y dy d2y] = fbasicd2(x)
   %% appropriate Gaussian calculations are carried out, and the cost
   %% function for the DCP given by x is calculated, and returned as y.
   
-  global dcp db prefix nstep verbose run_inputs ycur dcpfin ...
+  global dcp db prefix nstep run_inputs ycur dcpfin ...
          costmin stime0 astep dcpeval maxnorm muk fixnorm errcontinue
   
   ## Yet another function evaluation.
   nstep++;
   
-  if (verbose)
-    printf("### Iteration %d (with derivatives) ### [ %s ]\n",nstep,strtrim(ctime(time())));
-  endif
-
   ## Crash if any of the parameters is a nan
   if (any(isnan(x)))
     error(sprintf("Optimization procedure tried to use a NaN parameter in step %d\n",nstep));
@@ -49,12 +45,6 @@ function [y dy d2y] = fbasicd2(x)
 
   ## Unpack the DCP coefficients and exponents
   dcp = unpackdcp(x,dcp);
-
-  ## Write the DCP to the output (if verbose)
-  if (verbose)
-    printf("# DCP for this iteration\n");
-    writedcp(dcp);
-  endif
 
   ## Create the prefix directory if it doesn't exist yet
   if (!exist(prefix,"dir"))
@@ -76,9 +66,6 @@ function [y dy d2y] = fbasicd2(x)
       sidx(++n) = i;
     endfor
   endfor
-  if (verbose)
-    printf("# Running the %d input files: \n",length(ilist));
-  endif
 
   ## Run all inputs
   srun = run_inputs(ilist);
@@ -87,7 +74,7 @@ function [y dy d2y] = fbasicd2(x)
   ## If any of the Gaussian outputs are wrong, return Inf to the caller
   if (!isempty(srun) && (!exist("errcontinue","var") || !errcontinue))
     y = Inf;
-    stash_inputs_outputs(ilist);
+    stash_inputs_outputs(y);
     printf("#x2# | %2d | %5d | %15.7f | %15.7f | %7.4f | %7.4f | %7.4f | %7.4e | %d | %d |\n",...
            astep,nstep,y,...
            Inf,Inf,Inf,Inf,norm(x(2:2:end)),0,time()-stime0);
@@ -117,7 +104,7 @@ function [y dy d2y] = fbasicd2(x)
 
     ## Process this output
     wei(i) = db{i}.wei;
-    [erry(i) ycalc(i) yref(i) ay] = process_output_one(db{i},0,1);
+    [erry(i) ycalc(i) yref(i) ay] = process_output_one(db{i},:,:,1);
 
     ## Continue on error?
     if (exist("errcontinue","var") && errcontinue && isinf(ycalc(i)))
@@ -143,7 +130,7 @@ function [y dy d2y] = fbasicd2(x)
   ycur = ycalc;
 
   ## Send the inputs and outputs to the stash
-  stash_inputs_outputs(ilist);
+  stash_inputs_outputs(ycalc);
 
   ## Print summary to output
   if (exist("fixnorm","var") && fixnorm > 0)
@@ -165,15 +152,6 @@ function [y dy d2y] = fbasicd2(x)
     endfor
   endif
 
-  ## Verbose -> output the evaluation
-  if (verbose)
-    printf("| Id | Name | weig | yref | ycalc | dy |\n")
-    for i = 1:length(db)
-      printf("| %d | %s | %.4f | %14.8f | %14.8f | %14.8f |\n",...
-             i,db{i}.outname,wei(i),yref(i),ycalc(i),erry(i))
-    endfor
-  endif
-  
   ## Save this DCP to the stash
   writedcp(dcp,sprintf("%s/%s_%4.4d.dcp",prefix,prefix,nstep));
 

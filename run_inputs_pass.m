@@ -20,7 +20,7 @@ function sout = run_inputs_pass(ilist,xdmcoef=[],xdmfun="",extrad3="")
   %%
   %% This version does NOT run the inputs - it creates empty files.
   
-  global verbose iload ferr nstep prefix
+  global iload ferr nstep prefix
   
   ## Debug
   if (ferr > 0) 

@@ -31,7 +31,7 @@ function sout = run_inputs_grex(ilist,xdmcoef=[],xdmfun="",extrad3="")
   %% the calc results. When all jobs are done, control is given back
   %% to the caller.
   
-  global verbose iload
+  global iload
   
   ## Parameters for the run
   hours = 2; ## walltime hours
@@ -124,9 +124,6 @@ function sout = run_inputs_grex(ilist,xdmcoef=[],xdmfun="",extrad3="")
       error("Could not submit script: %s",jobname{i});
     endif
     aux = strsplit(strtrim(out),".");
-    if (verbose)
-      printf("Job %s submitted for %s\n",aux{1},jobname{i});
-    endif
     jobstr = sprintf("%s %s",jobstr,aux{1});
   endfor
 
@@ -150,9 +147,6 @@ function sout = run_inputs_grex(ilist,xdmcoef=[],xdmfun="",extrad3="")
        endif
      endfor
   until(all(done))
-  if (verbose)
-    printf("All Gaussian outputs are ready after %d seconds\n",nslept0);
-  endif
 
   ## Clean up the done and the err files
   for i = 1:length(ilist)
@@ -161,15 +155,15 @@ function sout = run_inputs_grex(ilist,xdmcoef=[],xdmfun="",extrad3="")
 
   ## Calculate the load for subsequent runs
   iload = read_jobload(ilist,iload);
-  if (verbose)
-    printf("# Job load\n")
-    printf("| Id | Name | Load (s) |\n")
-    for i = 1:length(ilist)
-      printf("| %d | %s | %.1f |\n",...
-             i,ilist{i},iload(i));
-    endfor
-    printf("#\n");
-  endif
+  ## if (verbose)
+  ##   printf("# Job load\n")
+  ##   printf("| Id | Name | Load (s) |\n")
+  ##   for i = 1:length(ilist)
+  ##     printf("| %d | %s | %.1f |\n",...
+  ##            i,ilist{i},iload(i));
+  ##   endfor
+  ##   printf("#\n");
+  ## endif
 
   ## Check that we have a normal termination. If not, pass the error 
   ## back to the caller.

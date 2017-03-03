@@ -10,14 +10,14 @@
 % FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
 % more details.
 
-function ypp = mderiv2(f,x0,h,verbose=0)
+function ypp = mderiv2(f,x0,h)
 
-  if (verbose)
-    printf("Step: %f \n",h);
-    printf("Derivative at: ");
-    printf("%.4e ",x0)
-    printf("\n");
-  endif
+  ## if (verbose)
+  ##   printf("Step: %f \n",h);
+  ##   printf("Derivative at: ");
+  ##   printf("%.4e ",x0)
+  ##   printf("\n");
+  ## endif
 
   ypp = zeros(length(x0));
   for icomp = 2:2:length(x0)
@@ -35,11 +35,11 @@ function ypp = mderiv2(f,x0,h,verbose=0)
 
     ## derivative
     ypp(icomp,icomp) = sum(coefs * f0') / h^2;
-    if (verbose)
-      printf("Comp %d, yp = %.8f f0 = ",icomp,ypp(icomp,icomp));
-      printf("%.8f ",f0);
-      printf("\n");
-    endif
+    ## if (verbose)
+    ##   printf("Comp %d, yp = %.8f f0 = ",icomp,ypp(icomp,icomp));
+    ##   printf("%.8f ",f0);
+    ##   printf("\n");
+    ## endif
   endfor
 
 endfunction

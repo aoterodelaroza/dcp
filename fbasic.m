@@ -20,16 +20,12 @@ function y = fbasic(x)
   %% calculations are carried out, and the cost function for the DCP
   %% given by x is calculated, and returned as y.
   
-  global dcp db prefix nstep verbose run_inputs ycur dcpfin ...
+  global dcp db prefix nstep run_inputs ycur dcpfin ...
          costmin stime0 astep dcpeval maxnorm fixnorm muk errcontinue
   
   ## Yet another function evaluation.
   nstep++;
   
-  if (verbose)
-    printf("### Iteration %d ### [ %s ]\n",nstep,strtrim(ctime(time())));
-  endif
-
   ## Crash if any of the parameters is a nan
   if (any(isnan(x)))
     error(sprintf("Optimization procedure tried to use a NaN parameter in step %d\n",nstep));
@@ -47,12 +43,6 @@ function y = fbasic(x)
 
   ## Unpack the DCP coefficients and exponents
   dcp = unpackdcp(x,dcp);
-
-  ## Write the DCP to the output (if verbose)
-  if (verbose)
-    printf("# DCP for this iteration\n");
-    writedcp(dcp);
-  endif
 
   ## Create the prefix directory if it doesn't exist yet
   if (!exist(prefix,"dir"))
@@ -74,9 +64,6 @@ function y = fbasic(x)
       sidx(++n) = i;
     endfor
   endfor
-  if (verbose)
-    printf("# Running the %d input files: \n",length(ilist));
-  endif
   
   ## Run all inputs
   srun = run_inputs(ilist);
@@ -85,7 +72,7 @@ function y = fbasic(x)
   ## If any of the Gaussian outputs are wrong, return Inf to the caller
   if (!isempty(srun) && (!exist("errcontinue","var") || !errcontinue))
     y = Inf;
-    stash_inputs_outputs(ilist);
+    stash_inputs_outputs(y);
     printf("#x0# | %2d | %5d | %15.7f | %15.7f | %7.4f | %7.4f | %7.4f | %7.4e | %d | %d |\n",...
            astep,nstep,y,...
            Inf,Inf,Inf,Inf,norm(x(2:2:end)),0,time()-stime0);
@@ -105,7 +92,7 @@ function y = fbasic(x)
       nerr++;
       continue
     endif
-    [dy(i) ycalc(i) yref(i)] = process_output_one(db{i},0,0);
+    [dy(i) ycalc(i) yref(i)] = process_output_one(db{i},:,:,0);
   endfor
 
   ## Continue on error?
@@ -126,7 +113,7 @@ function y = fbasic(x)
   ycur = ycalc;
 
   ## Send the inputs and outputs to the stash
-  stash_inputs_outputs(ilist);
+  stash_inputs_outputs(ycalc);
 
   ## Calculate the cost function, use the weights
   wei = zeros(length(db),1);
@@ -155,15 +142,6 @@ function y = fbasic(x)
     endfor
   endif
 
-  ## Verbose -> output the evaluation
-  if (verbose)
-    printf("| Id | Name | weig | yref | ycalc | dy |\n")
-    for i = 1:length(db)
-      printf("| %d | %s | %14.8f | %14.8f | %14.8f | %14.8f |\n",...
-             i,db{i}.outname,wei(i),yref(i),ycalc(i),dy(i))
-    endfor
-  endif
-  
   ## Save this DCP to the stash
   writedcp(dcp,sprintf("%s/%s_%4.4d.dcp",prefix,prefix,nstep));
 

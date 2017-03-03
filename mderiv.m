@@ -10,14 +10,14 @@
 % FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
 % more details.
 
-function yp = mderiv(f,x0,hodd,heven,verbose=0)
+function yp = mderiv(f,x0,hodd,heven)
 
-  if (verbose)
-    printf("Steps: odd - %f even - %f\n",hodd,heven);
-    printf("Derivative at: ");
-    printf("%.4e ",x0)
-    printf("\n");
-  endif
+  ## if (verbose)
+  ##   printf("Steps: odd - %f even - %f\n",hodd,heven);
+  ##   printf("Derivative at: ");
+  ##   printf("%.4e ",x0)
+  ##   printf("\n");
+  ## endif
 
   yp = zeros(size(x0));
   for icomp = 2:2:length(x0)
@@ -41,12 +41,10 @@ function yp = mderiv(f,x0,hodd,heven,verbose=0)
 
     ## derivative
     yp(icomp) = sum(coefs * f0') / h;
-    if (verbose)
-      printf("Comp %d, yp = %.8f f0 = ",icomp,yp(icomp));
-      printf("%.8f ",f0);
-      printf("\n");
-    endif
+    ## if (verbose)
+    ##   printf("Comp %d, yp = %.8f f0 = ",icomp,yp(icomp));
+    ##   printf("%.8f ",f0);
+    ##   printf("\n");
+    ## endif
   endfor
-  if (verbose)
-  endif
 endfunction

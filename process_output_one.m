@@ -75,9 +75,15 @@ function [dy ycalc yref dery ycalcnd] = process_output_one(ent,xdm=[],d3="",deri
         e2d = str2num(out);
         e2 = e2s + e2d;
       else
-        [s out] = system(sprintf("grep Done %s | tail -n 1 | awk '{print $5}'",file));
-        e2 = str2num(out);
-        e2s = 0;
+        if (derivs == 0) 
+          [s out] = system(sprintf("grep Done %s | tail -n 1 | awk '{print $5}'",file));
+          e2 = str2num(out);
+          e2s = 0;
+        else
+          [s out] = system(sprintf("grep Done %s | awk '{print $5}'",file));
+          e2 = str2num(out);
+          e2s = 0;
+        endif
       endif
       if (s != 0 || s2 != 0 || isempty(e2)) 
         dy = ycalc = yref = ycalcnd = Inf;

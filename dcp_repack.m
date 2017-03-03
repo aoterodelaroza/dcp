@@ -12,7 +12,7 @@
 % more details.
 
 format long
-global dcp basis db prefix nstep verbose run_inputs ycur...
+global dcp basis db prefix nstep ycur...
        dcpfin costmin iload stime0 astep savetar ncpu mem...
        ferr
 
@@ -105,7 +105,6 @@ db = parsedb(listdb);
 db = filldb(db,[],method,extragau);
 
 ## Initialization
-verbose = 0;
 if (!iscell(dcpini))
   dcpini = {dcpini};
 endif
