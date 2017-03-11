@@ -161,7 +161,7 @@ function y = fbasic(x)
       fprintf(fid,"# MAE = %.4f\n",mean(abs(yref-ycalc)));
       fprintf(fid,"# MAPE = %.4f\n",mean(abs((yref-ycalc)./yref))*100);
       fprintf(fid,"# RMS = %.4f\n",sqrt(mean((yref-ycalc).^2)));
-      fprintf(fid,"# wRMS = %.4f\n",sqrt(sum(wei .* (yref-ycalc).^2)/sum(wei)));
+      fprintf(fid,"# wRMS = %.4f\n",sqrt(sum(wei .* (yref-ycalc).^2)));
       fprintf(fid,"# Cost function : %.10f\n",y);
       fprintf(fid,"# Penalty function : %.10f\n",costmin);
       fclose(fid);
