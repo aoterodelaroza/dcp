@@ -68,7 +68,6 @@ cfactor = 2;
 ## Threshold for the precision (Hartree) and minimum effect on the binding 
 ## energies (kcal/mol).
 precthr = 1e-5;
-minde = 0.1;
 
 ## Threshold for the non-linearity error (kcal/mol)
 nonlinthr = 1e-3;
@@ -296,10 +295,7 @@ for iexp = 1:length(explist)
 
     ## Finish the downstroke
     if (dir == -1 && nstep > 2)
-      if (any(abs(ycur) < minde))
-        ## discard the current coefficient 
-        dir = 1;
-      elseif (all(nonlin < precthr)) 
+      if (all(nonlin < precthr)) 
         ## accept the current coefficient
         dir = 1;
         cprev = c;
