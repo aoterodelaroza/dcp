@@ -43,12 +43,6 @@ listdb = {...
            "h2o_shields/water3UUU.db",...
            "atz_b3lyp/bdex_oh-h-04.db",...
 };
-listdb = {...
-           "h2o_shields/water2Cs.db",...
-           "h2o_shields/water3UUD.db",...
-           "h2o_shields/water3UUU.db",...
-           "atz_b3lyp/bdex_oh-h-04.db",...
-};
 
 ## Atom/channel/exponent list for which the non-linearity test will be
 ## run.
@@ -57,7 +51,7 @@ channel="l";
 explist=[0.01 0.1];
 
 ## Base coefficient for the linearity range exploration
-c0=0.1;
+c0=0.001;
 
 ## Maximum and minimum coefficient values
 cmax = 2.1;
@@ -149,8 +143,10 @@ db = db(find(iuse));
 
 ## enter main loop
 c0final = [];
+yempty = [];
 for iexp = 1:length(explist)
   exponent = explist(iexp);
+  printf("\n### Exponent: %.10f ###\n",exponent)
 
   ## Create the prefix directory if it doesn't exist yet
   prefix = sprintf("%s-%2.2d",prefix0,iexp);
@@ -206,42 +202,48 @@ for iexp = 1:length(explist)
     endif
 
     if (!ismember(idx,ysaveidx))
-      ## Set up the Gaussian input files
-      if (ferr > 0) 
-        fprintf(ferr,"# Setting up Gaussian input files - %s\n",strtrim(ctime(time())));
-        fflush(ferr);
-      endif
-      ilist = {};
-      for i = 1:length(db)
-        if (irunup(i))
-          anew = setup_input_one(db{i},dcp);
-          ilist = {ilist{:}, anew{:}};
+      if (isinf(idx) && !isempty(yempty))
+        ycalc = yempty;
+      else
+        ## Set up the Gaussian input files
+        if (ferr > 0) 
+          fprintf(ferr,"# Setting up Gaussian input files - %s\n",strtrim(ctime(time())));
+          fflush(ferr);
         endif
-      endfor
-      if (ferr > 0) 
-        fprintf(ferr,"# List of inputs has %d entries\n",length(ilist));
-        fflush(ferr);
-      endif
+        ilist = {};
+        for i = 1:length(db)
+          if (irunup(i))
+            anew = setup_input_one(db{i},dcp);
+            ilist = {ilist{:}, anew{:}};
+          endif
+        endfor
+        if (ferr > 0) 
+          fprintf(ferr,"# List of inputs has %d entries\n",length(ilist));
+          fflush(ferr);
+        endif
 
-      ## Run all inputs
-      srun = run_inputs(ilist);
+        ## Run all inputs
+        srun = run_inputs(ilist);
 
-      ## Collect the results 
-      if (ferr > 0) 
-        fprintf(ferr,"# Collecting the results and calculating errors - %s\n",strtrim(ctime(time())));
-        fflush(ferr);
-      endif
-      ycalc = yref = ycalcnd = zeros(length(db),1);
-      for i = 1:length(db)
-        if (irunup(i))
-          [~, ycalc(i), ~, ~, ~] = process_output_one(db{i});
+        ## Collect the results 
+        if (ferr > 0) 
+          fprintf(ferr,"# Collecting the results and calculating errors - %s\n",strtrim(ctime(time())));
+          fflush(ferr);
+        endif
+        ycalc = yref = ycalcnd = zeros(length(db),1);
+        for i = 1:length(db)
+          if (irunup(i))
+            [~, ycalc(i), ~, ~, ~] = process_output_one(db{i});
+          else
+            ycalc(i) = 0;
+          endif
+        endfor
+        if (nstep > 1)
+          ysaveidx = [ysaveidx idx];
+          ysave{100 + idx} = ycalc;
         else
-          ycalc(i) = 0;
+          yempty = ycalc;
         endif
-      endfor
-      if (nstep > 1)
-        ysaveidx = [ysaveidx idx];
-        ysave{100 + idx} = ycalc;
       endif
     else
       ycalc = ysave{100 + idx};
@@ -251,7 +253,6 @@ for iexp = 1:length(explist)
     printf("# Direction: %d\n",dir);
     printf("# Index: %d\n",idx);
     if (nstep == 1)
-      yempty = ycalc;
       printf("# Step %d - empty\n",nstep);
       printf("| Id|           Name       |       ycalc   |\n");
       for i = 1:length(db)
@@ -343,6 +344,11 @@ printf("#### Final list of coefficients ####\n",exponent);
 printf("| Id| Exponent | c0 | cmax |\n");
 for i = 1:length(explist)
   printf("| %d | %.10f | %.10f | %.10f |\n",i,explist(i),c0final(i,1),c0final(i,2));
+endfor
+printf("\n");
+for i = 1:length(explist)
+  printf("%d %s %s %.10f %.10f %.10f\n",i,atom,channel,...
+         explist(i),c0final(i,1),c0final(i,2));
 endfor
 printf("\n");
 
