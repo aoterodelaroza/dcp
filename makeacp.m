@@ -1,6 +1,6 @@
 % Copyright (C) 2015 Alberto Otero-de-la-Roza <aoterodelaroza@gmail.com>
 %
-% dcp is free software: you can redistribute it and/or modify it under
+% acp is free software: you can redistribute it and/or modify it under
 % the terms of the GNU General Public License as published by the Free
 % Software Foundation, either version 3 of the License, or (at your
 % option) any later version. See <http://www.gnu.org/licenses/>.
@@ -10,10 +10,10 @@
 % FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
 % more details.
 
-function dcp = makedcp(atom,l,exp,coef)
-  %% function dcp = makedcp(atom,l,exp,coef)
+function acp = makeacp(atom,l,exp,coef)
+  %% function acp = makeacp(atom,l,exp,coef)
   %%
-  %% Make a DCP with a single term for a given atom, channel
+  %% Make a ACP with a single term for a given atom, channel
   %% (l, s, p, d), exponent, and coefficient.
 
   global ferr
@@ -30,27 +30,27 @@ function dcp = makedcp(atom,l,exp,coef)
     il = 4;
   endif
 
-  dcp = cell();
-  dcp{1} = struct();
-  dcp{1}.atom = atom;
-  dcp{1}.name = atom;
-  dcp{1}.nblock = il;
-  dcp{1}.block = cell(1,il);
+  acp = cell();
+  acp{1} = struct();
+  acp{1}.atom = atom;
+  acp{1}.name = atom;
+  acp{1}.nblock = il;
+  acp{1}.block = cell(1,il);
   for i = 1:il
-    dcp{1}.block{i}.name = llabel{i};
+    acp{1}.block{i}.name = llabel{i};
     if (i == il)
-      dcp{1}.block{i}.nterm = 1;
-      dcp{1}.block{i}.n = [2];
-      dcp{1}.block{i}.exp = [exp];
-      dcp{1}.block{i}.coef = [coef];
+      acp{1}.block{i}.nterm = 1;
+      acp{1}.block{i}.n = [2];
+      acp{1}.block{i}.exp = [exp];
+      acp{1}.block{i}.coef = [coef];
     else
-      dcp{1}.block{i}.nterm = 0;
-      dcp{1}.block{i}.n = [];
-      dcp{1}.block{i}.exp = [];
-      dcp{1}.block{i}.coef = [];
+      acp{1}.block{i}.nterm = 0;
+      acp{1}.block{i}.n = [];
+      acp{1}.block{i}.exp = [];
+      acp{1}.block{i}.coef = [];
     endif
   endfor
-  dcp{1}.nelec = 0;
-  dcp{1}.nparam = 2;
+  acp{1}.nelec = 0;
+  acp{1}.nparam = 2;
 
 end

@@ -1,6 +1,6 @@
 % Copyright (C) 2015 Alberto Otero-de-la-Roza <aoterodelaroza@gmail.com>
 %
-% dcp is free software: you can redistribute it and/or modify it under
+% acp is free software: you can redistribute it and/or modify it under
 % the terms of the GNU General Public License as published by the Free
 % Software Foundation, either version 3 of the License, or (at your
 % option) any later version. See <http://www.gnu.org/licenses/>.
@@ -14,7 +14,7 @@ function db = parsedb(files)
   %% function db = parsedb(files)
   %%
   %% Reads a list of files containing the description of the calculations
-  %% with which the DCPs will be optimized and builds the internal database
+  %% with which the ACPs will be optimized and builds the internal database
   %% for the calculation. 
   
   global ferr

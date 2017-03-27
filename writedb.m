@@ -1,6 +1,6 @@
 % Copyright (C) 2015 Alberto Otero-de-la-Roza <aoterodelaroza@gmail.com>
 %
-% dcp is free software: you can redistribute it and/or modify it under
+% acp is free software: you can redistribute it and/or modify it under
 % the terms of the GNU General Public License as published by the Free
 % Software Foundation, either version 3 of the License, or (at your
 % option) any later version. See <http://www.gnu.org/licenses/>.
@@ -24,7 +24,7 @@ function writedb(db,file="")
     fid = fopen(file,"w");
     if (fid < 0)
       printf("Error: could not open output file.\n");
-      printf("Dumping DCP info RIGHT HERE!\n");
+      printf("Dumping ACP info RIGHT HERE!\n");
       fid = stdout();
       docrash = 1;
     endif
@@ -114,7 +114,7 @@ function writedb(db,file="")
 
   ## Wrap up
   if (docrash)
-    error(sprintf("Could not open file for final DCP output: %s",file));
+    error(sprintf("Could not open file for final ACP output: %s",file));
   elseif (fid != stdout())
     fclose(fid);
   endif

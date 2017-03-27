@@ -1,6 +1,6 @@
 % Copyright (C) 2015 Alberto Otero-de-la-Roza <aoterodelaroza@gmail.com>
 %
-% dcp is free software: you can redistribute it and/or modify it under
+% acp is free software: you can redistribute it and/or modify it under
 % the terms of the GNU General Public License as published by the Free
 % Software Foundation, either version 3 of the License, or (at your
 % option) any later version. See <http://www.gnu.org/licenses/>.
@@ -15,13 +15,13 @@ function y = fbasic(x)
   %%
   %% Evaluation function for the minimization routine. This function is meant
   %% to be used as argument for one of the optim routines (like bfgsmin,
-  %% minimize, or nonlin_min). The argument are the DCP coefficients
+  %% minimize, or nonlin_min). The argument are the ACP coefficients
   %% and exponents, packed into a convenient array. The appropriate Gaussian
-  %% calculations are carried out, and the cost function for the DCP
+  %% calculations are carried out, and the cost function for the ACP
   %% given by x is calculated, and returned as y.
   
-  global dcp db prefix nstep run_inputs ycur dcpfin ...
-         costmin stime0 astep dcpeval maxnorm fixnorm muk errcontinue
+  global acp db prefix nstep run_inputs ycur acpfin ...
+         costmin stime0 astep acpeval maxnorm fixnorm muk errcontinue
   
   ## Yet another function evaluation.
   nstep++;
@@ -41,8 +41,8 @@ function y = fbasic(x)
     return
   endif
 
-  ## Unpack the DCP coefficients and exponents
-  dcp = unpackdcp(x,dcp);
+  ## Unpack the ACP coefficients and exponents
+  acp = unpackacp(x,acp);
 
   ## Create the prefix directory if it doesn't exist yet
   if (!exist(prefix,"dir"))
@@ -58,7 +58,7 @@ function y = fbasic(x)
   sidx = [];
   n = 0;
   for i = 1:length(db)
-    anew = setup_input_one(db{i},dcp,0);
+    anew = setup_input_one(db{i},acp,0);
     ilist = {ilist{:}, anew{:}};
     for j = 1:length(anew)
       sidx(++n) = i;
@@ -142,17 +142,17 @@ function y = fbasic(x)
     endfor
   endif
 
-  ## Save this DCP to the stash
-  writedcp(dcp,sprintf("%s/%s_%4.4d.dcp",prefix,prefix,nstep));
+  ## Save this ACP to the stash
+  writeacp(acp,sprintf("%s/%s_%4.4d.acp",prefix,prefix,nstep));
 
-  ## Write the DCP if this is the best we have
+  ## Write the ACP if this is the best we have
   if (py < costmin)
-    if (length(dcpfin) > 0)
-      writedcp(dcp,dcpfin);
+    if (length(acpfin) > 0)
+      writeacp(acp,acpfin);
     endif
     costmin = py;
-    if (length(dcpeval) > 0)
-      fid = fopen(dcpeval,"w");
+    if (length(acpeval) > 0)
+      fid = fopen(acpeval,"w");
       fprintf(fid,"| Id | Name | weig | yref | ycalc | dy |\n")
       for i = 1:length(db)
         fprintf(fid,"| %d | %s | %.4f | %14.8f | %14.8f | %.4f |\n",...

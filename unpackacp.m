@@ -1,6 +1,6 @@
 % Copyright (C) 2015 Alberto Otero-de-la-Roza <aoterodelaroza@gmail.com>
 %
-% dcp is free software: you can redistribute it and/or modify it under
+% acp is free software: you can redistribute it and/or modify it under
 % the terms of the GNU General Public License as published by the Free
 % Software Foundation, either version 3 of the License, or (at your
 % option) any later version. See <http://www.gnu.org/licenses/>.
@@ -10,17 +10,21 @@
 % FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
 % more details.
 
-function x = packdcp(dcp)
-  %% function x = packdcp(dcp)
+function acp = unpackacp(x,acp0)
+  %% function acp = unpackacp(x,acp0)
   %%
-  %% Pack the DCP coefficients into an array for the minimization 
-  %% routine.
+  %% Unpack the ACP coefficients from array x using template acp0.
+  %% Return the ACP structure with the x coefficients and exponents.
 
-  x = [];
-  for i = 1:length(dcp)
-    for j = 1:dcp{i}.nblock
-      for k = 1:dcp{i}.block{j}.nterm
-        x = [x dcp{i}.block{j}.exp(k) dcp{i}.block{j}.coef(k)];
+  n = 0;
+  acp = acp0;
+  for i = 1:length(acp)
+    for j = 1:acp{i}.nblock
+      for k = 1:acp{i}.block{j}.nterm
+        n++;
+        acp{i}.block{j}.exp(k) = x(n);
+        n++;
+        acp{i}.block{j}.coef(k) = x(n);
       endfor
     endfor
   endfor

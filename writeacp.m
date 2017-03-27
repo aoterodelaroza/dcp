@@ -1,6 +1,6 @@
 % Copyright (C) 2015 Alberto Otero-de-la-Roza <aoterodelaroza@gmail.com>
 %
-% dcp is free software: you can redistribute it and/or modify it under
+% acp is free software: you can redistribute it and/or modify it under
 % the terms of the GNU General Public License as published by the Free
 % Software Foundation, either version 3 of the License, or (at your
 % option) any later version. See <http://www.gnu.org/licenses/>.
@@ -10,10 +10,10 @@
 % FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
 % more details.
 
-function writedcp(dcp,file="",atlist={})
-  %% function writedcp(dcp,file="")
+function writeacp(acp,file="",atlist={})
+  %% function writeacp(acp,file="")
   %%
-  %% Write the dcp cell array to a Gaussian-style DCP file for use in
+  %% Write the acp cell array to a Gaussian-style ACP file for use in
   %% calculations. If no file is given, write all the stuff to the stdout. 
   %% If file is a number instead of a string, use that as the file
   %% handle and do not close it at the end. If the cell array atlist 
@@ -29,7 +29,7 @@ function writedcp(dcp,file="",atlist={})
       fid = fopen(file,"w");
       if (fid < 0)
         printf("Error: could not open output file.\n");
-        printf("Dumping DCP info RIGHT HERE!\n");
+        printf("Dumping ACP info RIGHT HERE!\n");
         fid = stdout();
         docrash = 1;
       endif
@@ -43,17 +43,17 @@ function writedcp(dcp,file="",atlist={})
     atlist{i} = tolower(atlist{i});
   endfor
 
-  ## Write the DCP
-  for i = 1:length(dcp)
-    if (isempty(atlist) || any(ismember(atlist,tolower(dcp{i}.atom))))
-      fprintf(fid,"%s 0\n",dcp{i}.atom);
-      fprintf(fid,"%s %d %d\n",dcp{i}.name,dcp{i}.nblock-1,dcp{i}.nelec);
-      for j = 1:dcp{i}.nblock
-        fprintf(fid,"%s\n",dcp{i}.block{j}.name);
-        fprintf(fid,"%d\n",dcp{i}.block{j}.nterm);
-        for k = 1:dcp{i}.block{j}.nterm
-          fprintf(fid,"  %d   %.9f   %.9f\n",dcp{i}.block{j}.n(k),...
-                  dcp{i}.block{j}.exp(k),dcp{i}.block{j}.coef(k));
+  ## Write the ACP
+  for i = 1:length(acp)
+    if (isempty(atlist) || any(ismember(atlist,tolower(acp{i}.atom))))
+      fprintf(fid,"%s 0\n",acp{i}.atom);
+      fprintf(fid,"%s %d %d\n",acp{i}.name,acp{i}.nblock-1,acp{i}.nelec);
+      for j = 1:acp{i}.nblock
+        fprintf(fid,"%s\n",acp{i}.block{j}.name);
+        fprintf(fid,"%d\n",acp{i}.block{j}.nterm);
+        for k = 1:acp{i}.block{j}.nterm
+          fprintf(fid,"  %d   %.9f   %.9f\n",acp{i}.block{j}.n(k),...
+                  acp{i}.block{j}.exp(k),acp{i}.block{j}.coef(k));
         endfor
       endfor
     endif
@@ -61,7 +61,7 @@ function writedcp(dcp,file="",atlist={})
 
   ## Wrap up
   if (docrash)
-    error(sprintf("Could not open file for DCP output: %s",file));
+    error(sprintf("Could not open file for ACP output: %s",file));
   elseif (ischar(file) && fid != stdout())
     fclose(fid);
   endif

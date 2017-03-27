@@ -1,6 +1,6 @@
 % Copyright (C) 2015 Alberto Otero-de-la-Roza <aoterodelaroza@gmail.com>
 %
-% dcp is free software: you can redistribute it and/or modify it under
+% acp is free software: you can redistribute it and/or modify it under
 % the terms of the GNU General Public License as published by the Free
 % Software Foundation, either version 3 of the License, or (at your
 % option) any later version. See <http://www.gnu.org/licenses/>.
@@ -87,7 +87,7 @@ function sout = run_inputs_grex(ilist,xdmcoef=[],xdmfun="",extrad3="")
       fprintf(fid,"#PBS -S /bin/bash\n");
       fprintf(fid,"#PBS -j eo\n");
       fprintf(fid,"#PBS -e %s/%s.err \n",pwd(),name);
-      fprintf(fid,"#PBS -N dcp_%s\n",name);
+      fprintf(fid,"#PBS -N acp_%s\n",name);
       fprintf(fid,"#PBS -l walltime=%d:00:00,mem=%dGB,nodes=1:ppn=%d\n",hours,mem0,ncpu0);
       fprintf(fid,"#PBS -m n\n");
       fprintf(fid,"\n");

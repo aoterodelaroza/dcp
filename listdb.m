@@ -1,7 +1,7 @@
 #! /usr/bin/octave -q
 % Copyright (C) 2015 Alberto Otero-de-la-Roza <aoterodelaroza@gmail.com>
 %
-% dcp is free software: you can redistribute it and/or modify it under
+% acp is free software: you can redistribute it and/or modify it under
 % the terms of the GNU General Public License as published by the Free
 % Software Foundation, either version 3 of the License, or (at your
 % option) any later version. See <http://www.gnu.org/licenses/>.
@@ -16,7 +16,7 @@ format long
 
 #### Modify this to change the input behavior ####
 
-## List of database files to use in DCP optimization
+## List of database files to use in ACP optimization
 listdb = {...
            "db/s668_Water-Pyridine_090.db",...
            "db/s668_Water-Pyridine_095.db",...

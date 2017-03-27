@@ -1,6 +1,6 @@
 % Copyright (C) 2015 Alberto Otero-de-la-Roza <aoterodelaroza@gmail.com>
 %
-% dcp is free software: you can redistribute it and/or modify it under
+% acp is free software: you can redistribute it and/or modify it under
 % the terms of the GNU General Public License as published by the Free
 % Software Foundation, either version 3 of the License, or (at your
 % option) any later version. See <http://www.gnu.org/licenses/>.
@@ -10,11 +10,11 @@
 % FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
 % more details.
 
-function writegjf(file,dcp,dcp0,basis,at,x,q,mult,ent,extragau="",chk="",wfx="",derivs=0)
-  %% function writegjf(file,dcp,dcp0,basis,at,x,q,mult,ent,extragau="",chk="",wfx="",derivs=0)
+function writegjf(file,acp,acp0,basis,at,x,q,mult,ent,extragau="",chk="",wfx="",derivs=0)
+  %% function writegjf(file,acp,acp0,basis,at,x,q,mult,ent,extragau="",chk="",wfx="",derivs=0)
   %%
-  %% Write a Gaussian input file (gjf) in filename file. Use the DCP
-  %% information contained in the dcp argument, the geometry in at
+  %% Write a Gaussian input file (gjf) in filename file. Use the ACP
+  %% information contained in the acp argument, the geometry in at
   %% (cell array of atomic symbols), x (array of atomic coordinates),
   %% q (charge), mult (multiplicity), and the method, basis, route
   %% section, etc. contained in the database entry ent. extragau is
@@ -22,9 +22,9 @@ function writegjf(file,dcp,dcp0,basis,at,x,q,mult,ent,extragau="",chk="",wfx="",
   %% the (optional) checkpoint file. If derivs is not zero and
   %% positive, generate the gjfs for the derivatives calculation up to
   %% derivs order. If derivs is negative, prepare the inputs for
-  %% theevaluation of the DCP terms. The dcp0 argument contains DCP
+  %% theevaluation of the ACP terms. The acp0 argument contains ACP
   %% specifications for some atoms; derivatives are not taken wrt the
-  %% coefficients in dcp0.
+  %% coefficients in acp0.
   
   global ncpu mem
 
@@ -50,7 +50,7 @@ function writegjf(file,dcp,dcp0,basis,at,x,q,mult,ent,extragau="",chk="",wfx="",
   endif
   
   ## Pseudo=read bit
-  if (!isempty(dcp) || !isempty(dcp0))
+  if (!isempty(acp) || !isempty(acp0))
     pseudostr = "pseudo=read";
   else
     pseudostr = "";
@@ -88,10 +88,10 @@ function writegjf(file,dcp,dcp0,basis,at,x,q,mult,ent,extragau="",chk="",wfx="",
     fprintf(fid,"\n");
   endif
 
-  ## DCP block
-  if (!isempty(dcp) || !isempty(dcp0))
-    writedcp(dcp,fid,at);
-    writedcp(dcp0,fid,at);
+  ## ACP block
+  if (!isempty(acp) || !isempty(acp0))
+    writeacp(acp,fid,at);
+    writeacp(acp0,fid,at);
     fprintf(fid,"\n");
   endif
 
@@ -102,7 +102,7 @@ function writegjf(file,dcp,dcp0,basis,at,x,q,mult,ent,extragau="",chk="",wfx="",
   endif
 
   if (derivs)
-    ## The same calculation without any DCP
+    ## The same calculation without any ACP
     fprintf(fid,"--Link1--\n");
     fprintf(fid,"%%chk=%s\n",chk);
     fprintf(fid,"%%mem=%dGB\n",mem);
@@ -119,8 +119,8 @@ function writegjf(file,dcp,dcp0,basis,at,x,q,mult,ent,extragau="",chk="",wfx="",
       fprintf(fid,"\n");
     endif
 
-    ## Pack and count the number of DCP coefficients/exponents
-    x0 = packdcp(dcp);
+    ## Pack and count the number of ACP coefficients/exponents
+    x0 = packacp(acp);
     n = length(x0) / 2;
 
     ## First derivatives wrt the coefficients/term evaluation
@@ -134,7 +134,7 @@ function writegjf(file,dcp,dcp0,basis,at,x,q,mult,ent,extragau="",chk="",wfx="",
         ## Keep the original coefficient to evaluate this term
         xtmp(2*i) = x0(2*i);
       endif
-      dcptmp = unpackdcp(xtmp,dcp);
+      acptmp = unpackacp(xtmp,acp);
       fprintf(fid,"--Link1--\n");
       fprintf(fid,"%%chk=%s\n",chk);
       fprintf(fid,"%%mem=%dGB\n",mem);
@@ -150,8 +150,8 @@ function writegjf(file,dcp,dcp0,basis,at,x,q,mult,ent,extragau="",chk="",wfx="",
         writebasis(basis,fid,at);
         fprintf(fid,"\n");
       endif
-      writedcp(dcptmp,fid,at);
-      writedcp(dcp0,fid,at);
+      writeacp(acptmp,fid,at);
+      writeacp(acp0,fid,at);
       fprintf(fid,"\n");
     endfor
   endif

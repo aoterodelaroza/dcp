@@ -1,7 +1,7 @@
 #! /usr/bin/octave -q
 % Copyright (C) 2015 Alberto Otero-de-la-Roza <aoterodelaroza@gmail.com>
 %
-% dcp is free software: you can redistribute it and/or modify it under
+% acp is free software: you can redistribute it and/or modify it under
 % the terms of the GNU General Public License as published by the Free
 % Software Foundation, either version 3 of the License, or (at your
 % option) any later version. See <http://www.gnu.org/licenses/>.
@@ -13,8 +13,8 @@
 
 
 format long
-global dcp basis db prefix nstep run_inputs ycur dcpfin...
-       costmin iload stime0 astep savetar dcpeval muk dcp0...
+global acp basis db prefix nstep run_inputs ycur acpfin...
+       costmin iload stime0 astep savetar acpeval muk acp0...
        savetar errcontinue ncpu mem ferr
 
 #### Modify this to change the input behavior ####
@@ -39,7 +39,7 @@ extragau="SCF=(Conver=6, MaxCycle=40) Symm=none int=(grid=ultrafine)";
 ncpu=8;
 mem=2;
 
-## List of database files to use in DCP optimization
+## List of database files to use in ACP optimization
 listdb={...
           "db/s22_h2o_h2o.db",...
           "db/s22_nh3_nh3.db",...
@@ -48,28 +48,28 @@ listdb={...
 ## Weights. Must be the same length as listdb, or empty.
 weightdb=[];
 
-## Initial DCP file
-dcpini="e4.bsip";
+## Initial ACP file
+acpini="e4.bsip";
 
-## Final DCP file (can be the same as the initial file). While 
-## the script is running, dcpfin contains the DCP for the evaluation
+## Final ACP file (can be the same as the initial file). While 
+## the script is running, acpfin contains the ACP for the evaluation
 ## with lowest cost function.
-dcpfin="dcp.fin";
+acpfin="acp.fin";
 
-## This DCP will be included in all the calculations but it will not 
+## This ACP will be included in all the calculations but it will not 
 ## be optimized. 
-## dcpfix="dcp.fix";
+## acpfix="acp.fix";
 
-## Final evaluation file. Contains the evaluation of the best DCP
+## Final evaluation file. Contains the evaluation of the best ACP
 ## found on hte parametrization set. While the script is running,
-## dcpeval contains the DCP for the evaluation with the lowest cost
+## acpeval contains the ACP for the evaluation with the lowest cost
 ## function. 
-dcpeval="dcp.eval";
+acpeval="acp.eval";
 
 ## Prefix for the calculations. If prefix is "bleh", then all the
 ## inputs and outputs will be stored in subdirectory bleh/ of the
 ## current working directory. The file names will be bleh_xx.tar.bz2
-## where xx is the DCP optimization evaluation number. The archive
+## where xx is the ACP optimization evaluation number. The archive
 ## contains files bleh_xx_name, where name is the identifier for the
 ## database entry. 
 prefix="bleh";
@@ -126,7 +126,7 @@ if (exist("errfile","var"))
 endif
 
 ## Header
-printf("### DCP optimization started on %s ###\n",strtrim(ctime(time())));
+printf("### ACP optimization started on %s ###\n",strtrim(ctime(time())));
 printf("### PID: %d ###\n",getpid());
 [s out] = system("hostname");
 printf("### hostname: %s ###\n",strrep(out,"\n",""));
@@ -142,22 +142,22 @@ basis = parsebasis(basis);
 db = parsedb(listdb);
 db = filldb(db,weightdb,method,extragau);
 
-## Read the initial DCP
-dcp = parsedcp(dcpini);
+## Read the initial ACP
+acp = parseacp(acpini);
 
-## Read the fixed DCP
-if (exist("dcpfix","var") && !isempty(dcpfix))
-  dcp0 = parsedcp(dcpfix);
-  ## Check that the atoms in dcp and dcp0 do not clash
-  for i = 1:length(dcp)
-    for j = 1:length(dcp0)
-      if (strcmp(tolower(dcp{i}.atom),tolower(dcp0{j}.atom)))
-        error("Same atom in dcpini and dcpfix")
+## Read the fixed ACP
+if (exist("acpfix","var") && !isempty(acpfix))
+  acp0 = parseacp(acpfix);
+  ## Check that the atoms in acp and acp0 do not clash
+  for i = 1:length(acp)
+    for j = 1:length(acp0)
+      if (strcmp(tolower(acp{i}.atom),tolower(acp0{j}.atom)))
+        error("Same atom in acpini and acpfix")
       endif
     endfor
   endfor
 else
-  dcp0 = {};
+  acp0 = {};
 endif
 
 ## Run the minimization, initialize global variables
@@ -166,7 +166,7 @@ astep = 0;
 costmin = Inf;
 iload = [];
 stime0 = time();
-x = packdcp(dcp);
+x = packacp(acp);
 
 ## Set initial penalty coefficient
 muk = 0;
@@ -227,12 +227,12 @@ if (ferr > 0)
   fflush(ferr);
 endif
 
-## Write the final DCP
-dcp = unpackdcp(xmin,dcp);
-writedcp(dcp,dcpfin)
+## Write the final ACP
+acp = unpackacp(xmin,acp);
+writeacp(acp,acpfin)
 
 ## Write the results at the minimum
-printf("### Statistics for the parametrization set at the optimal DCP###\n");
+printf("### Statistics for the parametrization set at the optimal ACP###\n");
 printf("| Id | Name | yref | ycalc | dy |\n")
 dy = yref = zeros(length(db),1);
 for i = 1:length(db)
@@ -246,7 +246,7 @@ printf("# MAE = %.4f\n",mean(abs(yref-ycur)));
 printf("# MAPE = %.4f\n",mean(abs((yref-ycur)./yref))*100);
 printf("# RMS = %.4f\n",sqrt(mean((yref-ycur).^2)));
 printf("# Penalty function minimum: %.10f\n",ymin)
-printf("# Final DCP written to: %s\n",dcpfin)
+printf("# Final ACP written to: %s\n",acpfin)
 
 ## Close error file
 if (ferr > 0) 
@@ -255,5 +255,5 @@ if (ferr > 0)
 endif
 fclose(ferr);
 
-printf("### DCP optimization finished on %s ###\n",strtrim(ctime(time())));
+printf("### ACP optimization finished on %s ###\n",strtrim(ctime(time())));
 

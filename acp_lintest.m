@@ -1,7 +1,7 @@
 #! /usr/bin/octave -q
 % Copyright (C) 2015 Alberto Otero-de-la-Roza <aoterodelaroza@gmail.com>
 %
-% dcp is free software: you can redistribute it and/or modify it under
+% acp is free software: you can redistribute it and/or modify it under
 % the terms of the GNU General Public License as published by the Free
 % Software Foundation, either version 3 of the License, or (at your
 % option) any later version. See <http://www.gnu.org/licenses/>.
@@ -12,7 +12,7 @@
 % more details.
 
 format long
-global dcp basis db prefix nstep run_inputs iload savetar ncpu mem ferr
+global acp basis db prefix nstep run_inputs iload savetar ncpu mem ferr
 
 #### Modify this to change the input behavior ####
 
@@ -35,7 +35,7 @@ extragau="SCF=(Conver=8, MaxCycle=80) Symm=none int=(grid=ultrafine)";
 ncpu=8;
 mem=2;
 
-## List of database files to use in DCP linearity test
+## List of database files to use in ACP linearity test
 ## [listdb weightdb] = training_set(1,1,1,1,1);
 listdb = {...
            "h2o_shields/water2Cs.db",...
@@ -69,7 +69,7 @@ nonlinthr = 1e-3;
 ## Prefix for the calculations. If prefix is "bleh", then all the
 ## inputs and outputs will be stored in subdirectory bleh/ of the
 ## current working directory. The file names will be bleh_xx.tar.bz2
-## where xx is the DCP optimization evaluation number. The archive
+## where xx is the ACP optimization evaluation number. The archive
 ## contains files bleh_xx_name, where name is the identifier for the
 ## database entry. 
 prefix0="bleh";
@@ -105,7 +105,7 @@ if (exist("errfile","var"))
 endif
 
 ## Header
-printf("### DCP non-linearity and precision tests started on %s ###\n",strtrim(ctime(time())));
+printf("### ACP non-linearity and precision tests started on %s ###\n",strtrim(ctime(time())));
 printf("### PID: %d ###\n",getpid());
 [s out] = system("hostname");
 printf("### hostname: %s ###\n",strrep(out,"\n",""));
@@ -187,7 +187,7 @@ for iexp = 1:length(explist)
         c = c * cfactor;
       endif
     endif
-    dcp = makedcp(atom,channel,exponent,c);
+    acp = makeacp(atom,channel,exponent,c);
 
     ## Debug
     if (ferr > 0) 
@@ -213,7 +213,7 @@ for iexp = 1:length(explist)
         ilist = {};
         for i = 1:length(db)
           if (irunup(i))
-            anew = setup_input_one(db{i},dcp);
+            anew = setup_input_one(db{i},acp);
             ilist = {ilist{:}, anew{:}};
           endif
         endfor
@@ -353,4 +353,4 @@ endfor
 printf("\n");
 
 ## Termination
-printf("### DCP non-linearity and precision tests finished on %s ###\n",strtrim(ctime(time())));
+printf("### ACP non-linearity and precision tests finished on %s ###\n",strtrim(ctime(time())));

@@ -1,6 +1,6 @@
 % Copyright (C) 2015 Alberto Otero-de-la-Roza <aoterodelaroza@gmail.com>
 %
-% dcp is free software: you can redistribute it and/or modify it under
+% acp is free software: you can redistribute it and/or modify it under
 % the terms of the GNU General Public License as published by the Free
 % Software Foundation, either version 3 of the License, or (at your
 % option) any later version. See <http://www.gnu.org/licenses/>.
@@ -10,18 +10,18 @@
 % FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
 % more details.
 
-function ilist = setup_input_one(ent,dcp,derivs=0)
-  %% function ilist = setup_input_one(ent,dcp,derivs=0)
+function ilist = setup_input_one(ent,acp,derivs=0)
+  %% function ilist = setup_input_one(ent,acp,derivs=0)
   %%
   %% Set up all the inputs necessary to perform the calculation
-  %% indicated in database entry ent for the given DCP. Returns the
+  %% indicated in database entry ent for the given ACP. Returns the
   %% list of input names (without the gjf) and writes those same
   %% inputs to the current working directory. If derivs is not zero
   %% and positive, generate the gjfs for the derivatives calculation
   %% up to derivs order. If derivs is negative, prepare the inputs for
-  %% theevaluation of the DCP terms.
+  %% theevaluation of the ACP terms.
 
-  global prefix nstep basis dcp0 ferr
+  global prefix nstep basis acp0 ferr
 
   ## Debug
   if (ferr > 0) 
@@ -42,7 +42,7 @@ function ilist = setup_input_one(ent,dcp,derivs=0)
       else
         extragau = "";
       endif
-      writegjf(file,dcp,dcp0,basis,ent.molc{j}.at,ent.molc{j}.x,ent.molc{j}.q,ent.molc{j}.mult,ent,extragau,chk,wfx,derivs);
+      writegjf(file,acp,acp0,basis,ent.molc{j}.at,ent.molc{j}.x,ent.molc{j}.q,ent.molc{j}.mult,ent,extragau,chk,wfx,derivs);
       writexyz(filexyz,ent.molc{j}.at,ent.molc{j}.x,ent.molc{j}.q,ent.molc{j}.mult);
       ilist = {ilist{:}, sprintf("%s_%4.4d_%s_mol%d",prefix,nstep,ent.name,j)};
     endfor
@@ -57,7 +57,7 @@ function ilist = setup_input_one(ent,dcp,derivs=0)
     else
       extragau = "";
     endif
-    writegjf(file,dcp,dcp0,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult,ent,extragau,chk,wfx,derivs);
+    writegjf(file,acp,acp0,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult,ent,extragau,chk,wfx,derivs);
     writexyz(filexyz,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult);
     ilist = {ilist{:}, sprintf("%s_%4.4d_%s_mol",prefix,nstep,ent.name)};
   elseif (strcmp(ent.type,"intramol_geometry") || strcmp(ent.type,"intermol_geometry"))
@@ -70,7 +70,7 @@ function ilist = setup_input_one(ent,dcp,derivs=0)
     else
       extragau = "";
     endif
-    writegjf(file,dcp,dcp0,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult,ent,extragau,:,:,0);
+    writegjf(file,acp,acp0,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult,ent,extragau,:,:,0);
     writexyz(filexyz,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult);
     ilist = {ilist{:}, sprintf("%s_%4.4d_%s_mol",prefix,nstep,ent.name)};
   elseif (strcmp(ent.type,"dipole"))
@@ -82,7 +82,7 @@ function ilist = setup_input_one(ent,dcp,derivs=0)
     else
       extragau = "";
     endif
-    writegjf(file,dcp,dcp0,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult,ent,extragau,:,:,0);
+    writegjf(file,acp,acp0,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult,ent,extragau,:,:,0);
     writexyz(filexyz,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult);
     ilist = {ilist{:}, sprintf("%s_%4.4d_%s_mol",prefix,nstep,ent.name)};
   elseif (strcmp(ent.type,"multipoles"))
@@ -96,7 +96,7 @@ function ilist = setup_input_one(ent,dcp,derivs=0)
       else
         extragau = "";
       endif
-      writegjf(file,dcp,dcp0,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult,ent,extragau,:,:,0);
+      writegjf(file,acp,acp0,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult,ent,extragau,:,:,0);
       writexyz(filexyz,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult);
       ilist = {ilist{:}, sprintf("%s_%4.4d_%s_mol",prefix,nstep,ent.name)};
     endif
