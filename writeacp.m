@@ -46,7 +46,7 @@ function writeacp(acp,file="",atlist={})
   ## Write the ACP
   for i = 1:length(acp)
     if (isempty(atlist) || any(ismember(atlist,tolower(acp{i}.atom))))
-      fprintf(fid,"%s 0\n",acp{i}.atom);
+      fprintf(fid,"-%s 0\n",acp{i}.atom);
       fprintf(fid,"%s %d %d\n",acp{i}.name,acp{i}.nblock-1,acp{i}.nelec);
       for j = 1:acp{i}.nblock
         fprintf(fid,"%s\n",acp{i}.block{j}.name);

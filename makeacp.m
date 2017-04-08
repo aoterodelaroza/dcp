@@ -28,6 +28,8 @@ function acp = makeacp(atom,l,exp,coef)
     il = 3;
   elseif (strcmpi(l,"d"))
     il = 4;
+  else
+    error(sprintf("Unknown angular momentum channel: %s",l));
   endif
 
   acp = cell();
