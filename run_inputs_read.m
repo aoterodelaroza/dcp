@@ -31,7 +31,7 @@ function sout = run_inputs_read(ilist,xdmcoef=[],xdmfun="",extrad3="")
   endif
 
   ## Copy of the output files in the prefix_name directory to the current directory
-  adir = sprintf("%s_%4.4d",prefix,nstep)
+  adir = sprintf("%s_%4.4d",prefix,nstep);
   for i = 1:length(ilist)
     name = ilist{i};
     [s out] = system(sprintf("cp -f %s/%s.* .",adir,name));
