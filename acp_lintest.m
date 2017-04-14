@@ -48,20 +48,16 @@ listdb = {...
 ## run.
 atom="O";
 channel="l";
-explist=[0.01 0.1];
+explist=[0.01 0.1 1.0];
 
 ## Base coefficient for the linearity range exploration
-c0=0.001;
+cmin=0.00001;
 
 ## Maximum and minimum coefficient values
 cmax = 2.1;
 
 ## Scaling factor for the coefficient exploration
 cfactor = 2;
-
-## Threshold for the precision (Hartree) and minimum effect on the binding 
-## energies (kcal/mol).
-precthr = 1e-5;
 
 ## Threshold for the non-linearity error (kcal/mol)
 nonlinthr = 1e-3;
@@ -98,6 +94,9 @@ errfile = "eval.err";
 
 #### No touching past this point. ####
 
+## c0 for the ACP terms;
+c0 = 0.001;
+
 ## Open error file
 ferr = -1;
 if (exist("errfile","var"))
@@ -105,7 +104,7 @@ if (exist("errfile","var"))
 endif
 
 ## Header
-printf("### ACP non-linearity and precision tests started on %s ###\n",strtrim(ctime(time())));
+printf("### ACP non-linearity tests started on %s ###\n",strtrim(ctime(time())));
 printf("### PID: %d ###\n",getpid());
 [s out] = system("hostname");
 printf("### hostname: %s ###\n",strrep(out,"\n",""));
@@ -141,9 +140,54 @@ endfor
 printf("### Using %d out of the original %d db entries ###\n",sum(iuse),length(db));
 db = db(find(iuse));
 
+## Calculate the ACP terms
+printf("\n### Calculating the ACP terms for each exponent###\n");
+prefix = sprintf("%s-terms",prefix0);
+nstep = 1;
+ilist = {};
+
+## Prepare the inputs
+if (ferr > 0) 
+  fprintf(ferr,"# Setting up Gaussian input files - %s\n",strtrim(ctime(time())));
+  fflush(ferr);
+endif
+for i = 1:length(db)
+  anew = setup_input_one_postscf(db{i},{atom},{channel},explist,c0);
+  ilist = {ilist{:}, anew{:}};
+endfor
+if (ferr > 0) 
+  fprintf(ferr,"# List of inputs has %d entries\n",length(ilist));
+  fflush(ferr);
+endif
+
+## Run all inputs
+srun = run_inputs(ilist);
+
+## Collect the results 
+yterm = zeros(length(explist),length(db));
+yempty = zeros(1,length(db));
+for i = 1:length(db)
+  [x1 x2] = process_output_one_postscf(db{i},{atom},{channel},explist);
+  yterm(:,i) = x1(:);
+  yempty(i) = x2;
+endfor
+
+## Write output
+for iexp = 1:length(explist)
+  printf("## Atom: %s Channel: %s Exponent: %.10f Coefficient: %.10f\n",atom,channel,explist(iexp),c0);
+  printf("| Id | Name | Empty | ACP term |\n");
+  for i = 1:length(db)
+    printf("| %d | %s | %.10f | %.10f |\n",i,db{i}.outname,yempty(i),yterm(iexp,i));
+  endfor
+  printf("\n")
+endfor
+
+## Clean up
+stash_inputs_outputs(yempty);
+
 ## enter main loop
-c0final = [];
-yempty = [];
+printf("\n### Calculating the maxcoef for each exponent ###\n");
+maxcoef = zeros(1,length(explist));
 for iexp = 1:length(explist)
   exponent = explist(iexp);
   printf("\n### Exponent: %.10f ###\n",exponent)
@@ -159,34 +203,14 @@ for iexp = 1:length(explist)
 
   ## Explore the coefficient limits of this exponent
   nstep = 0;
-  coef = c0;
-  dir = -1; 
+  c = cmin / cfactor;
   irunup = ones(1,length(db));
-  coefup = zeros(1,length(db));
-  ysave = cell();
-  ysaveidx = [];
+  coefup = zeros(1,length(db)) + cmin;
   while true 
     nstep++;
 
     ## build the next run
-    if (nstep == 1)
-      ## the empty
-      c = 0;
-    elseif (nstep == 2)
-      ## the c0
-      cprev = c0;
-      c = c0;
-    else
-      ## the other coefficients
-      if (dir == -1) 
-        cprev = c;
-      endif
-      if (dir == -1) 
-        c = c / cfactor;
-      else
-        c = c * cfactor;
-      endif
-    endif
+    c = c * cfactor;
     acp = makeacp(atom,channel,exponent,c);
 
     ## Debug
@@ -195,96 +219,54 @@ for iexp = 1:length(explist)
       fflush(ferr);
     endif
 
-    if (nstep > 1)
-      idx = log(c / c0) / log(cfactor);
-    else
-      idx = Inf;
+    ## Set up the Gaussian input files
+    if (ferr > 0) 
+      fprintf(ferr,"# Setting up Gaussian input files - %s\n",strtrim(ctime(time())));
+      fflush(ferr);
     endif
-
-    if (!ismember(idx,ysaveidx))
-      if (isinf(idx) && !isempty(yempty))
-        ycalc = yempty;
-      else
-        ## Set up the Gaussian input files
-        if (ferr > 0) 
-          fprintf(ferr,"# Setting up Gaussian input files - %s\n",strtrim(ctime(time())));
-          fflush(ferr);
-        endif
-        ilist = {};
-        for i = 1:length(db)
-          if (irunup(i))
-            anew = setup_input_one(db{i},acp);
-            ilist = {ilist{:}, anew{:}};
-          endif
-        endfor
-        if (ferr > 0) 
-          fprintf(ferr,"# List of inputs has %d entries\n",length(ilist));
-          fflush(ferr);
-        endif
-
-        ## Run all inputs
-        srun = run_inputs(ilist);
-
-        ## Collect the results 
-        if (ferr > 0) 
-          fprintf(ferr,"# Collecting the results and calculating errors - %s\n",strtrim(ctime(time())));
-          fflush(ferr);
-        endif
-        ycalc = yref = ycalcnd = zeros(length(db),1);
-        for i = 1:length(db)
-          if (irunup(i))
-            [~, ycalc(i), ~, ~, ~] = process_output_one(db{i});
-          else
-            ycalc(i) = 0;
-          endif
-        endfor
-        if (nstep > 1)
-          ysaveidx = [ysaveidx idx];
-          ysave{100 + idx} = ycalc;
-        else
-          yempty = ycalc;
-        endif
+    ilist = {};
+    for i = 1:length(db)
+      if (irunup(i))
+        anew = setup_input_one(db{i},acp);
+        ilist = {ilist{:}, anew{:}};
       endif
-    else
-      ycalc = ysave{100 + idx};
+    endfor
+    if (ferr > 0) 
+      fprintf(ferr,"# List of inputs has %d entries\n",length(ilist));
+      fflush(ferr);
     endif
+
+    ## Run all inputs
+    srun = run_inputs(ilist);
+
+    ## Collect the results 
+    if (ferr > 0) 
+      fprintf(ferr,"# Collecting the results and calculating errors - %s\n",strtrim(ctime(time())));
+      fflush(ferr);
+    endif
+    ycalc = zeros(1,length(db));
+    for i = 1:length(db)
+      if (irunup(i))
+        [xdum1 ycalc(i) xdum2 xdum3 xdum4] = process_output_one(db{i});
+      else
+        ycalc(i) = 0;
+      endif
+    endfor
 
     ## Save and write the results
-    printf("# Direction: %d\n",dir);
-    printf("# Index: %d\n",idx);
-    if (nstep == 1)
-      printf("# Step %d - empty\n",nstep);
-      printf("| Id|           Name       |       ycalc   |\n");
-      for i = 1:length(db)
-        printf("| %d | %20s | %14.8f |\n",i,db{i}.outname,ycalc(i));
-      endfor
-      printf("\n");
-    elseif (nstep == 2) 
-      ycur = ycalc - yempty;
-      yprev = ycur;
-      printf("# Step %d - c0 coefficient = %.10f\n",nstep,c);
-      printf("| Id|        Name       |       dycalc   |\n");
-      for i = 1:length(db)
-        printf("| %d | %20s | %14.8f |\n",i,db{i}.outname,ycur(i));
-      endfor
-      printf("\n");
-    else
-      if (dir == -1)
-        yprev = ycur;
+    ycur = ycalc - yempty;
+    yls = (yterm(iexp,:)-yempty) * c / c0;
+    nonlin = abs(ycur - yls);
+    printf("# Step %d - Coefficient = %.10f\n",nstep,c);
+    printf("| Id|        Name       |       yempty    |   yacp(ls)     |     yacp(scf)   |   non-lin |\n");
+    for i = 1:length(db)
+      if (irunup(i))
+        printf("| %d | %20s | %14.8f | %14.8f | %14.8f | %14.8f |\n",i,db{i}.outname,yempty(i),yls(i),ycur(i),nonlin(i));
+      else
+        printf("| %d | %20s | c0=%.10f | xxdonexx | xxdonexx | xxdonexx |\n",i,db{i}.outname,coefup(i));
       endif
-      ycur = ycalc - yempty;
-      nonlin = abs(ycur-yprev*c/cprev);
-      printf("# Step %d - coefficient = %.10f\n",nstep,c);
-      printf("| Id|        Name       |       dyprev     |     dycalc   |   non-lin (%f/%f) |\n",c,cprev);
-      for i = 1:length(db)
-        if (irunup(i))
-          printf("| %d | %20s | %14.8f | %14.8f | %14.8f |\n",i,db{i}.outname,yprev(i),ycur(i),nonlin(i));
-        else
-          printf("| %d | %20s | c0=%.10f | xxdonexx | xxdonexx |\n",i,db{i}.outname,coefup(i));
-        endif
-      endfor
-      printf("\n");
-    endif
+    endfor
+    printf("\n");
 
     ## Clean up
     stash_inputs_outputs(ycalc);
@@ -294,18 +276,9 @@ for iexp = 1:length(explist)
       error("Some of the outputs were Inf")
     endif
 
-    ## Finish the downstroke
-    if (dir == -1 && nstep > 2)
-      if (all(nonlin < precthr)) 
-        ## accept the current coefficient
-        dir = 1;
-        cprev = c;
-        yprev = ycur;
-      endif
-    elseif (dir == 1 && nstep > 2) 
-      irunup = irunup & (nonlin' <= nonlinthr);
-      coefup(find(nonlin' <= nonlinthr)) = c;
-    endif
+    ## Save the coefficients
+    irunup = irunup & (nonlin' <= nonlinthr);
+    coefup(find(nonlin' <= nonlinthr)) = c;
 
     ## Exit conditions
     if (c > cmax) 
@@ -320,16 +293,14 @@ for iexp = 1:length(explist)
   endwhile
 
   ## Print the final coefficients
-  printf("#### Coefficients for exponent %.10f ####\n",exponent);
-  printf("c0   = %.10f\n",cprev);
+  printf("#### Maximum Coefficients for exponent %.10f ####\n",exponent);
   printf("cmax = %.10f\n",min(coefup));
   printf("| Id|        Name       |       cmax     |\n");
   for i = 1:length(db)
     printf("| %d | %20s | %.10f |\n",i,db{i}.outname,coefup(i));
   endfor
   printf("\n");
-  c0final(iexp,1) = cprev;
-  c0final(iexp,2) = min(coefup);
+  maxcoef(iexp) = min(coefup);
 endfor
 
 ## Close error file
@@ -341,16 +312,17 @@ fclose(ferr);
 
 ## Print the final coefficients
 printf("#### Final list of coefficients ####\n",exponent);
-printf("| Id| Exponent | c0 | cmax |\n");
+printf("| Id| Exponent | maxcoef |\n");
 for i = 1:length(explist)
-  printf("| %d | %.10f | %.10f | %.10f |\n",i,explist(i),c0final(i,1),c0final(i,2));
+  printf("| %d | %.10f | %.10f |\n",i,explist(i),maxcoef(i));
 endfor
 printf("\n");
+printf("# maxcoef data file:\n");
 for i = 1:length(explist)
-  printf("%d %s %s %.10f %.10f %.10f\n",i,atom,channel,...
-         explist(i),c0final(i,1),c0final(i,2));
+  printf("%d %s %s %.10f %.10f\n",i,atom,channel,...
+         explist(i),maxcoef(i));
 endfor
 printf("\n");
 
 ## Termination
-printf("### ACP non-linearity and precision tests finished on %s ###\n",strtrim(ctime(time())));
+printf("### ACP non-linearity tests finished on %s ###\n",strtrim(ctime(time())));
