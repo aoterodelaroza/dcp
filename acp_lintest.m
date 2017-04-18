@@ -277,8 +277,8 @@ for iexp = 1:length(explist)
     endif
 
     ## Save the coefficients
-    irunup = irunup & (nonlin' <= nonlinthr);
-    coefup(find(nonlin' <= nonlinthr)) = c;
+    irunup = irunup & (nonlin <= nonlinthr);
+    coefup(find(nonlin <= nonlinthr)) = c;
 
     ## Exit conditions
     if (c > cmax) 
