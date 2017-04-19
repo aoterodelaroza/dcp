@@ -31,8 +31,6 @@ function sout = run_inputs_grex(ilist,xdmcoef=[],xdmfun="",extrad3="")
   %% the calc results. When all jobs are done, control is given back
   %% to the caller.
   
-  global iload
-  
   ## Parameters for the run
   hours = 2; ## walltime hours
   ncpu0 = 6; ## number of cores (local)
@@ -54,18 +52,8 @@ function sout = run_inputs_grex(ilist,xdmcoef=[],xdmfun="",extrad3="")
     every = 1;
   endif
 
-  if (isempty(iload)) 
-    ## No information: randomize the input list
-    idx = randperm(length(ilist));
-  else
-    [idum idx] = sort(iload);
-    n = length(ilist);
-    k = usenodes;
-    idx = [idx zeros(1,k*ceil(n/k)-n)];
-    idx = reshape(idx,k,ceil(n/k));
-    idx = idx';
-    idx = reshape(idx,1,k*ceil(n/k));
-  endif
+  ## randomize the input list
+  idx = randperm(length(ilist));
 
   ## Create submission scripts for all inputs on the list
   fid = -1;
@@ -152,18 +140,6 @@ function sout = run_inputs_grex(ilist,xdmcoef=[],xdmfun="",extrad3="")
   for i = 1:length(ilist)
     [s out] = system(sprintf("rm -f %s.done %s.err %s.sub",ilist{i},ilist{i},ilist{i}));
   endfor
-
-  ## Calculate the load for subsequent runs
-  iload = read_jobload(ilist,iload);
-  ## if (verbose)
-  ##   printf("# Job load\n")
-  ##   printf("| Id | Name | Load (s) |\n")
-  ##   for i = 1:length(ilist)
-  ##     printf("| %d | %s | %.1f |\n",...
-  ##            i,ilist{i},iload(i));
-  ##   endfor
-  ##   printf("#\n");
-  ## endif
 
   ## Check that we have a normal termination. If not, pass the error 
   ## back to the caller.

@@ -31,7 +31,7 @@ function sout = run_inputs_plonk(ilist,xdmcoef=[],xdmfun="",extrad3="")
   %% for the calc results. When all jobs are done, control is given
   %% back to the caller.
   
-  global iload ferr
+  global ferr
   
   ## Debug
   if (ferr > 0) 
@@ -161,18 +161,6 @@ function sout = run_inputs_plonk(ilist,xdmcoef=[],xdmfun="",extrad3="")
     endif
     [s out] = system(sprintf("rm -f %s.done %s.err %s.sub",ilist{i},ilist{i},ilist{i}));
   endfor
-
-  ## Calculate the load for subsequent runs
-  iload = read_jobload(ilist,iload);
-  ## if (verbose)
-  ##   printf("# Job load\n")
-  ##   printf("| Id | Name | Load (s) |\n")
-  ##   for i = 1:length(ilist)
-  ##     printf("| %d | %s | %.1f |\n",...
-  ##            i,ilist{i},iload(i));
-  ##   endfor
-  ##   printf("#\n");
-  ## endif
 
   ## Check that we have a normal termination. If not, pass the error 
   ## back to the caller.

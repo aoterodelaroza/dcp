@@ -31,7 +31,7 @@ function sout = run_inputs_elcap3(ilist,xdmcoef=[],xdmfun="",extrad3="")
   %% the calc results. When all jobs are done, control is given back
   %% to the caller.
   
-  global iload ferr
+  global ferr
   
   ## Debug
   if (ferr > 0) 
@@ -67,19 +67,8 @@ function sout = run_inputs_elcap3(ilist,xdmcoef=[],xdmfun="",extrad3="")
     every = 1;
   endif
 
-  ## Even out the load across nodes
-  if (isempty(iload)) 
-    ## No information: randomize the input list
-    idx = randperm(length(ilist));
-  else
-    [idum idx] = sort(iload);
-    n = length(ilist);
-    k = usenodes;
-    idx = [idx zeros(1,k*ceil(n/k)-n)];
-    idx = reshape(idx,k,ceil(n/k));
-    idx = idx';
-    idx = reshape(idx,1,k*ceil(n/k));
-  endif
+  ## Randomize the input list
+  idx = randperm(length(ilist));
 
   ## Create submission scripts for all inputs on the list
   if (ferr > 0) 
@@ -238,18 +227,6 @@ function sout = run_inputs_elcap3(ilist,xdmcoef=[],xdmfun="",extrad3="")
     endif
     [s out] = system(sprintf("rm -f %s.done %s.e* %s.sub",ilist{i},ilist{i},ilist{i}));
   endfor
-
-  ## Calculate the load for subsequent runs
-  iload = read_jobload(ilist,iload);
-  ## if (verbose)
-  ##   printf("# Job load\n")
-  ##   printf("| Id | Name | Load (s) |\n")
-  ##   for i = 1:length(ilist)
-  ##     printf("| %d | %s | %.1f |\n",...
-  ##            i,ilist{i},iload(i));
-  ##   endfor
-  ##   printf("#\n");
-  ## endif
 
   ## Check that we have a normal termination. If not, pass the error 
   ## back to the caller.

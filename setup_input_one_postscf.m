@@ -10,7 +10,7 @@
 % FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
 % more details.
 
-function ilist = setup_input_one_postscf(ent,atoms,lchan,lexp,c0)
+function ilist = setup_input_one_postscf(ent,atoms,lchan,lexp,c0,onlyonel)
   %% function ilist = setup_input_one(ent,atoms,lchan,lexp,c0)
   %%
   %% Set up all the inputs necessary to perform the calculation
@@ -22,6 +22,7 @@ function ilist = setup_input_one_postscf(ent,atoms,lchan,lexp,c0)
   %% calculations involve all atoms in atoms with maximum
   %% angular momentum channel lchan and all exponents in lexp.
   %% The post-SCF ACP terms are calculated using coefficient c0.
+  %% onlyonel: calculate only lchan, and not up to lchan.
 
   global prefix nstep basis ferr
 
@@ -46,7 +47,7 @@ function ilist = setup_input_one_postscf(ent,atoms,lchan,lexp,c0)
       endif
       writegjf(file,{},{},basis,ent.molc{j}.at,ent.molc{j}.x,ent.molc{j}.q,ent.molc{j}.mult,ent,extragau,chk,wfx,0);
       writexyz(filexyz,ent.molc{j}.at,ent.molc{j}.x,ent.molc{j}.q,ent.molc{j}.mult);
-      appendgjf(file,basis,ent.molc{j}.at,ent.molc{j}.q,ent.molc{j}.mult,ent,extragau,chk,atoms,lchan,lexp,c0);
+      appendgjf(file,basis,ent.molc{j}.at,ent.molc{j}.q,ent.molc{j}.mult,ent,extragau,chk,atoms,lchan,lexp,c0,onlyonel);
       ilist = {ilist{:}, sprintf("%s_%4.4d_%s_mol%d",prefix,nstep,ent.name,j)};
     endfor
 
@@ -63,7 +64,7 @@ function ilist = setup_input_one_postscf(ent,atoms,lchan,lexp,c0)
     endif
     writegjf(file,{},{},basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult,ent,extragau,chk,wfx,0);
     writexyz(filexyz,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult);
-    appendgjf(file,basis,ent.mol.at,ent.mol.q,ent.mol.mult,ent,extragau,chk,atoms,lchan,lexp,c0);
+    appendgjf(file,basis,ent.mol.at,ent.mol.q,ent.mol.mult,ent,extragau,chk,atoms,lchan,lexp,c0,onlyonel);
     ilist = {ilist{:}, sprintf("%s_%4.4d_%s_mol",prefix,nstep,ent.name)};
 
   elseif (strcmp(ent.type,"intramol_geometry") || strcmp(ent.type,"intermol_geometry"))

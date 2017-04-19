@@ -13,7 +13,7 @@
 
 format long
 global acp basis db prefix nstep run_inputs ycur...
-       acpfin costmin iload stime0 astep savetar ncpu mem...
+       acpfin costmin stime0 astep savetar ncpu mem...
        ferr
 
 #### Modify this to change the input behavior ####
@@ -131,7 +131,7 @@ if (ferr > 0)
   fflush(ferr);
 endif
 for i = 1:length(db)
-  anew = setup_input_one_postscf(db{i},atoms,lchan,lexp,c0);
+  anew = setup_input_one_postscf(db{i},atoms,lchan,lexp,c0,0);
   ilist = {ilist{:}, anew{:}};
 endfor
 if (ferr > 0) 
@@ -166,7 +166,7 @@ endif
 xterm = zeros(nterm,length(db));
 xempty = zeros(1,length(db));
 for i = 1:length(db)
-  [x1 x2] = process_output_one_postscf(db{i},atoms,lchan,lexp);
+  [x1 x2] = process_output_one_postscf(db{i},atoms,lchan,lexp,0);
   xterm(:,i) = x1(:);
   xempty(i) = x2;
 endfor

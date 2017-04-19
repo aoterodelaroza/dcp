@@ -13,7 +13,7 @@
 
 format long
 global acp basis db prefix nstep run_inputs ycur...
-       acpfin costmin iload stime0 astep savetar ncpu mem...
+       acpfin costmin stime0 astep savetar ncpu mem...
        ferr
 
 #### Modify this to change the input behavior ####
@@ -201,8 +201,8 @@ for iacp = 1:length(acpini)
   endif
 
   ## Write the results at the minimum
-  printf("# ACP %d (%s) | Cost = %.10f | wRMS = %.4f | MAE = %.4f | MAPE = %.4f | RMS = %.4f | Time = %.1f |\n",...
-         iacp,acpini{iacp},cost,wrms,mae,mape,rms,sum(iload));
+  printf("# ACP %d (%s) | Cost = %.10f | wRMS = %.4f | MAE = %.4f | MAPE = %.4f | RMS = %.4f |\n",...
+         iacp,acpini{iacp},cost,wrms,mae,mape,rms);
   
   if (isempty(xdmcoef) && isempty(extrad3))
     printf("| Id|           Name       |       yref   |      ycalc   |       dy     |\n");

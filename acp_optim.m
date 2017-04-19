@@ -14,7 +14,7 @@
 
 format long
 global acp basis db prefix nstep run_inputs ycur acpfin...
-       costmin iload stime0 astep savetar acpeval muk acp0...
+       costmin stime0 astep savetar acpeval muk acp0...
        savetar errcontinue ncpu mem ferr
 
 #### Modify this to change the input behavior ####
@@ -164,7 +164,6 @@ endif
 nstep = 0;
 astep = 0;
 costmin = Inf;
-iload = [];
 stime0 = time();
 x = packacp(acp);
 

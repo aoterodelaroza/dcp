@@ -20,7 +20,7 @@ function sout = run_inputs_pass(ilist,xdmcoef=[],xdmfun="",extrad3="")
   %%
   %% This version does NOT run the inputs - it creates empty files.
   
-  global iload ferr nstep prefix
+  global ferr nstep prefix
   
   ## Debug
   if (ferr > 0) 
@@ -82,9 +82,6 @@ function sout = run_inputs_pass(ilist,xdmcoef=[],xdmfun="",extrad3="")
     name = ilist{i};
     [s out] = system(sprintf("cp -f %s.gjf %s_%4.4d/",name,prefix,nstep));
   endfor
-
-  ## Set a load of 1 for all the jobs
-  iload = ones(size(ilist));
 
   ## No errors
   sout = [];

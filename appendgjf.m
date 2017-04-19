@@ -10,8 +10,8 @@
 % FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
 % more details.
 
-function appendgjf(file,basis,at,q,mult,ent,extragau="",chk="",atoms,lchan,lexp,c0)
-  %% function appendgjf(file,basis,at,q,mult,ent,extragau="",chk="",atoms,lchan,lexp,c0)
+function appendgjf(file,basis,at,q,mult,ent,extragau="",chk="",atoms,lchan,lexp,c0,onlyonel)
+  %% function appendgjf(file,basis,at,q,mult,ent,extragau="",chk="",atoms,lchan,lexp,c0,onlyonel)
   %%
   %% Append to a Gaussian input file (gjf) with filename file. For
   %% each combination of atom (atoms), angular momentum channel
@@ -20,6 +20,7 @@ function appendgjf(file,basis,at,q,mult,ent,extragau="",chk="",atoms,lchan,lexp,
   %% checkpoint file (chk).  The basis set (basis), atom list (at),
   %% charge (q), multiplicity (mult), method (ent.method), extra
   %% keywords (ent.extragau and extragau) are read from the arguments.
+  %% onlyonel: calculate only lchan, and not up to lchan.
   
   global ncpu mem
 
@@ -42,7 +43,12 @@ function appendgjf(file,basis,at,q,mult,ent,extragau="",chk="",atoms,lchan,lexp,
     else
       lmax = getfield(l2num,(lower(lchan{iatom})));
     endif
-    for il = 1:lmax
+    if (onlyonel) 
+      lini = lmax;
+    else
+      lini = 1;
+    endif
+    for il = lini:lmax
       for iexp = 1:length(lexp)
 
         ## Link1

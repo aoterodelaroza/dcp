@@ -12,7 +12,7 @@
 % more details.
 
 format long
-global acp basis db prefix nstep run_inputs iload savetar ncpu mem ferr
+global acp basis db prefix nstep run_inputs savetar ncpu mem ferr
 
 #### Modify this to change the input behavior ####
 
@@ -152,7 +152,7 @@ if (ferr > 0)
   fflush(ferr);
 endif
 for i = 1:length(db)
-  anew = setup_input_one_postscf(db{i},{atom},{channel},explist,c0);
+  anew = setup_input_one_postscf(db{i},{atom},{channel},explist,c0,1);
   ilist = {ilist{:}, anew{:}};
 endfor
 if (ferr > 0) 
@@ -167,7 +167,7 @@ srun = run_inputs(ilist);
 yterm = zeros(length(explist),length(db));
 yempty = zeros(1,length(db));
 for i = 1:length(db)
-  [x1 x2] = process_output_one_postscf(db{i},{atom},{channel},explist);
+  [x1 x2] = process_output_one_postscf(db{i},{atom},{channel},explist,1);
   yterm(:,i) = x1(:);
   yempty(i) = x2;
 endfor

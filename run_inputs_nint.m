@@ -31,7 +31,7 @@ function sout = run_inputs_nint(ilist,xdmcoef=[],xdmfun="",extrad3="")
   %% for the calc results. When all jobs are done, control is given
   %% back to the caller.
   
-  global iload prefix ferr
+  global prefix ferr
   
   if (!isempty(extrad3))
     error("d3 calculations not supported by this run_inputs driver")
@@ -213,19 +213,6 @@ function sout = run_inputs_nint(ilist,xdmcoef=[],xdmfun="",extrad3="")
     system(sprintf("rm -f %s_%4.4d.tar.bz2",prefix,i));
   endfor
   
-  ## ## Calculate the load for subsequent runs
-  ## disp("calculating the iload")
-  ## iload = read_jobload(ilist,iload);
-  ## if (verbose)
-  ##   printf("# Job load\n")
-  ##   printf("| Id | Name | Load (s) |\n")
-  ##   for i = 1:length(ilist)
-  ##     printf("| %d | %s | %.1f |\n",...
-  ##            i,ilist{i},iload(i));
-  ##   endfor
-  ##   printf("#\n");
-  ## endif
-
   ## Check that we have a normal termination. If not, pass the error 
   ## back to the caller.
   if (ferr > 0) 

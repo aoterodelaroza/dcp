@@ -32,7 +32,7 @@ function sout = run_inputs_plonk_packed(ilist,xdmcoef=[],xdmfun="",extrad3="")
   %% directory. When all archives are done, control is given 
   %% back to the caller.
   
-  global iload prefix
+  global prefix
   
   ## Parameters for the run
   sleeptime = 5; ## time in seconds between job completion checks
@@ -145,19 +145,6 @@ function sout = run_inputs_plonk_packed(ilist,xdmcoef=[],xdmfun="",extrad3="")
     system(sprintf("tar xjf %s_%4.4d.tar.bz2",prefix,i));
     system(sprintf("rm -f %s_%4.4d.tar.bz2",prefix,i));
   endfor
-
-  ## ## Calculate the load for subsequent runs
-  ## iload = read_jobload(ilist,iload);
-  ## if (verbose)
-  ##   printf("# Job load\n")
-  ##   printf("| Id | Name | Load (s) |\n")
-  ##   for i = 1:length(ilist)
-  ##     printf("| %d | %s | %.1f |\n",...
-  ##            i,ilist{i},iload(i));
-  ##   endfor
-  ##   printf("#\n");
-  ## endif
-  iload = ones(size(ilist));
 
   ## Check that we have a normal termination. If not, pass the error 
   ## back to the caller.
