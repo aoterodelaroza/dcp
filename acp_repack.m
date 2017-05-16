@@ -161,10 +161,10 @@ for iacp = 1:length(acpini)
   if (exist("savetar","var") && exist(sprintf("%s/%s_%4.4d.tar.%s",prefix,prefix,nstep,savetar),"file"))
     file = sprintf("%s/%s_%4.4d.tar.%s",prefix,prefix,nstep,savetar);
   else
-    alist = {"xz","bz2","gz",""};
+    alist = {".xz",".bz2",".gz",""};
     for i = 1:length(alist)
-      if (exist(sprintf("%s/%s_%4.4d.tar.%s",prefix,prefix,nstep,alist{i}),"file"))
-        file = sprintf("%s/%s_%4.4d.tar.%s",prefix,prefix,nstep,alist{i});
+      if (exist(sprintf("%s/%s_%4.4d.tar%s",prefix,prefix,nstep,alist{i}),"file"))
+        file = sprintf("%s/%s_%4.4d.tar%s",prefix,prefix,nstep,alist{i});
         break
       endif
     endfor
