@@ -1,5 +1,12 @@
 type reaction_frozen
 ref -3.281
+ref blyp/aqz -0.13615908
+ref b3lyp/atz -0.8001412200
+ref blyp/atz -0.1690872000
+ref hf/atz -0.9320911500
+ref lcwpbe/atz -1.4423579400
+ref pbe0/atz -1.6494358100
+ref pbe/atz -1.5824387600
 molc 1.0 0 1
 N -0.0554535700 -0.9479909030 0.0100102760
 H -0.0573160940 -1.9577133000 0.0550528670

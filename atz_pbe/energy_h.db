@@ -1,8 +1,0 @@
-## Database entry number 1
-## Read from file: atz_blyp/energy_h.db
-type total_energy
-ref -0.4998036900
-extragau    scf(qc)
-mol 0 2
-H 0.0000000000 0.0000000000 0.0000000000
-end

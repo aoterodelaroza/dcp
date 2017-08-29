@@ -1,8 +1,0 @@
-## Database entry number 1
-## Read from file: atz_blyp/energy_mon_hf.db
-type total_energy
-ref -100.3913738300
-mol 0 1
-F 0.0000000000 0.0000000000 0.0942700000
-H 0.0000000000 0.0000000000 -0.8298300000
-end

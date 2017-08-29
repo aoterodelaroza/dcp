@@ -1,0 +1,12 @@
+type total_energy
+ref blyp/aqz -75.08850855
+ref b3lyp/atz -75.0941778800
+ref blyp/atz -75.0834183300
+ref hf/atz -74.8129822100
+ref lcwpbe/atz -75.0471256200
+ref pbe0/atz -75.0162651900
+ref pbe/atz -75.0077772200
+extragau   scf(qc)
+mol 0 3
+O 0.0000000000 0.0000000000 0.0000000000
+end

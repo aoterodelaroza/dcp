@@ -1,6 +1,0 @@
-type total_energy
-ref -54.4011622400
-extragau  scf(qc)
-mol 0 4
-N 0.0000000000 0.0000000000 0.0000000000
-end
