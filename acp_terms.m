@@ -46,6 +46,11 @@ listdb = {...
            "atz_hf/energy_o.db",...
 };
 
+## Use this keyword to select a particular reference energy. Empty
+## usually means high-level reference data. Other options are, for 
+## instance, blyp/aqz or lcwpbe/atz.
+reftype="";
+
 ## List of atoms
 atoms = {"H","C","O","N"};
 
@@ -110,7 +115,7 @@ endif
 basis = parsebasis(basis);
 
 ## Read the parametrization database 
-db = parsedb(listdb);
+db = parsedb(listdb,reftype);
 db = filldb(db,[],method,extragau);
 
 ## Create the prefix directory if it doesn't exist yet

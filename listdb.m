@@ -28,6 +28,11 @@ listdb = {...
            "db/s668_Water-Pyridine_200.db",...
 };
 
+## Use this keyword to select a particular reference energy. Empty
+## usually means high-level reference data. Other options are, for 
+## instance, blyp/aqz or lcwpbe/atz.
+reftype="";
+
 ## print reference energies to the output
 printref=1;
 ## printref="";
@@ -40,7 +45,7 @@ printxyz={"mol","mon1","mon2"};
 #### No touching past this point. ####
 
 ## Read the parametrization database and print the reference energies
-db = parsedb(listdb);
+db = parsedb(listdb,reftype);
 db = filldb(db,[],"blyp","",1,4);
 
 ## print the reference energies

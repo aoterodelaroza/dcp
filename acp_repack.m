@@ -47,6 +47,11 @@ listdb = {
           "temp/bleh5.db",...
 };
 
+## Use this keyword to select a particular reference energy. Empty
+## usually means high-level reference data. Other options are, for 
+## instance, blyp/aqz or lcwpbe/atz.
+reftype="";
+
 ## List of ACP files to evaluate (you can use a cell array of files
 ## here, like {"C.acp","H.acp"}, or a single string "bleh.acp")
 acpini={"empty.bsip"};
@@ -101,7 +106,7 @@ endif
 basis = parsebasis(basis);
 
 ## Read the parametrization database 
-db = parsedb(listdb);
+db = parsedb(listdb,reftype);
 db = filldb(db,[],method,extragau);
 
 ## Initialization

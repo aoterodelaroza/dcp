@@ -45,6 +45,11 @@ listdb={...
           "db/s22_nh3_nh3.db",...
 };
 
+## Use this keyword to select a particular reference energy. Empty
+## usually means high-level reference data. Other options are, for 
+## instance, blyp/aqz or lcwpbe/atz.
+reftype="";
+
 ## Weights. Must be the same length as listdb, or empty.
 weightdb=[];
 
@@ -139,7 +144,7 @@ endif
 basis = parsebasis(basis);
 
 ## Read the parametrization database 
-db = parsedb(listdb);
+db = parsedb(listdb,reftype);
 db = filldb(db,weightdb,method,extragau);
 
 ## Read the initial ACP

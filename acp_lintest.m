@@ -44,6 +44,11 @@ listdb = {...
            "atz_b3lyp/bdex_oh-h-04.db",...
 };
 
+## Use this keyword to select a particular reference energy. Empty
+## usually means high-level reference data. Other options are, for 
+## instance, blyp/aqz or lcwpbe/atz.
+reftype="";
+
 ## Atom/channel/exponent list for which the non-linearity test will be
 ## run.
 atom="O";
@@ -117,7 +122,7 @@ endif
 basis = parsebasis(basis);
 
 ## Read the parametrization database 
-db = parsedb(listdb);
+db = parsedb(listdb,reftype);
 db = filldb(db,[],method,extragau);
 
 ## Discard the elements that do not contain the current atom
