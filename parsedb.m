@@ -84,7 +84,7 @@ function db = parsedb(files,reftype)
           eref = anew{2};
         endif
         if (strcmpi(thisref,reftype))
-          db{ndb}.ref = eref;
+          db{ndb}.ref = str2num(eref);
         else
           continue
         endif
