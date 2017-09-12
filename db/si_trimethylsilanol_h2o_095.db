@@ -1,4 +1,5 @@
 type reaction_frozen
+ref lcwpbe-xdm/atz -5.53075336
 ref b3lyp/aqz -3.69866130
 molc 1.0 0 1
 SI -0.5954900000 0.0110500000 -0.0198200000
