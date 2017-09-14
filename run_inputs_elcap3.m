@@ -31,7 +31,7 @@ function sout = run_inputs_elcap3(ilist,xdmcoef=[],xdmfun="",extrad3="")
   %% the calc results. When all jobs are done, control is given back
   %% to the caller.
   
-  global ferr
+  global ferr prefix
   
   ## Debug
   if (ferr > 0) 
@@ -193,19 +193,18 @@ function sout = run_inputs_elcap3(ilist,xdmcoef=[],xdmfun="",extrad3="")
      nslept += sleeptime;
      ## Check we didn't exceed the sleeptime
      if (nslept > maxtime)
-       error(sprintf("Maximum sleep time %f exceeded: no qstat available.",maxtime));
+       error(sprintf("Maximum sleep time %f exceeded",maxtime));
      endif
      ## See if calcs are done
-     for i = find(!done)
-       if (exist(sprintf("%s.done",ilist{i}),"file") && exist(sprintf("%s.log",ilist{i}),"file"))
-	 [s1 out] = system(sprintf("tail -n 3 %s.log | grep -q 'Error termination'",ilist{i}));
-         [s2 out] = system(sprintf("tail -n 1 %s.log | grep -q 'Normal termination'",ilist{i}));
-         if (s1 == 0 || s2 == 0) 
-           done(i) = 1;
-           nslept = 0;
-         endif
-       endif
-     endfor
+     [s out] = system(sprintf("find . -name '%s_*.done' | cut -f 2 -d / | sed -e 's/\.done//'",prefix));
+     if (s == 0)
+       alist = strfields(out);
+       for i = 1:length(alist)
+	 ihere = find(strcmp(alist{i},ilist));
+	 done(ihere) = 1;
+	 nslept = 0;
+       endfor
+     endif
   until(all(done))
   if (ferr > 0) 
     fprintf(ferr,"# All calcs finished - %s\n",strtrim(ctime(time())));
