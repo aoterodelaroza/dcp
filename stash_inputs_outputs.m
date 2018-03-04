@@ -18,7 +18,7 @@ function stash_inputs_outputs(ycalc)
   %% energy is Inf, move all the information to the <prefix>_failed/
   %% directory.
   
-  global nstep prefix db savetar ferr
+  global nstep prefix db savetar ferr run_inputs
 
   ## debug
   if (ferr > 0) 
@@ -38,7 +38,7 @@ function stash_inputs_outputs(ycalc)
   endif
 
   ## Create and populate the failed directory
-  if (any(isinf(ycalc)))
+  if (any(isinf(ycalc)) && !strcmp(func2str(run_inputs),"run_inputs_pass"))
     if (ferr > 0) 
       fprintf(ferr,"# Some calcs failed; moving them to failed directory - %s\n",strtrim(ctime(time())));
       fflush(ferr);

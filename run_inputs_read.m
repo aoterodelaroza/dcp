@@ -61,7 +61,7 @@ function sout = run_inputs_read(ilist,xdmcoef=[],xdmfun="",extrad3="")
 
   ## Debug
   if (ferr > 0) 
-    fprintf(ferr,"# End run_inputs_elcap3 - %s\n",strtrim(ctime(time())));
+    fprintf(ferr,"# End run_inputs_read - %s\n",strtrim(ctime(time())));
     fflush(ferr);
   endif
 

@@ -136,7 +136,7 @@ if (ferr > 0)
   fflush(ferr);
 endif
 for i = 1:length(db)
-  anew = setup_input_one_postscf(db{i},atoms,lchan,lexp,c0,0);
+  anew = setup_input_one_postscf(db{i},atoms,lchan,lexp,c0,0,!strcmp(func2str(run_inputs),"run_inputs_read"));
   ilist = {ilist{:}, anew{:}};
 endfor
 if (ferr > 0) 
