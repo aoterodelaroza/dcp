@@ -178,9 +178,11 @@ for iacp = 1:length(acpini)
     fflush(ferr);
   endif
   dy = ycalc = yref = ycalcnd = zeros(length(db),1);
-  for i = 1:length(db)
-    [dy(i) ycalc(i) yref(i) xdum ycalcnd(i)] = process_output_one(db{i},xdmcoef,extrad3,0);
-  endfor
+  if (!strcmp(func2str(run_inputs),"run_inputs_pass"))
+    for i = 1:length(db)
+      [dy(i) ycalc(i) yref(i) xdum ycalcnd(i)] = process_output_one(db{i},xdmcoef,extrad3,0);
+    endfor
+  endif
   if (any(ycalc == Inf))
     mae = Inf;
     mape = Inf;
