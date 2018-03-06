@@ -75,7 +75,7 @@ function appendgjf(file,basis,at,q,mult,ent,extragau="",chk="",atoms,lchan,lexp,
 
         ## The route line
         fprintf(fid,"#t %s %s iop(5/13=1,5/36=2,99/5=2) pseudo=read %s %s %s scf=(maxcycle=1)\n",...
-                ent.method,basisstr,ent.extragau,extragau,chkstr);
+                ent.method,basisstr,extragau,chkstr);
 
         ## Title and multiplicity
         fprintf(fid,"\n");
