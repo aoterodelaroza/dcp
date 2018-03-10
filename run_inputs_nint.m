@@ -141,7 +141,7 @@ function sout = run_inputs_nint(ilist,xdmcoef=[],xdmfun="",extrad3="")
 
   ## Grab the lock
   while (exist(lockdir,"dir") || system(sprintf("mkdir %s",lockdir)))
-    sleep(1)
+    pause(1)
   endwhile
 
   ## Submit all the scripts to the queue
@@ -171,7 +171,7 @@ function sout = run_inputs_nint(ilist,xdmcoef=[],xdmfun="",extrad3="")
        fprintf(ferr,"# waiting... (%d/%d done) %s\n",sum(done),length(done),strtrim(ctime(time())));
        fflush(ferr);
      endif
-     sleep(sleeptime);
+     pause(sleeptime);
      nslept0 += sleeptime;
      nslept += sleeptime;
      ## Check we didn't exceed the sleeptime

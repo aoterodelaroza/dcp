@@ -160,7 +160,7 @@ function sout = run_inputs_elcap3(ilist,xdmcoef=[],xdmfun="",extrad3="")
   endif
 
   ## Give time to sync the NFS
-  sleep(sleeptime);
+  pause(sleeptime);
 
   ## Submit all the scripts to the queue
   if (ferr > 0) 
@@ -188,7 +188,7 @@ function sout = run_inputs_elcap3(ilist,xdmcoef=[],xdmfun="",extrad3="")
        fprintf(ferr,"# waiting... (%d/%d done) %s\n",sum(done),length(done),strtrim(ctime(time())));
        fflush(ferr);
      endif
-     sleep(sleeptime);
+     pause(sleeptime);
      nslept0 += sleeptime;
      nslept += sleeptime;
      ## Check we didn't exceed the sleeptime
@@ -212,7 +212,7 @@ function sout = run_inputs_elcap3(ilist,xdmcoef=[],xdmfun="",extrad3="")
   endif
 
   ## Give time to sync the NFS
-  sleep(sleeptime);
+  pause(sleeptime);
 
   ## Clean up the done and the err files
   if (ferr > 0) 

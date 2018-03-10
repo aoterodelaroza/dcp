@@ -103,7 +103,7 @@ function sout = run_inputs_plonk_packed(ilist,xdmcoef=[],xdmfun="",extrad3="")
 
   ## Grab the lock
   while (exist(lockdir,"dir") || system(sprintf("mkdir %s",lockdir)))
-    sleep(1)
+    pause(1)
   endwhile
 
   ## Submit all the scripts to the queue
@@ -121,7 +121,7 @@ function sout = run_inputs_plonk_packed(ilist,xdmcoef=[],xdmfun="",extrad3="")
   nslept = 0;
   nslept0 = 0;
   do 
-     sleep(sleeptime);
+     pause(sleeptime);
      nslept0 += sleeptime;
      nslept += sleeptime;
      ## Check we didn't exceed the sleeptime

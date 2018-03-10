@@ -94,7 +94,7 @@ function sout = run_inputs_plonk_priority(ilist,xdmcoef=[],xdmfun="",extrad3="")
 
   ## Grab the lock
   while (exist(lockdir,"dir") || system(sprintf("mkdir %s",lockdir)))
-    sleep(1)
+    pause(1)
   endwhile
 
   ## Write the job names to the temporary file 
@@ -129,7 +129,7 @@ function sout = run_inputs_plonk_priority(ilist,xdmcoef=[],xdmfun="",extrad3="")
        fprintf(ferr,"# waiting... (%d/%d done) %s\n",sum(done),length(done),strtrim(ctime(time())));
        fflush(ferr);
      endif
-     sleep(sleeptime);
+     pause(sleeptime);
      nslept0 += sleeptime;
      nslept += sleeptime;
      ## Check we didn't exceed the sleeptime
@@ -157,7 +157,7 @@ function sout = run_inputs_plonk_priority(ilist,xdmcoef=[],xdmfun="",extrad3="")
   endif
 
   ## Give time to sync the NFS
-  sleep(sleeptime);
+  pause(sleeptime);
 
   ## Clean up the done and the err files
   if (ferr > 0) 

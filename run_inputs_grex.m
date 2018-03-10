@@ -102,7 +102,7 @@ function sout = run_inputs_grex(ilist,xdmcoef=[],xdmfun="",extrad3="")
   endif
 
   ## Give time to sync the NFS
-  sleep(sleeptime);
+  pause(sleeptime);
 
   ## Submit all the scripts to the queue
   jobstr = "";
@@ -120,7 +120,7 @@ function sout = run_inputs_grex(ilist,xdmcoef=[],xdmfun="",extrad3="")
   nslept = 0;
   nslept0 = 0;
   do 
-     sleep(sleeptime);
+     pause(sleeptime);
      nslept0 += sleeptime;
      nslept += sleeptime;
      ## Check we didn't exceed the sleeptime
