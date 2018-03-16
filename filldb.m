@@ -195,6 +195,16 @@ function db = filldb(db,weis=[],method=[],extragau);
       if (!isfield(db{i}.mol,"at") || !isfield(db{i}.mol,"x"))
         error(sprintf("Molecule entry %s is not sane",db{i}.file))
       endif
+    elseif (strcmp(db{i}.type,"crystal_energy"))
+      if (!isfield(db{i}.crys,"nat") || db{i}.crys.nat <= 0)
+        error(sprintf("Crystal entry %s has no atoms",db{i}.file))
+      endif
+      if (!isfield(db{i}.crys,"at") || !isfield(db{i}.crys,"x"))
+        error(sprintf("Crystal entry %s is not sane",db{i}.file))
+      endif
+      if (!isfield(db{i},"kpts"))
+        error(sprintf("Crystal needs k-points",db{i}.file))
+      endif
     elseif (strcmp(db{i}.type,"multipoles"))
       ## Sanity checks for the multipole calculations
       if (!isfield(db{i},"mol"))

@@ -21,7 +21,7 @@ function ilist = setup_input_one(ent,acp,derivs=0)
   %% up to derivs order. If derivs is negative, prepare the inputs for
   %% theevaluation of the ACP terms.
 
-  global prefix nstep basis acp0 ferr
+  global prefix nstep basis ferr
 
   ## Debug
   if (ferr > 0) 
@@ -60,6 +60,11 @@ function ilist = setup_input_one(ent,acp,derivs=0)
     writegjf(file,acp,acp0,basis,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult,ent,extragau,chk,wfx,derivs);
     writexyz(filexyz,ent.mol.at,ent.mol.x,ent.mol.q,ent.mol.mult);
     ilist = {ilist{:}, sprintf("%s_%4.4d_%s_mol",prefix,nstep,ent.name)};
+  elseif (strcmp(ent.type,"crystal_energy"))
+    ## A crystal calculation
+    file = sprintf("%s_%4.4d_%s.d12",prefix,nstep,ent.name);
+    writed12(file,acp,basis,ent);
+    ilist = {ilist{:}, sprintf("%s_%4.4d_%s",prefix,nstep,ent.name)};
   elseif (strcmp(ent.type,"intramol_geometry") || strcmp(ent.type,"intermol_geometry"))
     ## A geometry relaxation; append "opt" to extragau
     file = sprintf("%s_%4.4d_%s_mol.gjf",prefix,nstep,ent.name);

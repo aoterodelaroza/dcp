@@ -73,6 +73,8 @@ function db = parsedb(files,reftype)
         db{ndb}.type = lower(anew{2});
       elseif (strcmp(keyw,"name"))
         db{ndb}.name = rest;
+      elseif (strcmp(keyw,"kpts"))
+        db{ndb}.kpts = str2num(rest);
       elseif (strcmp(keyw,"extragau"))
         db{ndb}.extragau = rest;
       elseif (strcmp(keyw,"ref"))
@@ -154,7 +156,34 @@ function db = parsedb(files,reftype)
           db{ndb}.mol.x(n,:) = [x y z];
         until (!ischar(line))
         db{ndb}.mol.nat = n;
+      elseif (strcmp(keyw,"crys"))
+        db{ndb}.crys = struct();
+        line = strtrim(fgetl(fid));
+        [x1 x2 x3 x4 x5 x6] = sscanf(line,"%f %f %f %f %f %f","C");
+        db{ndb}.crys.aa = [x1 x2 x3];
+        db{ndb}.crys.bb = [x4 x5 x6];
+        n = 0;
+        db{ndb}.crys.at = {};
+        db{ndb}.crys.x = [];
+        do 
+           line = strtrim(fgetl(fid));
+           anew = strfields(line);
+           keyw = lower(anew{1});
+           rest = strrep(line,anew{1},"");
+
+           if (length(line) == 0 || line(1:1) == "#")
+             continue
+           elseif (strcmp(tolower(keyw),"end"))
+             break
+           endif
+           [at x y z] = sscanf(line,"%s %f %f %f","C");
+           n++;
+           db{ndb}.crys.at{n} = at;
+           db{ndb}.crys.x(n,:) = [x y z];
+        until (!ischar(line))
+        db{ndb}.crys.nat = n;
       elseif (strcmp(keyw,"mon1"))
+        db{ndb}.ref = 0;
         db{ndb}.mon1 = struct();
         if (length(anew) == 3)
           db{ndb}.mon1.q = str2num(anew{2});
@@ -239,7 +268,7 @@ function db = parsedb(files,reftype)
       ndb--;
     endif
 
-    if (isinf(db{ndb}.ref))
+    if (isinf(db{ndb}.ref) && !strcmp(db{ndb}.type,"crystal_energy"))
       error(sprintf("reference type %s not found in file %s",reftype,files{i}));
     endif
   endfor # 1:length(files)
