@@ -196,14 +196,34 @@ function db = filldb(db,weis=[],method=[],extragau);
         error(sprintf("Molecule entry %s is not sane",db{i}.file))
       endif
     elseif (strcmp(db{i}.type,"crystal_energy"))
-      if (!isfield(db{i}.crys,"nat") || db{i}.crys.nat <= 0)
-        error(sprintf("Crystal entry %s has no atoms",db{i}.file))
-      endif
-      if (!isfield(db{i}.crys,"at") || !isfield(db{i}.crys,"x"))
-        error(sprintf("Crystal entry %s is not sane",db{i}.file))
-      endif
-      if (!isfield(db{i},"kpts"))
-        error(sprintf("Crystal needs k-points",db{i}.file))
+      if (isfield(db{i},"crys"))
+        if (!isfield(db{i}.crys,"nat") || db{i}.crys.nat <= 0)
+          error(sprintf("Crystal entry %s has no atoms",db{i}.file))
+        endif
+        if (!isfield(db{i}.crys,"at") || !isfield(db{i}.crys,"x"))
+          error(sprintf("Crystal entry %s is not sane",db{i}.file))
+        endif
+        if (!isfield(db{i},"kpts"))
+          error(sprintf("Crystal needs k-points",db{i}.file))
+        endif
+      elseif (isfield(db{i},"mol"))
+        if (!isfield(db{i},"mol"))
+          error(sprintf("Entry %s has no molecular structure",db{i}.file))
+        endif
+        if (!isfield(db{i}.mol,"q"))
+          db{i}.mol.q = 0;
+        endif
+        if (!isfield(db{i}.mol,"mult"))
+          db{i}.mol.mult = 1;
+        endif
+        if (!isfield(db{i}.mol,"nat") || db{i}.mol.nat <= 0)
+          error(sprintf("Molecule entry %s has no atoms",db{i}.file))
+        endif
+        if (!isfield(db{i}.mol,"at") || !isfield(db{i}.mol,"x"))
+          error(sprintf("Molecule entry %s is not sane",db{i}.file))
+        endif
+      else
+          error(sprintf("crystal_energy type must have either crys or mol"));
       endif
     elseif (strcmp(db{i}.type,"multipoles"))
       ## Sanity checks for the multipole calculations

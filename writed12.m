@@ -35,33 +35,62 @@ function writed12(file,acp,basis,ent)
   if (fid <= 0) 
     error(sprintf("Could not open Gaussian input file for writing: %s",file));
   endif
-  fprintf(fid,"Title\n");
-  fprintf(fid,"CRYSTAL\n");
-  fprintf(fid,"0 0 0\n");
-  fprintf(fid,"1\n");
-  fprintf(fid,"%.10f %.10f %.10f %.10f %.10f %.10f\n",ent.crys.aa,ent.crys.bb);
-  fprintf(fid,"%d\n",ent.crys.nat);
-  for i = 1:ent.crys.nat
-    iz = getfield(Z,toupper(ent.crys.at{i}));
-    
-    found = 0;
-    for j = 1:length(basis)
-      if (strcmpi(basis{j}.atom,ent.crys.at{i}))
-        found = j;
-        break
-      endif
-    endfor
-    if (!found)
-      ent
-      error("Atom not found in basis")
-    endif
 
-    zused(iz) = found;
-    if (zacp(iz))
-      iz = iz + 200;
-    endif
-    fprintf(fid,"%d %.10f %.10f %.10f\n",iz,ent.crys.x(i,:));
-  endfor
+  if (isfield(ent,"crys"))
+    fprintf(fid,"Title\n");
+    fprintf(fid,"CRYSTAL\n");
+    fprintf(fid,"0 0 0\n");
+    fprintf(fid,"1\n");
+    fprintf(fid,"%.10f %.10f %.10f %.10f %.10f %.10f\n",ent.crys.aa,ent.crys.bb);
+    fprintf(fid,"%d\n",ent.crys.nat);
+    for i = 1:ent.crys.nat
+      iz = getfield(Z,toupper(ent.crys.at{i}));
+      
+      found = 0;
+      for j = 1:length(basis)
+        if (strcmpi(basis{j}.atom,ent.crys.at{i}))
+          found = j;
+          break
+        endif
+      endfor
+      if (!found)
+        ent
+        error("Atom not found in basis")
+      endif
+
+      zused(iz) = found;
+      if (zacp(iz))
+        iz = iz + 200;
+      endif
+      fprintf(fid,"%d %.10f %.10f %.10f\n",iz,ent.crys.x(i,:));
+    endfor
+  else
+    fprintf(fid,"Title\n");
+    fprintf(fid,"MOLECULE\n");
+    fprintf(fid,"1\n");
+    fprintf(fid,"%d\n",ent.mol.nat);
+    for i = 1:ent.mol.nat
+      iz = getfield(Z,toupper(ent.mol.at{i}));
+      
+      found = 0;
+      for j = 1:length(basis)
+        if (strcmpi(basis{j}.atom,ent.mol.at{i}))
+          found = j;
+          break
+        endif
+      endfor
+      if (!found)
+        ent
+        error("Atom not found in basis")
+      endif
+
+      zused(iz) = found;
+      if (zacp(iz))
+        iz = iz + 200;
+      endif
+      fprintf(fid,"%d %.10f %.10f %.10f\n",iz,ent.mol.x(i,:));
+    endfor
+  endif
 
   fprintf(fid,"SETPRINT\n");
   fprintf(fid,"1\n");
@@ -177,8 +206,10 @@ function writed12(file,acp,basis,ent)
     fprintf(fid,"4\n");
     fprintf(fid,"END\n");
   endif
-  fprintf(fid,"SHRINK\n");
-  fprintf(fid,"%d %d\n",ent.kpts,ent.kpts);
+  if (isfield(ent,"crys"))
+    fprintf(fid,"SHRINK\n");
+    fprintf(fid,"%d %d\n",ent.kpts,ent.kpts);
+  endif
   if (isfield(crysopt,"toldee"))
     fprintf(fid,"TOLDEE\n");
     fprintf(fid,"%d\n",crysopt.toldee);

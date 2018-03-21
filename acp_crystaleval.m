@@ -33,12 +33,12 @@ basis="minis.gbs";
 ## List of database files to use in ACP optimization
 ## [listdb weightdb] = training_set(1,1,1,1,1);
 listdb = {
-          "db_crys/x23_co2.db",...
+          "db_crys/x23_mol_co2.db",...
 };
 
 ## List of ACP files to evaluate (you can use a cell array of files
 ## here, like {"C.acp","H.acp"}, or a single string "bleh.acp")
-acpini={"csp-20.acp"};
+acpini={"minis.bsip"};
 
 ## Prefix for the calculations. If prefix is "bleh", then all the
 ## inputs and outputs will be stored in subdirectory bleh/ of the
