@@ -12,7 +12,7 @@
 % more details.
 
 format long
-global acp basis db prefix nstep run_inputs ycur...
+global acp acp0 basis db prefix nstep run_inputs ycur...
        acpfin costmin stime0 astep savetar ncpu mem...
        ferr
 
@@ -40,7 +40,7 @@ mem=2;
 ## List of database files to use in ACP optimization
 ## [listdb weightdb] = training_set(1,1,1,1,1);
 listdb = {
-          "new/s225_waterdimer10.db",...
+          "db/s225_waterdimer10.db",...
 };
 
 ## Use this keyword to select a particular reference energy. Empty
