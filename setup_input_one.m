@@ -21,7 +21,7 @@ function ilist = setup_input_one(ent,acp,derivs=0)
   %% up to derivs order. If derivs is negative, prepare the inputs for
   %% theevaluation of the ACP terms.
 
-  global prefix nstep basis ferr
+  global prefix nstep basis ferr acp0
 
   ## Debug
   if (ferr > 0) 
