@@ -31,7 +31,7 @@ function basis = parsebasis(alist)
 
   ## Accept a string instead of a cell array
   if (ischar(alist))
-    if (!exist(alist,"file"))
+    if (!exist(alist,"file") || exist(alist,"dir"))
       basis = alist;
       return
     else
