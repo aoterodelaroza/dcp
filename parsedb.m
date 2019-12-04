@@ -268,7 +268,8 @@ function db = parsedb(files,reftype)
       ndb--;
     endif
 
-    if (isinf(db{ndb}.ref) && !strcmp(db{ndb}.type,"crystal_energy"))
+    if (isinf(db{ndb}.ref) && !strcmp(db{ndb}.type,"crystal_energy") &&...
+       !strcmp(db{ndb}.type,"intramol_geometry"))
       error(sprintf("reference type %s not found in file %s",reftype,files{i}));
     endif
   endfor # 1:length(files)
