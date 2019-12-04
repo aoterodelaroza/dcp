@@ -65,7 +65,7 @@ function sout = run_inputs_serial(ilist,xdmcoef=[],xdmfun="",extrad3="")
         printf("\n");
       endif
     endif
-    [s out] = system(sprintf("g09 %s.gjf 2>&1",ilist{i}));
+    [s out] = system(sprintf("g16 %s.gjf 2>&1",ilist{i}));
     if (!isempty(xdmcoef))
       [s2 out] = system(sprintf("postg %.10f %.10f %s.wfx %s > %s.pgout\n",xdmcoef(1),xdmcoef(2),ilist{i},xdmfun,ilist{i}));
     elseif (!isempty(extrad3))
